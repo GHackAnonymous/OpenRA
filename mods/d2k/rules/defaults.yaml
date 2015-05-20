@@ -28,7 +28,7 @@
 		Types: Vehicle
 	GivesBounty:
 	Repairable:
-		RepairBuildings: repaira,repairo,repairh
+		RepairBuildings: repair
 	CombatDebugOverlay:
 	Guard:
 		Voice: Guard
@@ -51,7 +51,7 @@
 	TemporaryOwnerManager:
 	MustBeDestroyed:
 	AnnounceOnSeen:
-		Notification: EnemyUnitsApproaching
+		Notification: EnemyUnitsDetected
 
 ^Tank:
 	AppearsOnRadar:
@@ -83,7 +83,7 @@
 		Types: Tank
 	GivesBounty:
 	Repairable:
-		RepairBuildings: repaira,repairo,repairh
+		RepairBuildings: repair
 	CombatDebugOverlay:
 	Guard:
 		Voice: Guard
@@ -106,7 +106,7 @@
 	TemporaryOwnerManager:
 	MustBeDestroyed:
 	AnnounceOnSeen:
-		Notification: EnemyUnitsApproaching
+		Notification: EnemyUnitsDetected
 
 ^Husk:
 	Health:
@@ -135,6 +135,7 @@
 		ForceHealthPercentage: 25
 	DisabledOverlay:
 	ScriptTriggers:
+	RenderUnit:
 
 ^TowerHusk:
 	Health:
@@ -192,8 +193,12 @@
 		Voice: InfantryVoice
 	TargetableUnit:
 		TargetTypes: Ground
-	RenderInfantry:
+	RenderSprites:
+	WithInfantryBody:
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
 	WithDeathAnimation:
 	AutoTarget:
 	AttackMove:
@@ -232,7 +237,7 @@
 	UpgradeManager:
 	MustBeDestroyed:
 	AnnounceOnSeen:
-		Notification: EnemyUnitsApproaching
+		Notification: EnemyUnitsDetected
 	TerrainModifiesDamage:
 		TerrainModifier:
 			Rough: 80
@@ -270,7 +275,8 @@
 		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
 	AnnounceOnSeen:
-		Notification: EnemyUnitsApproaching
+		Notification: EnemyUnitsDetected
+	RenderUnit:
 
 ^Helicopter:
 	Inherits: ^Plane
@@ -292,8 +298,8 @@
 	ExternalCapturable:
 	ExternalCapturableBar:
 	SoundOnDamageTransition:
-		DamagedSound: EXPLSML1.WAV
-		DestroyedSound: EXPLHG1.WAV
+		DamagedSounds: EXPLSML1.WAV
+		DestroyedSounds: EXPLHG1.WAV
 	RenderBuilding:
 	WithBuildingExplosion:
 	RepairableBuilding:
@@ -329,3 +335,4 @@
 		Range: 2c0, 5c0
 	ScriptTriggers:
 	WithMakeAnimation:
+

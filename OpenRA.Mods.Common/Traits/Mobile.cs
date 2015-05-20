@@ -30,7 +30,7 @@ namespace OpenRA.Mods.Common.Traits
 	}
 
 	[Desc("Unit is able to move.")]
-	public class MobileInfo : ITraitInfo, IOccupySpaceInfo, IFacingInfo, IMoveInfo, UsesInit<FacingInit>, UsesInit<LocationInit>, UsesInit<SubCellInit>
+	public class MobileInfo : IMoveInfo, IOccupySpaceInfo, IFacingInfo, UsesInit<FacingInit>, UsesInit<LocationInit>, UsesInit<SubCellInit>
 	{
 		[FieldLoader.LoadUsing("LoadSpeeds")]
 		[Desc("Set Water: 0 for ground units and lower the value on rough terrain.")]
@@ -160,14 +160,63 @@ namespace OpenRA.Mods.Common.Traits
 
 			// Sign of dot-product indicates (roughly) if vectors are facing in same or opposite directions:
 			var dp = CVec.Dot(selfMobile.ToCell - self.Location, otherMobile.ToCell - other.Location);
-			if (dp <= 0) return false;
 
-			return true;
+			return dp > 0;
+		}
+
+		public int TileSetMovementHash(TileSet tileSet)
+		{
+			var terrainInfos = TilesetTerrainInfo[tileSet];
+
+			// Compute and return the hash using aggregate
+			return terrainInfos.Aggregate(terrainInfos.Length,
+				(current, terrainInfo) => unchecked(current * 31 + terrainInfo.Cost));
 		}
 
 		public bool CanEnterCell(World world, Actor self, CPos cell, Actor ignoreActor = null, CellConditions check = CellConditions.All)
 		{
 			if (MovementCostForCell(world, cell) == int.MaxValue)
+				return false;
+
+			return CanMoveFreelyInto(world, self, cell, ignoreActor, check);
+		}
+
+		// Determines whether the actor is blocked by other Actors
+		public bool CanMoveFreelyInto(World world, Actor self, CPos cell, Actor ignoreActor, CellConditions check)
+		{
+			if (SharesCell && world.ActorMap.HasFreeSubCell(cell))
+				return true;
+
+			if (check.HasFlag(CellConditions.TransientActors))
+			{
+				var canIgnoreMovingAllies = self != null && !check.HasFlag(CellConditions.BlockedByMovers);
+				var needsCellExclusively = self == null || Crushes == null || !Crushes.Any();
+				foreach (var a in world.ActorMap.GetUnitsAt(cell))
+				{
+					if (a == ignoreActor)
+						continue;
+
+					// Neutral/enemy units are blockers. Allied units that are moving are not blockers.
+					if (canIgnoreMovingAllies && self.Owner.Stances[a.Owner] == Stance.Ally && IsMovingInMyDirection(self, a)) continue;
+
+					// Non-sharable unit can enter a cell with shareable units only if it can crush all of them.
+					if (needsCellExclusively)
+						return false;
+					var crushables = a.TraitsImplementing<ICrushable>();
+					if (!crushables.Any())
+						return false;
+					foreach (var crushable in crushables)
+						if (!crushable.CrushableBy(Crushes, self.Owner))
+							return false;
+				}
+			}
+
+			return true;
+		}
+
+		public bool CanEnterCell(World world, Actor self, CPos cell, out int movementCost, Actor ignoreActor = null, CellConditions check = CellConditions.All)
+		{
+			if ((movementCost = MovementCostForCell(world, cell)) == int.MaxValue)
 				return false;
 
 			if (SharesCell && world.ActorMap.HasFreeSubCell(cell))
@@ -200,7 +249,8 @@ namespace OpenRA.Mods.Common.Traits
 			return true;
 		}
 
-		public SubCell GetAvailableSubCell(World world, Actor self, CPos cell, SubCell preferredSubCell = SubCell.Any, Actor ignoreActor = null, CellConditions check = CellConditions.All)
+		public SubCell GetAvailableSubCell(
+			World world, Actor self, CPos cell, SubCell preferredSubCell = SubCell.Any, Actor ignoreActor = null, CellConditions check = CellConditions.All)
 		{
 			if (MovementCostForCell(world, cell) == int.MaxValue)
 				return SubCell.Invalid;
@@ -245,6 +295,13 @@ namespace OpenRA.Mods.Common.Traits
 		}
 
 		public int GetInitialFacing() { return InitialFacing; }
+
+		public IReadOnlyDictionary<CPos, SubCell> OccupiedCells(ActorInfo info, CPos location, SubCell subCell = SubCell.Any)
+		{
+			return new ReadOnlyDictionary<CPos, SubCell>(new Dictionary<CPos, SubCell>() { { location, subCell } });
+		}
+
+		bool IOccupySpaceInfo.SharesCell { get { return SharesCell; } }
 	}
 
 	public class Mobile : IIssueOrder, IResolveOrder, IOrderVoice, IPositionable, IMove, IFacing, ISync, INotifyAddedToWorld, INotifyRemovedFromWorld, INotifyBlockingMove
@@ -254,6 +311,7 @@ namespace OpenRA.Mods.Common.Traits
 		internal int TicksBeforePathing = 0;
 
 		readonly Actor self;
+		readonly ISpeedModifier[] speedModifiers;
 		public readonly MobileInfo Info;
 		public bool IsMoving { get; set; }
 
@@ -292,6 +350,8 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			self = init.Self;
 			Info = info;
+
+			speedModifiers = self.TraitsImplementing<ISpeedModifier>().ToArray();
 
 			ToSubCell = FromSubCell = info.SharesCell ? init.World.Map.DefaultSubCell : SubCell.FullCell;
 			if (init.Contains<SubCellInit>())
@@ -506,6 +566,11 @@ namespace OpenRA.Mods.Common.Traits
 			return Info.CanEnterCell(self.World, self, cell, ignoreActor, checkTransientActors ? CellConditions.All : CellConditions.BlockedByMovers);
 		}
 
+		public bool CanMoveFreelyInto(CPos cell, Actor ignoreActor = null, bool checkTransientActors = true)
+		{
+			return Info.CanMoveFreelyInto(self.World, self, cell, ignoreActor, checkTransientActors ? CellConditions.All : CellConditions.BlockedByMovers);
+		}
+
 		public void EnteringCell(Actor self)
 		{
 			var crushables = self.World.ActorMap.GetUnitsAt(ToCell).Where(a => a != self)
@@ -534,7 +599,7 @@ namespace OpenRA.Mods.Common.Traits
 				return 0;
 
 			speed *= Info.Speed;
-			foreach (var t in self.TraitsImplementing<ISpeedModifier>())
+			foreach (var t in speedModifiers)
 				speed *= t.GetSpeedModifier() / 100m;
 
 			return (int)(speed / 100);
@@ -619,11 +684,12 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			readonly MobileInfo unitType;
 			readonly bool rejectMove;
+			public bool OverrideSelection { get { return false; } }
 
 			public MoveOrderTargeter(Actor self, MobileInfo unitType)
 			{
 				this.unitType = unitType;
-				this.rejectMove = !self.AcceptsOrder("Move");
+				rejectMove = !self.AcceptsOrder("Move");
 			}
 
 			public string OrderID { get { return "Move"; } }

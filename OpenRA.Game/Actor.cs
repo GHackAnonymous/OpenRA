@@ -25,11 +25,12 @@ namespace OpenRA
 	public class Actor : IScriptBindable, IScriptNotifyBind, ILuaTableBinding, ILuaEqualityBinding, ILuaToStringBinding, IEquatable<Actor>
 	{
 		public readonly ActorInfo Info;
+
 		public readonly World World;
+
 		public readonly uint ActorID;
 
-		[Sync]
-		public Player Owner;
+		[Sync] public Player Owner { get; set; }
 
 		public bool IsInWorld { get; internal set; }
 		public bool Destroyed { get; private set; }
@@ -65,8 +66,9 @@ namespace OpenRA
 			}
 		}
 
-		readonly IEnumerable<IRenderModifier> traitsImplementingRenderModifier;
-		readonly IEnumerable<IRender> traitsImplementingRender;
+		readonly IRenderModifier[] renderModifiers;
+		readonly IRender[] renders;
+		readonly IDisable[] disables;
 
 		internal Actor(World world, string name, TypeDictionary initDict)
 		{
@@ -108,8 +110,9 @@ namespace OpenRA
 				return new Rectangle(offset.X, offset.Y, size.X, size.Y);
 			});
 
-			traitsImplementingRenderModifier = TraitsImplementing<IRenderModifier>();
-			traitsImplementingRender = TraitsImplementing<IRender>();
+			renderModifiers = TraitsImplementing<IRenderModifier>().ToArray();
+			renders = TraitsImplementing<IRender>().ToArray();
+			disables = TraitsImplementing<IDisable>().ToArray();
 		}
 
 		public void Tick()
@@ -125,14 +128,14 @@ namespace OpenRA
 		public IEnumerable<IRenderable> Render(WorldRenderer wr)
 		{
 			var renderables = Renderables(wr);
-			foreach (var modifier in traitsImplementingRenderModifier)
+			foreach (var modifier in renderModifiers)
 				renderables = modifier.ModifyRender(this, wr, renderables);
 			return renderables;
 		}
 
 		IEnumerable<IRenderable> Renderables(WorldRenderer wr)
 		{
-			foreach (var render in traitsImplementingRender)
+			foreach (var render in renders)
 				foreach (var renderable in render.Render(this, wr))
 					yield return renderable;
 		}
@@ -235,7 +238,7 @@ namespace OpenRA
 		{
 			World.AddFrameEndTask(w =>
 			{
-				if (this.Destroyed)
+				if (Destroyed)
 					return;
 
 				var oldOwner = Owner;
@@ -257,6 +260,14 @@ namespace OpenRA
 				return;
 
 			health.Value.InflictDamage(this, attacker, health.Value.MaxHP, null, true);
+		}
+
+		public bool IsDisabled()
+		{
+			foreach (var disable in disables)
+				if (disable.Disabled)
+					return true;
+			return false;
 		}
 
 		#region Scripting interface

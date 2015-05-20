@@ -104,9 +104,19 @@ namespace OpenRA.Mods.Common.Traits
 					.Any(b => Math.Abs(a.X - b.X) <= Adjacent
 						&& Math.Abs(a.Y - b.Y) <= Adjacent));
 		}
+
+		public IReadOnlyDictionary<CPos, SubCell> OccupiedCells(ActorInfo info, CPos topLeft, SubCell subCell = SubCell.Any)
+		{
+			var occupied = FootprintUtils.UnpathableTiles(info.Name, this, topLeft)
+				.ToDictionary(c => c, c => SubCell.FullCell);
+
+			return new ReadOnlyDictionary<CPos, SubCell>(occupied);
+		}
+
+		bool IOccupySpaceInfo.SharesCell { get { return false; } }
 	}
 
-	public class Building : IOccupySpace, INotifySold, INotifyTransform, ISync, ITechTreePrerequisite, INotifyCreated, INotifyAddedToWorld, INotifyRemovedFromWorld
+	public class Building : IOccupySpace, INotifySold, INotifyTransform, ISync, INotifyCreated, INotifyAddedToWorld, INotifyRemovedFromWorld
 	{
 		public readonly BuildingInfo Info;
 		public bool BuildComplete { get; private set; }
@@ -130,8 +140,6 @@ namespace OpenRA.Mods.Common.Traits
 
 		public CPos TopLeft { get { return topLeft; } }
 		public WPos CenterPosition { get; private set; }
-
-		public IEnumerable<string> ProvidesPrerequisites { get { yield return self.Info.Name; } }
 
 		public Building(ActorInitializer init, BuildingInfo info)
 		{

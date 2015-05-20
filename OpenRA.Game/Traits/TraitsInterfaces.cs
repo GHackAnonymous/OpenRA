@@ -79,6 +79,7 @@ namespace OpenRA.Traits
 		int OrderPriority { get; }
 		bool CanTarget(Actor self, Target target, List<Actor> othersAtTarget, TargetModifiers modifiers, ref string cursor);
 		bool IsQueued { get; }
+		bool OverrideSelection { get; }
 	}
 
 	public interface IResolveOrder { void ResolveOrder(Actor self, Order order); }
@@ -103,6 +104,7 @@ namespace OpenRA.Traits
 	public interface INotifyEffectiveOwnerChanged { void OnEffectiveOwnerChanged(Actor self, Player oldEffectiveOwner, Player newEffectiveOwner); }
 	public interface INotifyCapture { void OnCapture(Actor self, Actor captor, Player oldOwner, Player newOwner); }
 	public interface INotifyInfiltrated { void Infiltrated(Actor self, Actor infiltrator); }
+	public interface INotifyDiscovered { void OnDiscovered(Actor self, Player discoverer, bool playNotification); }
 	public interface IDisableMove { bool MoveDisabled(Actor self); }
 
 	public interface ISeedableResource { void Seed(Actor self); }
@@ -135,6 +137,12 @@ namespace OpenRA.Traits
 		bool IsOwnerRowVisible { get; }
 	}
 
+	public interface IProvideTooltipInfo
+	{
+		bool IsTooltipVisible(Player forPlayer);
+		string TooltipText { get; }
+	}
+
 	public interface IDisabledTrait { bool IsTraitDisabled { get; } }
 	public interface IDisable { bool Disabled { get; } }
 	public interface IExplodeModifier { bool ShouldExplode(Actor self); }
@@ -142,8 +150,7 @@ namespace OpenRA.Traits
 
 	public interface IRadarSignature
 	{
-		IEnumerable<CPos> RadarSignatureCells(Actor self);
-		Color RadarSignatureColor(Actor self);
+		IEnumerable<Pair<CPos, Color>> RadarSignatureCells(Actor self);
 	}
 
 	public interface IVisibilityModifier { bool IsVisible(Actor self, Player byPlayer); }
@@ -151,7 +158,12 @@ namespace OpenRA.Traits
 
 	public interface IRadarColorModifier { Color RadarColorOverride(Actor self); }
 
-	public interface IOccupySpaceInfo : ITraitInfo { }
+	public interface IOccupySpaceInfo : ITraitInfo
+	{
+		IReadOnlyDictionary<CPos, SubCell> OccupiedCells(ActorInfo info, CPos location, SubCell subCell = SubCell.Any);
+		bool SharesCell { get; }
+	}
+
 	public interface IOccupySpace
 	{
 		WPos CenterPosition { get; }
@@ -187,6 +199,7 @@ namespace OpenRA.Traits
 	public interface IInaccuracyModifier { int GetInaccuracyModifier(); }
 	public interface IPowerModifier { int GetPowerModifier(); }
 	public interface ILoadsPalettes { void LoadPalettes(WorldRenderer wr); }
+	public interface ILoadsPlayerPalettes { void LoadPlayerPalettes(WorldRenderer wr, string playerName, HSLColor playerColor, bool replaceExisting); }
 	public interface IPaletteModifier { void AdjustPalette(IReadOnlyDictionary<string, MutablePalette> b); }
 	public interface IPips { IEnumerable<PipType> GetPips(Actor self); }
 	public interface ITags { IEnumerable<TagType> GetTags(); }
@@ -262,7 +275,7 @@ namespace OpenRA.Traits
 	public interface INotifyBecomingIdle { void OnBecomingIdle(Actor self); }
 	public interface INotifyIdle { void TickIdle(Actor self); }
 
-	public interface IBlocksBullets { }
+	public interface IBlocksProjectiles { }
 	public interface IRenderInfantrySequenceModifier
 	{
 		bool IsModifyingSequence { get; }
@@ -288,7 +301,7 @@ namespace OpenRA.Traits
 		WRot QuantizeOrientation(WRot orientation, int facings);
 	}
 
-	public interface IQuantizeBodyOrientationInfo { int QuantizedBodyFacings(SequenceProvider sequenceProvider, ActorInfo ai); }
+	public interface IQuantizeBodyOrientationInfo { int QuantizedBodyFacings(ActorInfo ai, SequenceProvider sequenceProvider, string race); }
 
 	public interface ITargetableInfo
 	{
@@ -322,17 +335,9 @@ namespace OpenRA.Traits
 		void OnObjectiveFailed(Player player, int objectiveID);
 	}
 
-	public static class DisableExts
-	{
-		public static bool IsDisabled(this Actor a)
-		{
-			return a.TraitsImplementing<IDisable>().Any(d => d.Disabled);
-		}
-	}
-
 	public interface ILegacyEditorRenderInfo
 	{
 		string EditorPalette { get; }
-		string EditorImage(ActorInfo actor);
+		string EditorImage(ActorInfo actor, SequenceProvider sequenceProvider, string race);
 	}
 }

@@ -44,8 +44,10 @@ namespace OpenRA.Graphics
 					{
 						var mapX = x + b.Left;
 						var mapY = y + b.Top;
-						var type = tileset[tileset.GetTerrainIndex(mapTiles[new MPos(mapX, mapY)])];
-						colors[y * stride + x] = type.Color.ToArgb();
+						var type = tileset.GetTileInfo(mapTiles[new MPos(mapX, mapY)]);
+						var color = type != null ? type.LeftColor : Color.Black;
+
+						colors[y * stride + x] = color.ToArgb();
 					}
 				}
 			}
@@ -145,12 +147,11 @@ namespace OpenRA.Graphics
 					if (!t.Actor.IsInWorld || world.FogObscures(t.Actor))
 						continue;
 
-					var color = t.Trait.RadarSignatureColor(t.Actor);
 					foreach (var cell in t.Trait.RadarSignatureCells(t.Actor))
 					{
-						var uv = cell.ToMPos(map);
+						var uv = cell.First.ToMPos(map);
 						if (b.Contains(uv.U, uv.V))
-							colors[(uv.V - b.Top) * stride + uv.U - b.Left] = color.ToArgb();
+							colors[(uv.V - b.Top) * stride + uv.U - b.Left] = cell.Second.ToArgb();
 					}
 				}
 			}

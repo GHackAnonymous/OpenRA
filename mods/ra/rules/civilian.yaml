@@ -13,43 +13,50 @@ C4:
 	Inherits: ^CivInfantry
 	Selectable:
 		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
 
 C5:
 	Inherits: ^CivInfantry
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C1
 
 C6:
 	Inherits: ^CivInfantry
 	Selectable:
 		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
 
 C7:
 	Inherits: ^CivInfantry
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C1
 
 C8:
 	Inherits: ^CivInfantry
 	Selectable:
 		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
 
 C9:
 	Inherits: ^CivInfantry
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C1
 
 C10:
 	Inherits: ^CivInfantry
 	Selectable:
 		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
 
 FCOM:
@@ -70,6 +77,7 @@ FCOM:
 	Bib:
 	Power:
 		Amount: -200
+	ProvidesPrerequisite@buildingname:
 
 HOSP:
 	Inherits: ^TechBuilding
@@ -94,6 +102,7 @@ HOSP:
 		UseDeathTypeSuffix: false
 	WithBuildingExplosion:
 		Delay: 1
+	ProvidesPrerequisite@buildingname:
 
 V01:
 	Inherits: ^CivBuilding
@@ -226,7 +235,10 @@ V19.Husk:
 		ExcludeTilesets: DESERT
 	Tooltip:
 		Name: Husk (Oil Pump)
-	WithFire:
+	RenderSprites:
+	WithSpriteBody:
+		StartSequence: fire-start
+		Sequence: fire-loop
 	-Health:
 	-Selectable:
 	-TargetableBuilding:
@@ -300,6 +312,7 @@ MISS:
 		UseDeathTypeSuffix: false
 	WithBuildingExplosion:
 		Delay: 1
+	ProvidesPrerequisite@buildingname:
 
 BIO:
 	Inherits: ^TechBuilding
@@ -316,6 +329,7 @@ BIO:
 		UseDeathTypeSuffix: false
 	WithBuildingExplosion:
 		Delay: 1
+	ProvidesPrerequisite@buildingname:
 
 OILB:
 	Inherits: ^TechBuilding
@@ -614,4 +628,28 @@ SNOWHUT:
 		Dimensions: 1,2
 	RenderBuilding:
 		Scale: 0.7
+
+LHUS:
+	Inherits: ^CivBuilding
+	EditorTilesetFilter:
+		RequireTilesets: TEMPERAT
+	Selectable:
+		Bounds: 24,48
+	Tooltip:
+		Name: Lighthouse
+	Building:
+		Footprint: _ x
+		Dimensions: 1,2
+
+WINDMILL:
+	Inherits: ^CivBuilding
+	EditorTilesetFilter:
+		RequireTilesets: TEMPERAT
+	Selectable:
+		Bounds: 36,36
+	Tooltip:
+		Name: Windmill
+	Building:
+		Footprint: _ x
+		Dimensions: 1,2
 

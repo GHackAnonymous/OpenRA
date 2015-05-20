@@ -9,7 +9,6 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace OpenRA.Primitives
@@ -23,6 +22,7 @@ namespace OpenRA.Primitives
 		{
 			if (loader == null)
 				throw new ArgumentNullException("loader");
+
 			this.loader = loader;
 			cache = new Dictionary<T, U>(c);
 		}
@@ -32,13 +32,7 @@ namespace OpenRA.Primitives
 
 		public U this[T key]
 		{
-			get
-			{
-				U result;
-				if (!cache.TryGetValue(key, out result))
-					cache.Add(key, result = loader(key));
-				return result;
-			}
+			get { return cache.GetOrAdd(key, loader); }
 		}
 
 		public bool ContainsKey(T key) { return cache.ContainsKey(key); }
@@ -47,6 +41,6 @@ namespace OpenRA.Primitives
 		public ICollection<T> Keys { get { return cache.Keys; } }
 		public ICollection<U> Values { get { return cache.Values; } }
 		public IEnumerator<KeyValuePair<T, U>> GetEnumerator() { return cache.GetEnumerator(); }
-		IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return GetEnumerator(); }
 	}
 }

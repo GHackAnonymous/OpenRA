@@ -18,8 +18,12 @@ namespace OpenRA
 {
 	public class GameInformation
 	{
+		public string Mod;
+		public string Version;
+
 		public string MapUid;
 		public string MapTitle;
+
 		public DateTime StartTimeUtc;
 
 		// Game end timestamp (when the recoding stopped).
@@ -114,7 +118,7 @@ namespace OpenRA
 				Color = runtimePlayer.Color,
 				Team = client.Team,
 				SpawnPoint = runtimePlayer.SpawnPoint,
-				IsRandomFaction = runtimePlayer.Country.Race != client.Country,
+				IsRandomFaction = runtimePlayer.Country.Race != client.Race,
 				IsRandomSpawnPoint = runtimePlayer.SpawnPoint != client.SpawnPoint
 			};
 

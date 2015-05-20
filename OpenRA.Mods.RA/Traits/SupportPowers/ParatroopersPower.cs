@@ -14,7 +14,6 @@ using System.Linq;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Mods.Common.Effects;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Mods.RA.Activities;
 using OpenRA.Primitives;
 using OpenRA.Traits;
 
@@ -198,7 +197,7 @@ namespace OpenRA.Mods.RA.Traits
 
 					beacon = new Beacon(
 						self.Owner,
-						target,
+						target - new WVec(0, 0, altitude),
 						Info.BeaconPalettePrefix,
 						Info.BeaconPoster,
 						Info.BeaconPosterPalette,

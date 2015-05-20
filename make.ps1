@@ -71,9 +71,13 @@ elseif ($command -eq "clean")
 	else
 	{
 		$proc = Start-Process $msBuild $msBuildArguments -NoNewWindow -PassThru -Wait
-		rm *.dll # delete third party dependencies
+		rm *.dll
 		rm *.config
 		rm mods/*/*.dll
+		if (Test-Path -Path thirdparty/download/)
+		{
+			rmdir thirdparty/download -Recurse -Force
+		}
 		echo "Clean complete."
 	}
 }
@@ -111,8 +115,8 @@ elseif ($command -eq "dependencies")
 {
 	cd thirdparty
 	./fetch-thirdparty-deps.ps1
-	cp *.dll ..
-	cp windows/*.dll ..
+	cp download/*.dll ..
+	cp download/windows/*.dll ..
 	cd ..
 	echo "Dependencies copied."
 }
@@ -154,13 +158,12 @@ elseif ($command -eq "check")
 	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Utility
 	echo "Checking for code style violations in OpenRA.Test..."
 	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Test
-	echo "Checking for code style violations in OpenRA.TilesetBuilder..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.TilesetBuilder
 }
 elseif ($command -eq "docs")
 {
-	./OpenRA.Utility.exe d2k --docs | Out-File DOCUMENTATION.md
-	./OpenRA.Utility.exe ra --lua-docs | Out-File Lua-API.md
+	./make.ps1 version
+	./OpenRA.Utility.exe d2k --docs | Out-File -Encoding "UTF8" DOCUMENTATION.md
+	./OpenRA.Utility.exe ra --lua-docs | Out-File -Encoding "UTF8" Lua-API.md
 }
 else
 {

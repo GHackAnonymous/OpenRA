@@ -18,37 +18,81 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	public interface IRenderActorPreviewSpritesInfo { IEnumerable<IActorPreview> RenderPreviewSprites(ActorPreviewInitializer init, RenderSpritesInfo rs, string image, int facings, PaletteReference p); }
-
-	public class RenderSpritesInfo : IRenderActorPreviewInfo, ITraitInfo
+	public interface IRenderActorPreviewSpritesInfo
 	{
-		[Desc("Defaults to the actor name.")]
+		IEnumerable<IActorPreview> RenderPreviewSprites(ActorPreviewInitializer init, RenderSpritesInfo rs, string image, int facings, PaletteReference p);
+	}
+
+	public class RenderSpritesInfo : IRenderActorPreviewInfo, ITraitInfo, ILegacyEditorRenderInfo
+	{
+		[Desc("The sequence name that defines the actor sprites. Defaults to the actor name.")]
 		public readonly string Image = null;
+
+		[FieldLoader.LoadUsing("LoadRaceImages")]
+		[Desc("A dictionary of race-specific image overrides.")]
+		public readonly Dictionary<string, string> RaceImages = null;
 
 		[Desc("Custom palette name")]
 		public readonly string Palette = null;
+
 		[Desc("Custom PlayerColorPalette: BaseName")]
 		public readonly string PlayerPalette = "player";
+
 		[Desc("Change the sprite image size.")]
 		public readonly float Scale = 1f;
 
-		public virtual object Create(ActorInitializer init) { return new RenderSprites(init.Self); }
+		protected static object LoadRaceImages(MiniYaml y)
+		{
+			MiniYaml images;
+
+			if (!y.ToDictionary().TryGetValue("RaceImages", out images))
+				return null;
+
+			return images.Nodes.ToDictionary(kv => kv.Key, kv => kv.Value.Value);
+		}
+
+		public virtual object Create(ActorInitializer init) { return new RenderSprites(init, this); }
 
 		public IEnumerable<IActorPreview> RenderPreview(ActorPreviewInitializer init)
 		{
 			var sequenceProvider = init.World.Map.SequenceProvider;
-			var image = RenderSprites.GetImage(init.Actor);
-			var palette = init.WorldRenderer.Palette(Palette ?? (init.Owner != null ? PlayerPalette + init.Owner.InternalName : null));
+			var race = init.Get<RaceInit, string>();
+			var ownerName = init.Get<OwnerInit>().PlayerName;
+			var image = GetImage(init.Actor, sequenceProvider, race);
+			var palette = init.WorldRenderer.Palette(Palette ?? PlayerPalette + ownerName);
 
 			var facings = 0;
 			var body = init.Actor.Traits.GetOrDefault<BodyOrientationInfo>();
 			if (body != null)
-				facings = body.QuantizedFacings == -1 ? init.Actor.Traits.Get<IQuantizeBodyOrientationInfo>().QuantizedBodyFacings(sequenceProvider, init.Actor) : body.QuantizedFacings;
+			{
+				facings = body.QuantizedFacings;
+
+				if (facings == -1)
+				{
+					var qbo = init.Actor.Traits.GetOrDefault<IQuantizeBodyOrientationInfo>();
+					facings = qbo != null ? qbo.QuantizedBodyFacings(init.Actor, sequenceProvider, race) : 1;
+				}
+			}
 
 			foreach (var spi in init.Actor.Traits.WithInterface<IRenderActorPreviewSpritesInfo>())
 				foreach (var preview in spi.RenderPreviewSprites(init, this, image, facings, palette))
 					yield return preview;
 		}
+
+		public string GetImage(ActorInfo actor, SequenceProvider sequenceProvider, string race)
+		{
+			if (RaceImages != null)
+			{
+				string raceImage = null;
+				if (RaceImages.TryGetValue(race, out raceImage) && sequenceProvider.HasSequence(raceImage))
+					return raceImage;
+			}
+
+			return (Image ?? actor.Name).ToLowerInvariant();
+		}
+
+		public string EditorPalette { get { return Palette; } }
+		public string EditorImage(ActorInfo actor, SequenceProvider sequenceProvider, string race) { return GetImage(actor, sequenceProvider, race); }
 	}
 
 	public class RenderSprites : IRender, ITick, INotifyOwnerChanged, INotifyEffectiveOwnerChanged
@@ -88,9 +132,10 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
+		readonly string race;
 		readonly RenderSpritesInfo info;
-		string cachedImage = null;
-		Dictionary<string, AnimationWrapper> anims = new Dictionary<string, AnimationWrapper>();
+		readonly List<AnimationWrapper> anims = new List<AnimationWrapper>();
+		string cachedImage;
 
 		public static Func<int> MakeFacingFunc(Actor self)
 		{
@@ -99,15 +144,10 @@ namespace OpenRA.Mods.Common.Traits
 			return () => facing.Facing;
 		}
 
-		public RenderSprites(Actor self)
+		public RenderSprites(ActorInitializer init, RenderSpritesInfo info)
 		{
-			info = self.Info.Traits.Get<RenderSpritesInfo>();
-		}
-
-		public static string GetImage(ActorInfo actor)
-		{
-			var info = actor.Traits.Get<RenderSpritesInfo>();
-			return (info.Image ?? actor.Name).ToLowerInvariant();
+			this.info = info;
+			race = init.Contains<RaceInit>() ? init.Get<RaceInit, string>() : init.Self.Owner.Country.Race;
 		}
 
 		public string GetImage(Actor self)
@@ -115,12 +155,12 @@ namespace OpenRA.Mods.Common.Traits
 			if (cachedImage != null)
 				return cachedImage;
 
-			return cachedImage = GetImage(self.Info);
+			return cachedImage = info.GetImage(self.Info, self.World.Map.SequenceProvider, race);
 		}
 
-		protected void UpdatePalette()
+		public void UpdatePalette()
 		{
-			foreach (var anim in anims.Values)
+			foreach (var anim in anims)
 				anim.OwnerChanged();
 		}
 
@@ -129,7 +169,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public virtual IEnumerable<IRenderable> Render(Actor self, WorldRenderer wr)
 		{
-			foreach (var a in anims.Values)
+			foreach (var a in anims)
 			{
 				if (!a.IsVisible)
 					continue;
@@ -147,11 +187,11 @@ namespace OpenRA.Mods.Common.Traits
 
 		public virtual void Tick(Actor self)
 		{
-			foreach (var a in anims.Values)
+			foreach (var a in anims)
 				a.Animation.Animation.Tick();
 		}
 
-		public void Add(string key, AnimationWithOffset anim, string palette = null, bool isPlayerPalette = false)
+		public void Add(AnimationWithOffset anim, string palette = null, bool isPlayerPalette = false)
 		{
 			// Use defaults
 			if (palette == null)
@@ -160,12 +200,12 @@ namespace OpenRA.Mods.Common.Traits
 				isPlayerPalette = info.Palette == null;
 			}
 
-			anims.Add(key, new AnimationWrapper(anim, palette, isPlayerPalette));
+			anims.Add(new AnimationWrapper(anim, palette, isPlayerPalette));
 		}
 
-		public void Remove(string key)
+		public void Remove(AnimationWithOffset anim)
 		{
-			anims.Remove(key);
+			anims.RemoveAll(a => a.Animation == anim);
 		}
 
 		public static string NormalizeSequence(Animation anim, DamageState state, string sequence)
@@ -198,7 +238,7 @@ namespace OpenRA.Mods.Common.Traits
 		// Required by RenderSimple
 		protected int2 AutoSelectionSize(Actor self)
 		{
-			return anims.Values.Where(b => b.IsVisible
+			return anims.Where(b => b.IsVisible
 				&& b.Animation.Animation.CurrentSequence != null)
 					.Select(a => (a.Animation.Animation.Image.Size * info.Scale).ToInt2())
 					.FirstOrDefault();

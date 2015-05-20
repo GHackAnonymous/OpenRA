@@ -38,8 +38,12 @@ namespace OpenRA.FileFormats
 		byte[] cbf;
 		byte[] cbp;
 		byte[] cbfBuffer;
-		byte[] fileBuffer = new byte[256000]; // Buffer for loading file subchunks, the maximum chunk size of a file is not defined
-		int maxCbfzSize = 256000;             // and the header definition for the size of the biggest chunks (color data) isn't accurate. But 256k is large enough for all TS videos(< 200k).
+
+		// Buffer for loading file subchunks, the maximum chunk size of a file is not defined
+		// and the header definition for the size of the biggest chunks (color data) isn't accurate.
+		// But 256k is large enough for all TS videos(< 200k).
+		byte[] fileBuffer = new byte[256000];
+		int maxCbfzSize = 256000;
 		int vtprSize = 0;
 		int currentChunkBuffer = 0;
 		int chunkBufferOffset = 0;
@@ -183,7 +187,9 @@ namespace OpenRA.FileFormats
 					{
 						case "SND0":
 						case "SND2":
-							if (audioChannels == 1)
+							if (audioChannels == 0)
+								throw new NotSupportedException();
+							else if (audioChannels == 1)
 							{
 								var rawAudio = stream.ReadBytes((int)length);
 								audio1.Write(rawAudio);
@@ -194,11 +200,15 @@ namespace OpenRA.FileFormats
 								audio1.Write(rawAudio);
 								rawAudio = stream.ReadBytes((int)length / 2);
 								audio2.Write(rawAudio);
+								if (length % 2 != 0)
+									stream.ReadBytes(2);
 							}
 
 							compressed = type == "SND2";
 							break;
 						default:
+							if (length + stream.Position > stream.Length)
+								throw new NotSupportedException("Vqa uses unknown Subtype: {0}".F(type));
 							stream.ReadBytes((int)length);
 							break;
 					}

@@ -26,9 +26,6 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Group queues from separate buildings together into the same tab.")]
 		public readonly string Group = null;
 
-		[Desc("Filter buildable items based on their Owner.")]
-		public readonly bool RequireOwner = true;
-
 		[Desc("Only enable this queue for certain factions")]
 		public readonly string[] Race = { };
 
@@ -79,7 +76,6 @@ namespace OpenRA.Mods.Common.Traits
 		Dictionary<ActorInfo, ProductionState> produceable;
 		List<ProductionItem> queue = new List<ProductionItem>();
 
-		// A list of things we are currently building
 		public Actor Actor { get { return self; } }
 
 		[Sync] public int QueueLength { get { return queue.Count; } }
@@ -156,14 +152,8 @@ namespace OpenRA.Mods.Common.Traits
 			{
 				var bi = a.Traits.Get<BuildableInfo>();
 
-				// Can our race build this by satisfying normal prerequisites?
-				var buildable = !Info.RequireOwner || bi.Owner.Contains(Race);
-
-				// Checks if Prerequisites want to hide the Actor from buildQueue if they are false
-				produceable.Add(a, new ProductionState { Visible = buildable });
-
-				if (buildable)
-					ttc.Add(a.Name, bi.Prerequisites, bi.BuildLimit, this);
+				produceable.Add(a, new ProductionState());
+				ttc.Add(a.Name, bi.Prerequisites, bi.BuildLimit, this);
 			}
 		}
 
@@ -361,6 +351,13 @@ namespace OpenRA.Mods.Common.Traits
 			queue.Add(item);
 		}
 
+		// Returns the actor/trait that is most likely (but not necessarily guaranteed) to produce something in this queue
+		public virtual TraitPair<Production> MostLikelyProducer()
+		{
+			var trait = self.TraitsImplementing<Production>().FirstOrDefault(p => p.Info.Produces.Contains(Info.Type));
+			return new TraitPair<Production> { Actor = self, Trait = trait };
+		}
+
 		// Builds a unit from the actor that holds this queue (1 queue per building)
 		// Returns false if the unit can't be built
 		protected virtual bool BuildUnit(string name)
@@ -385,7 +382,7 @@ namespace OpenRA.Mods.Common.Traits
 
 	public class ProductionState
 	{
-		public bool Visible = false;
+		public bool Visible = true;
 		public bool Buildable = false;
 	}
 

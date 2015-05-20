@@ -8,6 +8,7 @@
  */
 #endregion
 
+using System;
 using System.Linq;
 using OpenRA.GameRules;
 
@@ -18,10 +19,10 @@ namespace OpenRA.Traits
 		[Desc("HitPoints")]
 		public readonly int HP = 0;
 
-		[Desc("Physical size of the unit used for damage calculations.  Impacts within this radius apply full damage")]
+		[Desc("Physical size of the unit used for damage calculations. Impacts within this radius apply full damage.")]
 		public readonly WRange Radius = new WRange(426);
 
-		[Desc("Don't trigger interfaces such as AnnounceOnKill.")]
+		[Desc("Trigger interfaces such as AnnounceOnKill?")]
 		public readonly bool NotifyAppliedDamage = true;
 
 		public virtual object Create(ActorInitializer init) { return new Health(init, this); }
@@ -42,7 +43,10 @@ namespace OpenRA.Traits
 			Info = info;
 			MaxHP = info.HP;
 
-			hp = init.Contains<HealthInit>() ? (int)(init.Get<HealthInit, float>() * MaxHP) : MaxHP;
+			hp = init.Contains<HealthInit>() ? init.Get<HealthInit, int>() * MaxHP / 100 : MaxHP;
+			if (hp <= 0)
+				hp = Math.Max(MaxHP / 100, 1);
+
 			DisplayHp = hp;
 		}
 
@@ -110,7 +114,7 @@ namespace OpenRA.Traits
 			if (IsDead)
 				return;
 
-			var oldState = this.DamageState;
+			var oldState = DamageState;
 
 			// Apply any damage modifiers
 			if (!ignoreModifiers && damage > 0)
@@ -122,13 +126,13 @@ namespace OpenRA.Traits
 				damage = Util.ApplyPercentageModifiers(damage, modifiers);
 			}
 
-			hp = Exts.Clamp(hp - damage, 0, MaxHP);
+			hp = (hp - damage).Clamp(0, MaxHP);
 
 			var ai = new AttackInfo
 			{
 				Attacker = attacker,
 				Damage = damage,
-				DamageState = this.DamageState,
+				DamageState = DamageState,
 				PreviousDamageState = oldState,
 				Warhead = warhead,
 			};
@@ -169,12 +173,12 @@ namespace OpenRA.Traits
 		}
 	}
 
-	public class HealthInit : IActorInit<float>
+	public class HealthInit : IActorInit<int>
 	{
-		[FieldFromYamlKey] readonly float value = 1f;
+		[FieldFromYamlKey] readonly int value = 100;
 		public HealthInit() { }
-		public HealthInit(float init) { value = init; }
-		public float Value(World world) { return value; }
+		public HealthInit(int init) { value = init; }
+		public int Value(World world) { return value; }
 	}
 
 	public static class HealthExts

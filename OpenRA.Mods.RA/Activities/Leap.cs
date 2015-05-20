@@ -13,20 +13,19 @@ using System.Linq;
 using OpenRA.Activities;
 using OpenRA.GameRules;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Mods.RA.Traits;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.RA.Activities
 {
 	class Leap : Activity
 	{
-		Mobile mobile;
-		WeaponInfo weapon;
+		readonly Mobile mobile;
+		readonly WeaponInfo weapon;
+		readonly int length;
 
 		WPos from;
 		WPos to;
 		int ticks;
-		int length;
 		WAngle angle;
 
 		public Leap(Actor self, Actor target, WeaponInfo weapon, WRange speed, WAngle angle)
@@ -45,7 +44,8 @@ namespace OpenRA.Mods.RA.Activities
 			to = self.World.Map.CenterOfSubCell(targetMobile.FromCell, targetMobile.FromSubCell);
 			length = Math.Max((to - from).Length / speed.Range, 1);
 
-			self.Trait<RenderInfantry>().Attacking(self, Target.FromActor(target));
+			// HACK: why isn't this using the interface?
+			self.Trait<WithInfantryBody>().Attacking(self, Target.FromActor(target));
 
 			if (weapon.Report != null && weapon.Report.Any())
 				Sound.Play(weapon.Report.Random(self.World.SharedRandom), self.CenterPosition);

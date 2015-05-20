@@ -14,7 +14,7 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.RA.Traits
 {
-	class MineInfo : ITraitInfo, IOccupySpaceInfo
+	class MineInfo : ITraitInfo
 	{
 		public readonly string[] CrushClasses = { };
 		public readonly bool AvoidFriendly = true;
@@ -30,7 +30,7 @@ namespace OpenRA.Mods.RA.Traits
 
 		public Mine(ActorInitializer init, MineInfo info)
 		{
-			this.self = init.Self;
+			self = init.Self;
 			this.info = info;
 		}
 

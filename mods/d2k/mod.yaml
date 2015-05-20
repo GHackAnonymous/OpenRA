@@ -1,6 +1,6 @@
 Metadata:
 	Title: Dune 2000
-	Description: Three great houses fight for the precious spice, melange.\nHe who controls the spice controls the universe!\n\nOur work in progress Dune 2000 recreation brings modern\ngameplay improvements into the Dune universe.\n\nFuture versions of OpenRA will incorporate more of the missing\nunique features from this classic game.
+	Description: Three great houses fight for the precious spice, melange.\nHe who controls the spice controls the universe!\n\nTry to establish a foothold on the desert planet Arrakis\nwith its harsh environmental conditions and protect your\nharvesting operations from giant sandworms as well as\nruthless enemy factions.
 	Version: {DEV_VERSION}
 	Author: the OpenRA Developers
 
@@ -28,16 +28,15 @@ Rules:
 	./mods/d2k/rules/ai.yaml
 	./mods/d2k/rules/player.yaml
 	./mods/d2k/rules/world.yaml
+	./mods/d2k/rules/palettes.yaml
 	./mods/d2k/rules/defaults.yaml
 	./mods/d2k/rules/vehicles.yaml
+	./mods/d2k/rules/starport.yaml
+	./mods/d2k/rules/husks.yaml
 	./mods/d2k/rules/structures.yaml
 	./mods/d2k/rules/aircraft.yaml
 	./mods/d2k/rules/infantry.yaml
-	./mods/d2k/rules/atreides.yaml
-	./mods/d2k/rules/harkonnen.yaml
-	./mods/d2k/rules/ordos.yaml
 	./mods/d2k/rules/arrakis.yaml
-	./mods/d2k/rules/corrino.yaml
 
 Sequences:
 	./mods/d2k/sequences/aircraft.yaml
@@ -45,6 +44,11 @@ Sequences:
 	./mods/d2k/sequences/infantry.yaml
 	./mods/d2k/sequences/structures.yaml
 	./mods/d2k/sequences/misc.yaml
+
+TileSets:
+	./mods/d2k/tilesets/arrakis.yaml
+
+TileSize: 32,32
 
 Cursors:
 	./mods/d2k/cursors.yaml
@@ -69,10 +73,11 @@ ChromeLayout:
 	./mods/ra/chrome/ingame-infoscripterror.yaml
 	./mods/ra/chrome/ingame-infobriefing.yaml
 	./mods/ra/chrome/ingame-infoobjectives.yaml
-	./mods/ra/chrome/ingame-infostats.yaml
+	./mods/d2k/chrome/ingame-infostats.yaml
 	./mods/d2k/chrome/ingame-observer.yaml
 	./mods/ra/chrome/ingame-observerstats.yaml
 	./mods/d2k/chrome/ingame-player.yaml
+	./mods/ra/chrome/ingame-perf.yaml
 	./mods/ra/chrome/ingame-debug.yaml
 	./mods/d2k/chrome/ingame-leavemap.yaml
 	./mods/d2k/chrome/mainmenu.yaml
@@ -95,23 +100,19 @@ ChromeLayout:
 	./mods/ra/chrome/assetbrowser.yaml
 	./mods/ra/chrome/missionbrowser.yaml
 	./mods/ra/chrome/confirmation-dialogs.yaml
+	./mods/ra/chrome/editor.yaml
 
 Weapons:
 	./mods/d2k/weapons.yaml
 
 Voices:
-	./mods/d2k/voices.yaml
+	./mods/d2k/audio/voices.yaml
 
 Notifications:
-	./mods/d2k/notifications.yaml
-
-TileSets:
-	./mods/d2k/tilesets/arrakis.yaml
-
-TileSize: 32,32
+	./mods/d2k/audio/notifications.yaml
 
 Music:
-	./mods/d2k/music.yaml
+	./mods/d2k/audio/music.yaml
 
 Translations:
 	./mods/d2k/languages/english.yaml
@@ -180,3 +181,5 @@ Fonts:
 SupportsMapsFrom: d2k
 
 SpriteFormats: R8, ShpTD, TmpRA
+
+SpriteSequenceFormat: DefaultSpriteSequence

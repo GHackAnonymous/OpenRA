@@ -1,92 +1,9 @@
-World:
-	ChatCommands:
-	DevCommands:
-	PlayerCommands:
-	HelpCommand:
-	ScreenMap:
+^BaseWorld:
+	Inherits: ^Palettes
 	ActorMap:
+	ScreenMap:
+	TerrainGeometryOverlay:
 	LoadWidgetAtGameStart:
-	ScreenShaker:
-	MenuPaletteEffect:
-	WaterPaletteRotation:
-		ExcludePalettes: player, effect
-	ChronoshiftPaletteEffect:
-	NukePaletteEffect:
-	LightPaletteRotator:
-		ExcludePalettes: terrain, effect
-	BuildingInfluence:
-	ProductionQueueFromSelection:
-		ProductionPaletteWidget: PRODUCTION_PALETTE
-	BridgeLayer:
-		Bridges: bridge1, bridge2, br1, br2, br3, sbridge1, sbridge2, sbridge3, sbridge4
-	CrateSpawner:
-		DeliveryAircraft: badr
-		QuantizedFacings: 16
-		Minimum: 1
-		Maximum: 3
-		SpawnInterval: 120
-		WaterChance: .2
-	PlayerPaletteFromCurrentTileset:
-		Name: player
-		ShadowIndex: 3,4
-	PaletteFromCurrentTileset:
-		Name: terrain
-		ShadowIndex: 3,4
-	PaletteFromFile@chrome:
-		Name: chrome
-		Filename: temperat.pal
-		ShadowIndex: 3
-		AllowModifiers: false
-	PaletteFromFile@effect:
-		Name: effect
-		Filename: temperat.pal
-		ShadowIndex: 4
-	PaletteFromFile@colorpicker:
-		Name: colorpicker
-		Filename: temperat.pal
-		ShadowIndex: 4
-		AllowModifiers: false
-	PaletteFromRGBA@shadow:
-		Name: shadow
-		R: 0
-		G: 0
-		B: 0
-		A: 140
-	PaletteFromRGBA@cloak:
-		Name: cloak
-		R: 0
-		G: 0
-		B: 0
-		A: 140
-	PaletteFromRGBA@highlight:
-		Name: highlight
-		R: 255
-		G: 255
-		B: 255
-		A: 128
-	PaletteFromRGBA@moveflash:
-		Name: moveflash
-		R: 255
-		G: 255
-		B: 255
-		A: 64
-	PaletteFromRGBA@invuln:
-		Name: invuln
-		R: 128
-		G: 0
-		B: 0
-		A: 128
-	PaletteFromRGBA@disabled:
-		Name: disabled
-		R: 0
-		G: 0
-		B: 0
-		A: 180
-	ShroudPalette@shroud:
-		Type: Shroud
-	ShroudPalette@fog:
-		Name: fog
-		Fog: true
 	ShroudRenderer:
 		FogVariants: shroud
 		Index: 255, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 20, 40, 56, 65, 97, 130, 148, 194, 24, 33, 66, 132, 28, 41, 67, 134, 1, 2, 4, 8, 3, 6, 12, 9, 7, 14, 13, 11, 5, 10, 15, 255
@@ -95,7 +12,7 @@ World:
 		Name: Allies
 		Race: allies
 		Side: Allies
-		Description: Allies: Deception\nSpecial Ability: Can build fake structures
+		Selectable: False
 	Country@1:
 		Name: England
 		Race: england
@@ -105,7 +22,7 @@ World:
 		Name: France
 		Race: france
 		Side: Allies
-		Description: France: Concealment\nSpecial Structure: Advanced Gap Generator\nSpecial Unit: Mobile Gap Generator
+		Description: France: Deception\nSpecial Ability: Can build fake structures\nSpecial Unit: Mobile Gap Generator
 	Country@3:
 		Name: Germany
 		Race: germany
@@ -115,27 +32,35 @@ World:
 		Name: Soviet
 		Race: soviet
 		Side: Soviet
-		Description: Soviet: Infantry\nSpecial Ability: Paradrop\nSpecial Ability: Spy Plane
+		Selectable: False
 	Country@5:
 		Name: Russia
 		Race: russia
 		Side: Soviet
-		Description: Russia: Tanks\nSpecial Ability: Armor Airdrop\nSpecial Unit: MAD Tank
+		Description: Russia: Tesla Weapons\nSpecial Unit: Tesla Tank\nSpecial Unit: Shock Trooper
 	Country@6:
 		Name: Ukraine
 		Race: ukraine
 		Side: Soviet
 		Description: Ukraine: Demolitions\nSpecial Ability: Parabombs\nSpecial Unit: Demolition Truck
-	DomainIndex:
-	SmudgeLayer@SCORCH:
-		Type: Scorch
-		Sequence: scorches
-		SmokePercentage: 50
-	SmudgeLayer@CRATER:
-		Type: Crater
-		Sequence: craters
-	ResourceLayer:
-	ResourceClaimLayer:
+	Country@random:
+		Name: Any
+		Race: Random
+		RandomRaceMembers: RandomAllies, RandomSoviet
+		Side: Random
+		Description: A random country.
+	Country@randomallies:
+		Name: Allies
+		Race: RandomAllies
+		RandomRaceMembers: england, france, germany
+		Side: Random
+		Description: A random Allied country.
+	Country@randomsoviet:
+		Name: Soviet
+		Race: RandomSoviet
+		RandomRaceMembers: russia, ukraine
+		Side: Random
+		Description: A random Soviet country.
 	ResourceType@ore:
 		ResourceType: 1
 		Palette: player
@@ -160,8 +85,37 @@ World:
 		AllowedTerrainTypes: Clear,Road
 		AllowUnderActors: true
 		TerrainType: Gems
+
+World:
+	Inherits: ^BaseWorld
+	ChatCommands:
+	DevCommands:
+	PlayerCommands:
+	HelpCommand:
+	ScreenShaker:
+	BuildingInfluence:
+	ProductionQueueFromSelection:
+		ProductionPaletteWidget: PRODUCTION_PALETTE
+	BridgeLayer:
+		Bridges: bridge1, bridge2, br1, br2, br3, sbridge1, sbridge2, sbridge3, sbridge4
+	CrateSpawner:
+		DeliveryAircraft: badr
+		QuantizedFacings: 16
+		Minimum: 1
+		Maximum: 3
+		SpawnInterval: 120
+		WaterChance: .2
+	DomainIndex:
+	SmudgeLayer@SCORCH:
+		Type: Scorch
+		Sequence: scorches
+		SmokePercentage: 50
+	SmudgeLayer@CRATER:
+		Type: Crater
+		Sequence: craters
+	ResourceLayer:
+	ResourceClaimLayer:
 	PathfinderDebugOverlay:
-	TerrainGeometryOverlay:
 	SpawnMapActors:
 	CreateMPPlayers:
 	MPStartUnits@mcvonly:
@@ -211,3 +165,7 @@ World:
 	ObjectivesPanel:
 		PanelName: SKIRMISH_STATS
 
+EditorWorld:
+	Inherits: ^BaseWorld
+	EditorActorLayer:
+	EditorResourceLayer:

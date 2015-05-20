@@ -312,6 +312,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var gs = Game.Settings.Game;
 			var ks = Game.Settings.Keys;
 
+			BindCheckboxPref(panel, "CLASSICORDERS_CHECKBOX", gs, "UseClassicMouseStyle");
 			BindCheckboxPref(panel, "EDGESCROLL_CHECKBOX", gs, "ViewportEdgeScroll");
 			BindCheckboxPref(panel, "LOCKMOUSE_CHECKBOX", gs, "LockMouseWindow");
 			BindSliderPref(panel, "SCROLLSPEED_SLIDER", gs, "ViewportEdgeScrollStep");
@@ -422,7 +423,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					{ "ProductionTypeInfantryKey", "Infantry Tab" },
 					{ "ProductionTypeVehicleKey", "Vehicle Tab" },
 					{ "ProductionTypeAircraftKey", "Aircraft Tab" },
-					{ "ProductionTypeNavalKey", "Naval Tab" }
+					{ "ProductionTypeNavalKey", "Naval Tab" },
+					{ "ProductionTypeTankKey", "Tank Tab" },
+					{ "ProductionTypeMerchantKey", "Starport Tab" }
 				};
 
 				for (var i = 1; i <= 24; i++)
@@ -430,6 +433,20 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 				var header = ScrollItemWidget.Setup(hotkeyHeader, returnTrue, doNothing);
 				header.Get<LabelWidget>("LABEL").GetText = () => "Production Commands";
+				hotkeyList.AddChild(header);
+
+				foreach (var kv in hotkeys)
+					BindHotkeyPref(kv, ks, productionTemplate, hotkeyList);
+			}
+
+			// Support powers
+			{
+				var hotkeys = new Dictionary<string, string>();
+				for (var i = 1; i <= 6; i++)
+					hotkeys.Add("SupportPower{0:D2}Key".F(i), "Slot {0}".F(i));
+
+				var header = ScrollItemWidget.Setup(hotkeyHeader, returnTrue, doNothing);
+				header.Get<LabelWidget>("LABEL").GetText = () => "Support Power Commands";
 				hotkeyList.AddChild(header);
 
 				foreach (var kv in hotkeys)
@@ -472,6 +489,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			return () =>
 			{
+				gs.UseClassicMouseStyle = dgs.UseClassicMouseStyle;
 				gs.MouseScroll = dgs.MouseScroll;
 				gs.LockMouseWindow = dgs.LockMouseWindow;
 				gs.ViewportEdgeScroll = dgs.ViewportEdgeScroll;

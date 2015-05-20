@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Graphics;
+using OpenRA.Mods.Common.Traits;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.TS.Traits
@@ -36,7 +37,7 @@ namespace OpenRA.Mods.TS.Traits
 				() => false, () => 0);
 		}
 
-		public int QuantizedBodyFacings(SequenceProvider sequenceProvider, ActorInfo ai) { return 0; }
+		public int QuantizedBodyFacings(ActorInfo ai, SequenceProvider sequenceProvider, string race) { return 0; }
 	}
 
 	public class WithVoxelUnloadBody : IAutoSelectionSize

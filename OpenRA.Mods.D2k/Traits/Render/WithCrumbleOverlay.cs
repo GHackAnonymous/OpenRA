@@ -10,7 +10,6 @@
 
 using OpenRA.Graphics;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Mods.RA;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.D2k.Traits
@@ -39,16 +38,15 @@ namespace OpenRA.Mods.D2k.Traits
 			if (init.Contains<SkipMakeAnimsInit>())
 				return;
 
-			var key = "make_overlay_{0}".F(info.Sequence);
 			var rs = init.Self.Trait<RenderSprites>();
 
 			var overlay = new Animation(init.World, rs.GetImage(init.Self));
+			var anim = new AnimationWithOffset(overlay, null, () => !buildComplete);
 
 			// Remove the animation once it is complete
-			overlay.PlayThen(info.Sequence, () => init.World.AddFrameEndTask(w => rs.Remove(key)));
+			overlay.PlayThen(info.Sequence, () => init.World.AddFrameEndTask(w => rs.Remove(anim)));
 
-			rs.Add(key, new AnimationWithOffset(overlay, null, () => !buildComplete),
-				info.Palette, info.IsPlayerPalette);
+			rs.Add(anim, info.Palette, info.IsPlayerPalette);
 		}
 
 		public void BuildingComplete(Actor self)

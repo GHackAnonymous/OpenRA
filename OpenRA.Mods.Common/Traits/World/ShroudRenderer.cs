@@ -9,6 +9,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using OpenRA.Graphics;
 using OpenRA.Traits;
 
@@ -85,6 +86,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		readonly CellLayer<TileInfo> tileInfos;
 		readonly CellLayer<bool> shroudDirty;
+		readonly HashSet<CPos> cellsDirty;
+		readonly HashSet<CPos> cellsAndNeighborsDirty;
 
 		readonly Vertex[] fogVertices, shroudVertices;
 		readonly Sprite[] fogSprites, shroudSprites;
@@ -113,6 +116,8 @@ namespace OpenRA.Mods.Common.Traits
 
 			tileInfos = new CellLayer<TileInfo>(map);
 			shroudDirty = new CellLayer<bool>(map);
+			cellsDirty = new HashSet<CPos>();
+			cellsAndNeighborsDirty = new HashSet<CPos>();
 			var verticesLength = map.MapSize.X * map.MapSize.Y * 4;
 			fogVertices = new Vertex[verticesLength];
 			shroudVertices = new Vertex[verticesLength];
@@ -167,6 +172,12 @@ namespace OpenRA.Mods.Common.Traits
 
 			fogPalette = wr.Palette(info.FogPalette);
 			shroudPalette = wr.Palette(info.ShroudPalette);
+
+			wr.PaletteInvalidated += () =>
+			{
+				mapBorderShroudIsCached = false;
+				MarkCellsDirty(CellRegion.Expand(map.Cells, 1));
+			};
 		}
 
 		Edges GetEdges(MPos uv, Func<MPos, bool> isVisible)
@@ -209,13 +220,16 @@ namespace OpenRA.Mods.Common.Traits
 			if (currentShroud != newShroud)
 			{
 				if (currentShroud != null)
-					currentShroud.CellEntryChanged -= MarkCellAndNeighborsDirty;
+					currentShroud.CellsChanged -= MarkCellsDirty;
 
 				if (newShroud != null)
 				{
 					shroudDirty.Clear(true);
-					newShroud.CellEntryChanged += MarkCellAndNeighborsDirty;
+					newShroud.CellsChanged += MarkCellsDirty;
 				}
+
+				cellsDirty.Clear();
+				cellsAndNeighborsDirty.Clear();
 
 				currentShroud = newShroud;
 			}
@@ -223,6 +237,21 @@ namespace OpenRA.Mods.Common.Traits
 			if (currentShroud != null)
 			{
 				mapBorderShroudIsCached = false;
+
+				// We need to mark newly dirtied areas of the shroud.
+				// Expand the dirty area to cover the neighboring cells, since shroud is affected by neighboring cells.
+				foreach (var cell in cellsDirty)
+				{
+					cellsAndNeighborsDirty.Add(cell);
+					foreach (var direction in CVec.Directions)
+						cellsAndNeighborsDirty.Add(cell + direction);
+				}
+
+				foreach (var cell in cellsAndNeighborsDirty)
+					shroudDirty[cell] = true;
+
+				cellsDirty.Clear();
+				cellsAndNeighborsDirty.Clear();
 			}
 			else if (!mapBorderShroudIsCached)
 			{
@@ -231,9 +260,9 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		void MarkCellAndNeighborsDirty(CPos cell)
+		void MarkCellsDirty(IEnumerable<CPos> cellsChanged)
 		{
-			// Mark this cell and its 8 neighbors as being out of date.
+			// Mark changed cells as being out of date.
 			// We don't want to do anything more than this for several performance reasons:
 			// - If the cells remain off-screen for a long time, they may change several times before we next view
 			// them, so calculating their new vertices is wasted effort since we may recalculate them again before we
@@ -242,15 +271,7 @@ namespace OpenRA.Mods.Common.Traits
 			// leaves a trail of fog filling in behind). If we recalculated a cell and its neighbors when the first
 			// cell in a group changed, many cells would be recalculated again when the second cell, right next to the
 			// first, is updated. In fact we might do on the order of 3x the work we needed to!
-			shroudDirty[cell + new CVec(-1, -1)] = true;
-			shroudDirty[cell + new CVec(0, -1)] = true;
-			shroudDirty[cell + new CVec(1, -1)] = true;
-			shroudDirty[cell + new CVec(-1, 0)] = true;
-			shroudDirty[cell] = true;
-			shroudDirty[cell + new CVec(1, 0)] = true;
-			shroudDirty[cell + new CVec(-1, 1)] = true;
-			shroudDirty[cell + new CVec(0, 1)] = true;
-			shroudDirty[cell + new CVec(1, 1)] = true;
+			cellsDirty.UnionWith(cellsChanged);
 		}
 
 		void CacheMapBorderShroud()
@@ -269,22 +290,26 @@ namespace OpenRA.Mods.Common.Traits
 
 		void Render(CellRegion visibleRegion)
 		{
-			var renderRegion = CellRegion.Expand(visibleRegion, 1).MapCoords;
+			// Due to diamond tile staggering, we need to expand the cordon to get full shroud coverage.
+			if (map.TileShape == TileShape.Diamond)
+				visibleRegion = CellRegion.Expand(visibleRegion, 1);
 
 			if (currentShroud == null)
-			{
-				RenderMapBorderShroud(renderRegion);
-				return;
-			}
-
-			RenderPlayerShroud(visibleRegion, renderRegion);
+				RenderMapBorderShroud(visibleRegion);
+			else
+				RenderPlayerShroud(visibleRegion);
 		}
 
-		void RenderMapBorderShroud(CellRegion.MapCoordsRegion renderRegion)
+		void RenderMapBorderShroud(CellRegion visibleRegion)
 		{
+			// The map border shroud only affects the map border. If none of the visible cells are on the border, then
+			// we don't need to render anything and can bail early for performance.
+			if (CellRegion.Expand(map.Cells, -1).Contains(visibleRegion))
+				return;
+
 			// Render the shroud that just encroaches at the map border. This shroud is always fully cached, so we can
 			// just render straight from the cache.
-			foreach (var uv in renderRegion)
+			foreach (var uv in visibleRegion.MapCoords)
 			{
 				var offset = VertexArrayOffset(uv);
 				RenderCachedTile(shroudSpriteLayer[uv], shroudVertices, offset);
@@ -292,7 +317,7 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		void RenderPlayerShroud(CellRegion visibleRegion, CellRegion.MapCoordsRegion renderRegion)
+		void RenderPlayerShroud(CellRegion visibleRegion)
 		{
 			// Render the shroud by drawing the appropriate tile over each cell that is visible on-screen.
 			// For performance we keep a cache tiles we have drawn previously so we don't have to recalculate the
@@ -303,7 +328,7 @@ namespace OpenRA.Mods.Common.Traits
 			// cached vertices.
 			var visibleUnderShroud = currentShroud.IsExploredTest(visibleRegion);
 			var visibleUnderFog = currentShroud.IsVisibleTest(visibleRegion);
-			foreach (var uv in renderRegion)
+			foreach (var uv in visibleRegion.MapCoords)
 			{
 				var offset = VertexArrayOffset(uv);
 				if (shroudDirty[uv])

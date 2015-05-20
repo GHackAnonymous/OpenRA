@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -87,6 +88,29 @@ namespace OpenRA
 			return r.Contains(p.ToPointF());
 		}
 
+		static int WindingDirectionTest(int2 v0, int2 v1, int2 p)
+		{
+			return (v1.X - v0.X) * (p.Y - v0.Y) - (p.X - v0.X) * (v1.Y - v0.Y);
+		}
+
+		public static bool PolygonContains(this int2[] polygon, int2 p)
+		{
+			var windingNumber = 0;
+
+			for (var i = 0; i < polygon.Length; i++)
+			{
+				var tv = polygon[i];
+				var nv = polygon[(i + 1) % polygon.Length];
+
+				if (tv.Y <= p.Y && nv.Y > p.Y && WindingDirectionTest(tv, nv, p) > 0)
+					windingNumber++;
+				else if (tv.Y > p.Y && nv.Y <= p.Y && WindingDirectionTest(tv, nv, p) < 0)
+					windingNumber--;
+			}
+
+			return windingNumber != 0;
+		}
+
 		public static bool HasModifier(this Modifiers k, Modifiers mod)
 		{
 			return (k & mod) == mod;
@@ -113,19 +137,27 @@ namespace OpenRA
 
 		public static T Random<T>(this IEnumerable<T> ts, MersenneTwister r)
 		{
-			var xs = ts as ICollection<T>;
-			if (xs != null)
-				return xs.ElementAt(r.Next(xs.Count));
-			var ys = ts.ToList();
-			return ys[r.Next(ys.Count)];
+			return Random(ts, r, true);
 		}
 
 		public static T RandomOrDefault<T>(this IEnumerable<T> ts, MersenneTwister r)
 		{
-			if (!ts.Any())
-				return default(T);
+			return Random(ts, r, false);
+		}
 
-			return ts.Random(r);
+		static T Random<T>(IEnumerable<T> ts, MersenneTwister r, bool throws)
+		{
+			var xs = ts as ICollection<T>;
+			xs = xs ?? ts.ToList();
+			if (xs.Count == 0)
+			{
+				if (throws)
+					throw new ArgumentException("Collection must not be empty.", "ts");
+				else
+					return default(T);
+			}
+			else
+				return xs.ElementAt(r.Next(xs.Count));
 		}
 
 		public static float Product(this IEnumerable<float> xs)
@@ -309,12 +341,16 @@ namespace OpenRA
 			return new HashSet<T>(source);
 		}
 
-		public static Dictionary<TKey, TSource> ToDictionaryWithConflictLog<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, string debugName, Func<TKey, string> logKey, Func<TSource, string> logValue)
+		public static Dictionary<TKey, TSource> ToDictionaryWithConflictLog<TSource, TKey>(
+			this IEnumerable<TSource> source, Func<TSource, TKey> keySelector,
+			string debugName, Func<TKey, string> logKey, Func<TSource, string> logValue)
 		{
 			return ToDictionaryWithConflictLog(source, keySelector, x => x, debugName, logKey, logValue);
 		}
 
-		public static Dictionary<TKey, TElement> ToDictionaryWithConflictLog<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, string debugName, Func<TKey, string> logKey, Func<TElement, string> logValue)
+		public static Dictionary<TKey, TElement> ToDictionaryWithConflictLog<TSource, TKey, TElement>(
+			this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector,
+			string debugName, Func<TKey, string> logKey, Func<TElement, string> logValue)
 		{
 			// Fall back on ToString() if null functions are provided:
 			logKey = logKey ?? (s => s.ToString());
@@ -385,7 +421,8 @@ namespace OpenRA
 			{
 				for (var j = 0; j < height; j++)
 				{
-					// Workaround for broken ternary operators in certain versions of mono (3.10 and certain versions of the 3.8 series): https://bugzilla.xamarin.com/show_bug.cgi?id=23319
+					// Workaround for broken ternary operators in certain versions of mono
+					// (3.10 and certain versions of the 3.8 series): https://bugzilla.xamarin.com/show_bug.cgi?id=23319
 					if (i <= ts.GetUpperBound(0) && j <= ts.GetUpperBound(1))
 						result[i, j] = ts[i, j];
 					else
@@ -397,6 +434,25 @@ namespace OpenRA
 		}
 
 		public static Rectangle Bounds(this Bitmap b) { return new Rectangle(0, 0, b.Width, b.Height); }
+
+		public static Bitmap CloneWith32bbpArgbPixelFormat(this Bitmap original)
+		{
+			// Note: We would use original.Clone(original.Bounds(), PixelFormat.Format32bppArgb)
+			// but this doesn't work on mono.
+			var clone = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
+			try
+			{
+				using (var g = System.Drawing.Graphics.FromImage(clone))
+					g.DrawImage(original, original.Bounds());
+			}
+			catch (Exception)
+			{
+				clone.Dispose();
+				throw;
+			}
+
+			return clone;
+		}
 
 		public static int ToBits(this IEnumerable<bool> bits)
 		{

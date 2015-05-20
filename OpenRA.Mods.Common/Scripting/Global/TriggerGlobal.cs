@@ -196,7 +196,9 @@ namespace OpenRA.Mods.Common.Scripting
 			{
 				try
 				{
-					group.Remove(m);
+					if (!group.Remove(m))
+						return;
+
 					if (!group.Any())
 					{
 						copy.Call().Dispose();
@@ -259,10 +261,9 @@ namespace OpenRA.Mods.Common.Scripting
 			{
 				try
 				{
-					if (!group.Contains(m))
+					if (!group.Remove(m))
 						return;
 
-					group.Remove(m);
 					if (!group.Any())
 					{
 						copy.Call().Dispose();
@@ -403,6 +404,20 @@ namespace OpenRA.Mods.Common.Scripting
 		public void OnInfiltrated(Actor a, LuaFunction func)
 		{
 			GetScriptTriggers(a).RegisterCallback(Trigger.OnInfiltrated, func, Context);
+		}
+
+		[Desc("Call a function when this actor is discovered by an enemy or a player with a Neutral stance. " +
+			"The callback function will be called as func(Actor discovered, Player discoverer)")]
+		public void OnDiscovered(Actor a, LuaFunction func)
+		{
+			GetScriptTriggers(a).RegisterCallback(Trigger.OnDiscovered, func, Context);
+		}
+
+		[Desc("Call a function when this player is discovered by an enemy or neutral player. " +
+			"The callback function will be called as func(Player discovered, Player discoverer, Actor discoveredActor)")]
+		public void OnPlayerDiscovered(Player discovered, LuaFunction func)
+		{
+			GetScriptTriggers(discovered.PlayerActor).RegisterCallback(Trigger.OnPlayerDiscovered, func, Context);
 		}
 
 		[Desc("Removes all triggers from this actor." +

@@ -52,7 +52,10 @@ namespace OpenRA.Server
 
 		public ServerSettings Settings;
 		public ModData ModData;
+
+		// Managed by LobbyCommands
 		public Map Map;
+		public MapPlayers MapPlayers;
 		XTimer gameTimeout;
 
 		public static void SyncClientToPlayerReference(Session.Client c, PlayerReference pr)
@@ -64,7 +67,7 @@ namespace OpenRA.Server
 			else
 				c.Color = c.PreferredColor;
 			if (pr.LockRace)
-				c.Country = pr.Race;
+				c.Race = pr.Race;
 			if (pr.LockSpawn)
 				c.SpawnPoint = pr.Spawn;
 			if (pr.LockTeam)
@@ -289,7 +292,7 @@ namespace OpenRA.Server
 					Slot = LobbyInfo.FirstEmptySlot(),
 					PreferredColor = handshake.Client.Color,
 					Color = handshake.Client.Color,
-					Country = "random",
+					Race = "Random",
 					SpawnPoint = 0,
 					Team = 0,
 					State = Session.ClientState.Invalid,
@@ -304,7 +307,7 @@ namespace OpenRA.Server
 				}
 
 				if (client.Slot != null)
-					SyncClientToPlayerReference(client, Map.Players[client.Slot]);
+					SyncClientToPlayerReference(client, MapPlayers.Players[client.Slot]);
 				else
 					client.Color = HSLColor.FromRGB(255, 255, 255);
 
@@ -425,7 +428,7 @@ namespace OpenRA.Server
 
 			try
 			{
-				for (;;)
+				while (ms.Position < ms.Length)
 				{
 					var so = ServerOrder.Deserialize(br);
 					if (so == null) return;

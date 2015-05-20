@@ -24,29 +24,14 @@ namespace OpenRA.Traits
 	{
 		[Sync] public bool Disabled;
 
+		public event Action<IEnumerable<CPos>> CellsChanged;
+
 		readonly Actor self;
 		readonly Map map;
 
 		readonly CellLayer<short> visibleCount;
 		readonly CellLayer<short> generatedShroudCount;
 		readonly CellLayer<bool> explored;
-
-		public event Action<CPos> CellEntryChanged
-		{
-			add
-			{
-				visibleCount.CellEntryChanged += value;
-				generatedShroudCount.CellEntryChanged += value;
-				explored.CellEntryChanged += value;
-			}
-
-			remove
-			{
-				visibleCount.CellEntryChanged -= value;
-				generatedShroudCount.CellEntryChanged -= value;
-				explored.CellEntryChanged -= value;
-			}
-		}
 
 		readonly Lazy<IFogVisibilityModifier[]> fogVisibilities;
 
@@ -73,10 +58,10 @@ namespace OpenRA.Traits
 			generatedShroudCount = new CellLayer<short>(map);
 			explored = new CellLayer<bool>(map);
 
-			self.World.ActorAdded += AddVisibility;
+			self.World.ActorAdded += a => { CPos[] visible = null; AddVisibility(a, ref visible); };
 			self.World.ActorRemoved += RemoveVisibility;
 
-			self.World.ActorAdded += AddShroudGeneration;
+			self.World.ActorAdded += a => { CPos[] shrouded = null; AddShroudGeneration(a, ref shrouded); };
 			self.World.ActorRemoved += RemoveShroudGeneration;
 
 			fogVisibilities = Exts.Lazy(() => self.TraitsImplementing<IFogVisibilityModifier>().ToArray());
@@ -88,14 +73,36 @@ namespace OpenRA.Traits
 			slowVisibleTest = IsVisible;
 		}
 
-		void Invalidate()
+		void Invalidate(IEnumerable<CPos> changed)
 		{
+			if (CellsChanged != null)
+				CellsChanged(changed);
+
 			var oldHash = Hash;
 			Hash = Sync.HashPlayer(self.Owner) + self.World.WorldTick * 3;
 
 			// Invalidate may be called multiple times in one world tick, which is decoupled from rendering.
 			if (oldHash == Hash)
 				Hash += 1;
+		}
+
+		public static void UpdateVisibility(IEnumerable<Shroud> shrouds, Actor actor)
+		{
+			CPos[] visbility = null;
+			foreach (var shroud in shrouds)
+				shroud.UpdateVisibility(actor, ref visbility);
+		}
+
+		public static void UpdateShroudGeneration(IEnumerable<Shroud> shrouds, Actor actor)
+		{
+			CPos[] shrouded = null;
+			foreach (var shroud in shrouds)
+				shroud.UpdateShroudGeneration(actor, ref shrouded);
+		}
+
+		static CPos[] FindVisibleTiles(Actor actor, WRange range)
+		{
+			return GetVisOrigins(actor).SelectMany(o => FindVisibleTiles(actor.World, o, range)).Distinct().ToArray();
 		}
 
 		static IEnumerable<CPos> FindVisibleTiles(World world, CPos position, WRange radius)
@@ -110,28 +117,27 @@ namespace OpenRA.Traits
 					yield return cell;
 		}
 
-		void AddVisibility(Actor a)
+		void AddVisibility(Actor a, ref CPos[] visible)
 		{
 			var rs = a.TraitOrDefault<RevealsShroud>();
 			if (rs == null || !a.Owner.IsAlliedWith(self.Owner) || rs.Range == WRange.Zero)
 				return;
 
-			var origins = GetVisOrigins(a);
-			var visible = origins.SelectMany(o => FindVisibleTiles(a.World, o, rs.Range))
-				.Distinct().ToArray();
+			// Lazily generate the visible tiles, allowing the caller to re-use them if desired.
+			visible = visible ?? FindVisibleTiles(a, rs.Range);
 
-			// Update visibility
 			foreach (var c in visible)
 			{
-				visibleCount[c]++;
-				explored[c] = true;
+				var uv = c.ToMPos(map);
+				visibleCount[uv]++;
+				explored[uv] = true;
 			}
 
 			if (visibility.ContainsKey(a))
 				throw new InvalidOperationException("Attempting to add duplicate actor visibility");
 
 			visibility[a] = visible;
-			Invalidate();
+			Invalidate(visible);
 		}
 
 		void RemoveVisibility(Actor a)
@@ -141,30 +147,31 @@ namespace OpenRA.Traits
 				return;
 
 			foreach (var c in visible)
-				visibleCount[c]--;
+				visibleCount[c.ToMPos(map)]--;
 
 			visibility.Remove(a);
-			Invalidate();
+			Invalidate(visible);
 		}
 
-		public void UpdateVisibility(Actor a)
+		void UpdateVisibility(Actor a, ref CPos[] visible)
 		{
 			// Actors outside the world don't have any vis
 			if (!a.IsInWorld)
 				return;
 
 			RemoveVisibility(a);
-			AddVisibility(a);
+			AddVisibility(a, ref visible);
 		}
 
-		void AddShroudGeneration(Actor a)
+		void AddShroudGeneration(Actor a, ref CPos[] shrouded)
 		{
 			var cs = a.TraitOrDefault<CreatesShroud>();
 			if (cs == null || a.Owner.IsAlliedWith(self.Owner) || cs.Range == WRange.Zero)
 				return;
 
-			var shrouded = GetVisOrigins(a).SelectMany(o => FindVisibleTiles(a.World, o, cs.Range))
-				.Distinct().ToArray();
+			// Lazily generate the shrouded tiles, allowing the caller to re-use them if desired.
+			shrouded = shrouded ?? FindVisibleTiles(a, cs.Range);
+
 			foreach (var c in shrouded)
 				generatedShroudCount[c]++;
 
@@ -172,7 +179,7 @@ namespace OpenRA.Traits
 				throw new InvalidOperationException("Attempting to add duplicate shroud generation");
 
 			generation[a] = shrouded;
-			Invalidate();
+			Invalidate(shrouded);
 		}
 
 		void RemoveShroudGeneration(Actor a)
@@ -185,13 +192,13 @@ namespace OpenRA.Traits
 				generatedShroudCount[c]--;
 
 			generation.Remove(a);
-			Invalidate();
+			Invalidate(shrouded);
 		}
 
-		public void UpdateShroudGeneration(Actor a)
+		void UpdateShroudGeneration(Actor a, ref CPos[] shrouded)
 		{
 			RemoveShroudGeneration(a);
-			AddShroudGeneration(a);
+			AddShroudGeneration(a, ref shrouded);
 		}
 
 		public void UpdatePlayerStance(World w, Player player, Stance oldStance, Stance newStance)
@@ -201,8 +208,10 @@ namespace OpenRA.Traits
 
 			foreach (var a in w.Actors.Where(a => a.Owner == player))
 			{
-				UpdateVisibility(a);
-				UpdateShroudGeneration(a);
+				CPos[] visible = null;
+				UpdateVisibility(a, ref visible);
+				CPos[] shrouded = null;
+				UpdateShroudGeneration(a, ref shrouded);
 			}
 		}
 
@@ -221,10 +230,17 @@ namespace OpenRA.Traits
 
 		public void Explore(World world, CPos center, WRange range)
 		{
+			var changed = new List<CPos>();
 			foreach (var c in FindVisibleTiles(world, center, range))
-				explored[c] = true;
+			{
+				if (!explored[c])
+				{
+					explored[c] = true;
+					changed.Add(c);
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public void Explore(Shroud s)
@@ -232,27 +248,48 @@ namespace OpenRA.Traits
 			if (map.Bounds != s.map.Bounds)
 				throw new ArgumentException("The map bounds of these shrouds do not match.", "s");
 
+			var changed = new List<CPos>();
 			foreach (var uv in map.Cells.MapCoords)
-				if (s.explored[uv])
+			{
+				if (!explored[uv] && s.explored[uv])
+				{
 					explored[uv] = true;
+					changed.Add(uv.ToCPos(map));
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public void ExploreAll(World world)
 		{
+			var changed = new List<CPos>();
 			foreach (var uv in map.Cells.MapCoords)
-				explored[uv] = true;
+			{
+				if (!explored[uv])
+				{
+					explored[uv] = true;
+					changed.Add(uv.ToCPos(map));
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public void ResetExploration()
 		{
+			var changed = new List<CPos>();
 			foreach (var uv in map.Cells.MapCoords)
-				explored[uv] = visibleCount[uv] > 0;
+			{
+				var visible = visibleCount[uv] > 0;
+				if (explored[uv] != visible)
+				{
+					explored[uv] = visible;
+					changed.Add(uv.ToCPos(map));
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public bool IsExplored(CPos cell)
@@ -294,7 +331,7 @@ namespace OpenRA.Traits
 
 		public bool IsExplored(Actor a)
 		{
-			return GetVisOrigins(a).Any(o => IsExplored(o));
+			return GetVisOrigins(a).Any(IsExplored);
 		}
 
 		public bool IsVisible(CPos cell)
@@ -346,11 +383,11 @@ namespace OpenRA.Traits
 
 		public bool IsTargetable(Actor a)
 		{
-			if (HasFogVisibility())
-				return true;
-
 			if (a.TraitsImplementing<IVisibilityModifier>().Any(t => !t.IsVisible(a, self.Owner)))
 				return false;
+
+			if (HasFogVisibility())
+				return true;
 
 			return GetVisOrigins(a).Any(IsVisible);
 		}

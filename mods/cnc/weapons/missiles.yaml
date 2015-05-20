@@ -6,10 +6,10 @@ Rockets:
 	ValidTargets: Ground, Air
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Inaccuracy: 128
 		Image: DRAGON
-		ROT: 15
+		RateOfTurn: 15
 		Trail: smokey
 		ContrailLength: 8
 		Speed: 298
@@ -25,6 +25,7 @@ Rockets:
 			Light: 100
 			Heavy: 100
 			Concrete: 25
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -40,10 +41,10 @@ BikeRockets:
 	BurstDelay: 10
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Inaccuracy: 128
 		Image: DRAGON
-		ROT: 10
+		RateOfTurn: 10
 		Trail: smokey
 		ContrailLength: 8
 		Speed: 213
@@ -59,6 +60,7 @@ BikeRockets:
 			Light: 100
 			Heavy: 100
 			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -70,17 +72,18 @@ OrcaAGMissiles:
 	Burst: 2
 	BurstDelay: 12
 	Range: 5c0
+	MinRange: 1c256
 	Report: BAZOOK1.AUD
 	ValidTargets: Ground
 	Projectile: Missile
-		Arm: 0
-		High: yes
+		Arm: 1
+		Blockable: false
 		Inaccuracy: 128
 		Image: DRAGON
-		ROT: 20
+		RateOfTurn: 20
 		Trail: smokey
 		ContrailLength: 8
-		Speed: 298
+		Speed: 256
 		RangeLimit: 30
 	Warhead@1Dam: SpreadDamage
 		Spread: 128
@@ -92,6 +95,7 @@ OrcaAGMissiles:
 			Wood: 100
 			Light: 100
 			Heavy: 75
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -103,14 +107,15 @@ OrcaAAMissiles:
 	Burst: 2
 	BurstDelay: 12
 	Range: 5c0
+	MinRange: 1c256
 	Report: BAZOOK1.AUD
 	ValidTargets: Air
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Inaccuracy: 128
 		Image: DRAGON
-		ROT: 20
+		RateOfTurn: 20
 		Trail: smokey
 		ContrailLength: 8
 		Speed: 298
@@ -123,6 +128,7 @@ OrcaAAMissiles:
 		Versus:
 			Light: 75
 			Heavy: 50
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -138,10 +144,10 @@ MammothMissiles:
 	BurstDelay: 15
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Inaccuracy: 128
 		Image: DRAGON
-		ROT: 20
+		RateOfTurn: 20
 		Trail: smokey
 		ContrailLength: 8
 		Speed: 341
@@ -156,6 +162,7 @@ MammothMissiles:
 			Wood: 75
 			Light: 100
 			Heavy: 50
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -177,12 +184,12 @@ MammothMissiles:
 	ValidTargets: Ground
 	Projectile: Bullet
 		Arm: 5
-		High: yes
+		Blockable: false
 		Shadow: true
 		Inaccuracy: 853
 		Angle: 62
 		Image: DRAGON
-		ROT: 2
+		RateOfTurn: 2
 		ContrailLength: 10
 		Trail: smokey
 		Speed: 341
@@ -196,6 +203,7 @@ MammothMissiles:
 			Wood: 60
 			Light: 100
 			Heavy: 50
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -211,10 +219,10 @@ MammothMissiles:
 	ValidTargets: Ground, Air
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Inaccuracy: 213
 		Image: DRAGON
-		ROT: 10
+		RateOfTurn: 10
 		Trail: smokey
 		ContrailLength: 8
 		Speed: 213
@@ -229,6 +237,7 @@ MammothMissiles:
 			Wood: 75
 			Light: 100
 			Heavy: 90
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -243,10 +252,10 @@ BoatMissile:
 	Report: ROCKET2.AUD
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Inaccuracy: 213
 		Image: DRAGON
-		ROT: 10
+		RateOfTurn: 10
 		Trail: smokey
 		ContrailLength: 8
 		Speed: 170
@@ -260,6 +269,7 @@ BoatMissile:
 			Wood: 75
 			Light: 60
 			Heavy: 25
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -278,10 +288,10 @@ TowerMissle:
 	ValidTargets: Ground
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Inaccuracy: 128
 		Image: DRAGON
-		ROT: 20
+		RateOfTurn: 20
 		Trail: smokey
 		ContrailLength: 8
 		Speed: 298
@@ -296,6 +306,7 @@ TowerMissle:
 			Wood: 25
 			Light: 100
 			Heavy: 100
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -309,9 +320,9 @@ SAMMissile:
 	ValidTargets: Air
 	Projectile: Missile
 		Arm: 0
-		High: yes
+		Blockable: false
 		Image: MISSILE
-		ROT: 20
+		RateOfTurn: 20
 		Speed: 426
 		RangeLimit: 35
 		Trail: smokey
@@ -326,6 +337,7 @@ SAMMissile:
 			Heavy: 75
 		DeathType: 4
 		Damage: 30
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -338,7 +350,7 @@ HonestJohn:
 	Report: ROCKET1.AUD
 	Projectile: Bullet
 		Arm: 10
-		High: yes
+		Blockable: false
 		Shadow: true
 		Inaccuracy: 213
 		Image: patriot
@@ -355,6 +367,7 @@ HonestJohn:
 			Wood: 75
 			Light: 60
 			Heavy: 25
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -368,11 +381,11 @@ Patriot:
 	Report: ROCKET2.AUD
 	ValidTargets: Air
 	Projectile: Missile
-		High: yes
+		Blockable: false
 		Image: patriot
 		Trail: smokey
 		ContrailLength: 8
-		ROT: 20
+		RateOfTurn: 20
 		Speed: 341
 		RangeLimit: 30
 		Angle: 88
@@ -386,8 +399,10 @@ Patriot:
 			Heavy: 75
 		DeathType: 4
 		Damage: 32
+		DamageTypes: Prone50Percent, TriggerProne
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
 		Explosion: poof
 		ImpactSound: xplos.aud
+

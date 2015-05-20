@@ -17,7 +17,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("Renders a decorative animation on units and buildings.")]
-	public class WithIdleOverlayInfo : ITraitInfo, IRenderActorPreviewSpritesInfo, Requires<RenderSpritesInfo>, Requires<IBodyOrientationInfo>
+	public class WithIdleOverlayInfo : UpgradableTraitInfo, ITraitInfo, IRenderActorPreviewSpritesInfo, Requires<RenderSpritesInfo>, Requires<IBodyOrientationInfo>
 	{
 		[Desc("Sequence name to use")]
 		public readonly string Sequence = "idle-overlay";
@@ -37,10 +37,16 @@ namespace OpenRA.Mods.Common.Traits
 
 		public IEnumerable<IActorPreview> RenderPreviewSprites(ActorPreviewInitializer init, RenderSpritesInfo rs, string image, int facings, PaletteReference p)
 		{
+			if (UpgradeMinEnabledLevel > 0)
+				yield break;
+
+			if (Palette != null)
+				p = init.WorldRenderer.Palette(Palette);
+
 			var body = init.Actor.Traits.Get<BodyOrientationInfo>();
 			var facing = init.Contains<FacingInit>() ? init.Get<FacingInit, int>() : 0;
 			var anim = new Animation(init.World, image, () => facing);
-			anim.PlayRepeating(Sequence);
+			anim.PlayRepeating(RenderSprites.NormalizeSequence(anim, init.GetDamageState(), Sequence));
 
 			var orientation = body.QuantizeOrientation(new WRot(WAngle.Zero, WAngle.Zero, WAngle.FromFacing(facing)), facings);
 			var offset = body.LocalToWorld(Offset.Rotate(orientation));
@@ -48,27 +54,28 @@ namespace OpenRA.Mods.Common.Traits
 		}
 	}
 
-	public class WithIdleOverlay : INotifyDamageStateChanged, INotifyBuildComplete, INotifySold, INotifyTransform
+	public class WithIdleOverlay : UpgradableTrait<WithIdleOverlayInfo>, INotifyDamageStateChanged, INotifyBuildComplete, INotifySold, INotifyTransform
 	{
 		Animation overlay;
 		bool buildComplete;
 
 		public WithIdleOverlay(Actor self, WithIdleOverlayInfo info)
+			: base(info)
 		{
 			var rs = self.Trait<RenderSprites>();
 			var body = self.Trait<IBodyOrientation>();
-			var disabled = self.TraitsImplementing<IDisable>();
 
 			buildComplete = !self.HasTrait<Building>(); // always render instantly for units
 			overlay = new Animation(self.World, rs.GetImage(self));
-			overlay.PlayRepeating(info.Sequence);
-			rs.Add("idle_overlay_{0}".F(info.Sequence),
-				new AnimationWithOffset(overlay,
-					() => body.LocalToWorld(info.Offset.Rotate(body.QuantizeOrientation(self, self.Orientation))),
-					() => !buildComplete,
-					() => info.PauseOnLowPower && disabled.Any(d => d.Disabled),
-					p => WithTurret.ZOffsetFromCenter(self, p, 1)),
-				info.Palette, info.IsPlayerPalette);
+			overlay.PlayRepeating(RenderSprites.NormalizeSequence(overlay, self.GetDamageState(), info.Sequence));
+
+			var anim = new AnimationWithOffset(overlay,
+				() => body.LocalToWorld(info.Offset.Rotate(body.QuantizeOrientation(self, self.Orientation))),
+				() => IsTraitDisabled || !buildComplete,
+				() => (info.PauseOnLowPower && self.IsDisabled()) || !buildComplete,
+				p => WithTurret.ZOffsetFromCenter(self, p, 1));
+
+			rs.Add(anim, info.Palette, info.IsPlayerPalette);
 		}
 
 		public void BuildingComplete(Actor self)

@@ -110,6 +110,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		Ruleset rules;
 		List<string> players = new List<string>();
 		Action<string> errorHandler;
+		MapPlayers mapPlayers;
 
 		LegacyMapImporter(string filename, Ruleset rules, Action<string> errorHandler)
 		{
@@ -123,7 +124,6 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		{
 			var map = new LegacyMapImporter(filename, rules, errorHandler).map;
 			map.RequiresMod = mod;
-			map.MakeDefaultPlayers();
 			map.FixOpenAreas(rules);
 			return map;
 		}
@@ -147,12 +147,9 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			map = Map.FromTileset(rules.TileSets[tileset]);
 			map.Title = basic.GetValue("Name", Path.GetFileNameWithoutExtension(iniFile));
 			map.Author = "Westwood Studios";
-			map.MapSize.X = mapSize;
-			map.MapSize.Y = mapSize;
+			map.MapSize = new int2(mapSize, mapSize);
 			map.Bounds = Rectangle.FromLTRB(offsetX, offsetY, offsetX + width, offsetY + height);
 
-			map.Smudges = Exts.Lazy(() => new List<SmudgeReference>());
-			map.Actors = Exts.Lazy(() => new Dictionary<string, ActorReference>());
 			map.MapResources = Exts.Lazy(() => new CellLayer<ResourceTile>(TileShape.Rectangle, size));
 			map.MapTiles = Exts.Lazy(() => new CellLayer<TerrainTile>(TileShape.Rectangle, size));
 
@@ -181,9 +178,6 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			LoadActors(file, "INFANTRY");
 			LoadSmudges(file, "SMUDGE");
 
-			foreach (var p in players)
-				LoadPlayer(file, p, legacyMapFormat == IniMapFormat.RedAlert);
-
 			var wps = file.GetSection("Waypoints")
 					.Where(kv => Exts.ParseIntegerInvariant(kv.Value) > 0)
 					.Select(kv => Pair.New(Exts.ParseIntegerInvariant(kv.Key),
@@ -194,19 +188,31 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			{
 				if (kv.First <= 7)
 				{
-					var a = new ActorReference("mpspawn");
-					a.Add(new LocationInit((CPos)kv.Second));
-					a.Add(new OwnerInit("Neutral"));
-					map.Actors.Value.Add("Actor" + map.Actors.Value.Count.ToString(), a);
+					var ar = new ActorReference("mpspawn")
+					{
+						new LocationInit((CPos)kv.Second),
+						new OwnerInit("Neutral")
+					};
+
+					map.ActorDefinitions.Add(new MiniYamlNode("Actor" + actorCount++, ar.Save()));
 				}
 				else
 				{
-					var a = new ActorReference("waypoint");
-					a.Add(new LocationInit((CPos)kv.Second));
-					a.Add(new OwnerInit("Neutral"));
-					map.Actors.Value.Add("waypoint" + kv.First, a);
+					var ar = new ActorReference("waypoint")
+					{
+						new LocationInit((CPos)kv.Second),
+						new OwnerInit("Neutral")
+					};
+
+					map.ActorDefinitions.Add(new MiniYamlNode("waypoint" + kv.First, ar.Save()));
 				}
 			}
+
+			// Create default player definitions only if there are no players to import
+			mapPlayers = new MapPlayers(map.Rules, (players.Count == 0) ? map.SpawnPoints.Value.Length : 0);
+			foreach (var p in players)
+				LoadPlayer(file, p, legacyMapFormat == IniMapFormat.RedAlert);
+			map.PlayerDefinitions = mapPlayers.ToMiniYaml();
 		}
 
 		static int2 LocationFromMapOffset(int offset, int mapSize)
@@ -289,12 +295,13 @@ namespace OpenRA.Mods.Common.UtilityCommands
 
 					if (o != 255 && overlayActorMapping.ContainsKey(redAlertOverlayNames[o]))
 					{
-						map.Actors.Value.Add("Actor" + actorCount++,
-							new ActorReference(overlayActorMapping[redAlertOverlayNames[o]])
-							{
-								new LocationInit(cell),
-								new OwnerInit("Neutral")
-							});
+						var ar = new ActorReference(overlayActorMapping[redAlertOverlayNames[o]])
+						{
+							new LocationInit(cell),
+							new OwnerInit("Neutral")
+						};
+
+						map.ActorDefinitions.Add(new MiniYamlNode("Actor" + actorCount++, ar.Save()));
 					}
 				}
 			}
@@ -309,12 +316,13 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			foreach (var kv in terrain)
 			{
 				var loc = Exts.ParseIntegerInvariant(kv.Key);
-				map.Actors.Value.Add("Actor" + actorCount++,
-					new ActorReference(kv.Value.ToLowerInvariant())
-					{
-						new LocationInit(new CPos(loc % mapSize, loc / mapSize)),
-						new OwnerInit("Neutral")
-					});
+				var ar = new ActorReference(kv.Value.ToLowerInvariant())
+				{
+					new LocationInit(new CPos(loc % mapSize, loc / mapSize)),
+					new OwnerInit("Neutral")
+				};
+
+				map.ActorDefinitions.Add(new MiniYamlNode("Actor" + actorCount++, ar.Save()));
 			}
 		}
 
@@ -349,12 +357,15 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				map.MapResources.Value[cell] = new ResourceTile(res.First, res.Second);
 
 				if (overlayActorMapping.ContainsKey(kv.Value.ToLower()))
-					map.Actors.Value.Add("Actor" + actorCount++,
-						new ActorReference(overlayActorMapping[kv.Value.ToLower()])
-						{
-							new LocationInit(cell),
-							new OwnerInit("Neutral")
-						});
+				{
+					var ar = new ActorReference(overlayActorMapping[kv.Value.ToLower()])
+					{
+						new LocationInit(cell),
+						new OwnerInit("Neutral")
+					};
+
+					map.ActorDefinitions.Add(new MiniYamlNode("Actor" + actorCount++, ar.Save()));
+				}
 			}
 		}
 
@@ -367,12 +378,13 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			foreach (var kv in terrain)
 			{
 				var loc = Exts.ParseIntegerInvariant(kv.Key);
-				map.Actors.Value.Add("Actor" + actorCount++,
-					new ActorReference(kv.Value.Split(',')[0].ToLowerInvariant())
-					{
-						new LocationInit(new CPos(loc % mapSize, loc / mapSize)),
-						new OwnerInit("Neutral")
-					});
+				var ar = new ActorReference(kv.Value.Split(',')[0].ToLowerInvariant())
+				{
+					new LocationInit(new CPos(loc % mapSize, loc / mapSize)),
+					new OwnerInit("Neutral")
+				};
+
+				map.ActorDefinitions.Add(new MiniYamlNode("Actor" + actorCount++, ar.Save()));
 			}
 		}
 
@@ -393,7 +405,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 						players.Add(parts[0]);
 
 					var loc = Exts.ParseIntegerInvariant(parts[3]);
-					var health = float.Parse(parts[2], NumberFormatInfo.InvariantInfo) / 256;
+					var health = Exts.ParseIntegerInvariant(parts[2]) * 100 / 256;
 					var facing = (section == "INFANTRY") ? Exts.ParseIntegerInvariant(parts[6]) : Exts.ParseIntegerInvariant(parts[4]);
 
 					var actor = new ActorReference(parts[1].ToLowerInvariant())
@@ -403,7 +415,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					};
 
 					var initDict = actor.InitDict;
-					if (health != 1)
+					if (health != 100)
 						initDict.Add(new HealthInit(health));
 					if (facing != 0)
 						initDict.Add(new FacingInit(facing));
@@ -414,7 +426,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					if (!rules.Actors.ContainsKey(parts[1].ToLowerInvariant()))
 						errorHandler("Ignoring unknown actor type: `{0}`".F(parts[1].ToLowerInvariant()));
 					else
-						map.Actors.Value.Add("Actor" + actorCount++, actor);
+						map.ActorDefinitions.Add(new MiniYamlNode("Actor" + actorCount++, actor.Save()));
 				}
 				catch (Exception)
 				{
@@ -430,7 +442,8 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				// loc=type,loc,depth
 				var parts = s.Value.Split(',');
 				var loc = Exts.ParseIntegerInvariant(parts[1]);
-				map.Smudges.Value.Add(new SmudgeReference(parts[0].ToLowerInvariant(), new int2(loc % mapSize, loc / mapSize), Exts.ParseIntegerInvariant(parts[2])));
+				var key = "{0} {1},{2} {3}".F(parts[0].ToLowerInvariant(), loc % mapSize, loc / mapSize, Exts.ParseIntegerInvariant(parts[2]));
+				map.SmudgeDefinitions.Add(new MiniYamlNode(key, ""));
 			}
 		}
 
@@ -506,7 +519,11 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				}
 			}
 
-			map.Players.Add(section, pr);
+			// Overwrite default player definitions if needed
+			if (!mapPlayers.Players.ContainsKey(section))
+				mapPlayers.Players.Add(section, pr);
+			else
+				mapPlayers.Players[section] = pr;
 		}
 
 		void LoadVideos(IniFile file, string section)

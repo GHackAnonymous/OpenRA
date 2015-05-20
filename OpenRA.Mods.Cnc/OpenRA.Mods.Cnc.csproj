@@ -52,17 +52,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Drawing" />
     <Reference Include="Eluant">
-      <HintPath>..\thirdparty\Eluant.dll</HintPath>
+      <HintPath>..\thirdparty\download\Eluant.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -75,12 +67,12 @@
     <Compile Include="Traits\Render\RenderGunboat.cs" />
     <Compile Include="Traits\Render\WithCargo.cs" />
     <Compile Include="Traits\Render\WithDeliveryAnimation.cs" />
-    <Compile Include="Traits\Render\WithFire.cs" />
     <Compile Include="Traits\Render\WithRoof.cs" />
     <Compile Include="Traits\SpawnViceroid.cs" />
     <Compile Include="Traits\SupportPowers\IonCannonPower.cs" />
     <Compile Include="Widgets\Logic\CncMainMenuLogic.cs" />
     <Compile Include="Widgets\Logic\ProductionTabsLogic.cs" />
+    <Compile Include="Traits\RenderUnitFlying.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenRA.Game\OpenRA.Game.csproj">
@@ -91,11 +83,6 @@
     <ProjectReference Include="..\OpenRA.Mods.Common\OpenRA.Mods.Common.csproj">
       <Project>{FE6C8CC0-2F07-442A-B29F-17617B3B7FC6}</Project>
       <Name>OpenRA.Mods.Common</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\OpenRA.Mods.RA\OpenRA.Mods.RA.csproj">
-      <Project>{4A8A43B5-A9EF-4ED0-99DD-4BAB10A0DB6E}</Project>
-      <Name>OpenRA.Mods.RA</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

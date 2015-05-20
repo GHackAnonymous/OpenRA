@@ -110,10 +110,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			filenameInput = panel.Get<TextFieldWidget>("FILENAME_INPUT");
 			filenameInput.OnTextEdited = () => ApplyFilter(filenameInput.Text);
+			filenameInput.OnEscKey = filenameInput.YieldKeyboardFocus;
 
 			var frameContainer = panel.GetOrNull("FRAME_SELECTOR");
 			if (frameContainer != null)
-				frameContainer.IsVisible = () => (currentSprites != null && currentSprites.Length > 1) || (isVideoLoaded && player != null && player.Video != null && player.Video.Frames > 1);
+				frameContainer.IsVisible = () => (currentSprites != null && currentSprites.Length > 1) ||
+					(isVideoLoaded && player != null && player.Video != null && player.Video.Frames > 1);
 
 			frameSlider = panel.Get<SliderWidget>("FRAME_SLIDER");
 			if (frameSlider != null)
@@ -134,12 +136,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				frameText.GetText = () =>
 					isVideoLoaded ?
 					"{0} / {1}".F(player.Video.CurrentFrame + 1, player.Video.Frames) :
-					"{0} / {1}".F(currentFrame + 1, currentSprites.Length);
+					"{0} / {1}".F(currentFrame, currentSprites.Length - 1);
 			}
 
 			var playButton = panel.GetOrNull<ButtonWidget>("BUTTON_PLAY");
 			if (playButton != null)
 			{
+				playButton.Key = new Hotkey(Keycode.SPACE, Modifiers.None);
 				playButton.OnClick = () =>
 				{
 					if (isVideoLoaded)
@@ -154,6 +157,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var pauseButton = panel.GetOrNull<ButtonWidget>("BUTTON_PAUSE");
 			if (pauseButton != null)
 			{
+				pauseButton.Key = new Hotkey(Keycode.SPACE, Modifiers.None);
 				pauseButton.OnClick = () =>
 				{
 					if (isVideoLoaded)
@@ -168,6 +172,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var stopButton = panel.GetOrNull<ButtonWidget>("BUTTON_STOP");
 			if (stopButton != null)
 			{
+				stopButton.Key = new Hotkey(Keycode.RETURN, Modifiers.None);
 				stopButton.OnClick = () =>
 				{
 					if (isVideoLoaded)
@@ -184,6 +189,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var nextButton = panel.GetOrNull<ButtonWidget>("BUTTON_NEXT");
 			if (nextButton != null)
 			{
+				nextButton.Key = new Hotkey(Keycode.RIGHT, Modifiers.None);
 				nextButton.OnClick = () =>
 				{
 					if (!isVideoLoaded)
@@ -196,6 +202,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var prevButton = panel.GetOrNull<ButtonWidget>("BUTTON_PREV");
 			if (prevButton != null)
 			{
+				prevButton.Key = new Hotkey(Keycode.LEFT, Modifiers.None);
 				prevButton.OnClick = () =>
 				{
 					if (!isVideoLoaded)
@@ -297,7 +304,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (!GlobalFileSystem.Exists(filename))
 				return false;
 
-			if (Path.GetExtension(filename) == ".vqa")
+			if (Path.GetExtension(filename).ToLower() == ".vqa")
 			{
 				player = panel.Get<VqaPlayerWidget>("PLAYER");
 				currentFilename = filename;
@@ -362,9 +369,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		bool ShowPaletteDropdown(DropDownButtonWidget dropdown, World world)
 		{
-			Func<PaletteFromFile, ScrollItemWidget, ScrollItemWidget> setupItem = (palette, itemTemplate) =>
+			Func<string, ScrollItemWidget, ScrollItemWidget> setupItem = (name, itemTemplate) =>
 			{
-				var name = palette.Name;
 				var item = ScrollItemWidget.Setup(itemTemplate,
 					() => currentPalette == name,
 					() => currentPalette = name);
@@ -373,7 +379,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				return item;
 			};
 
-			var palettes = world.WorldActor.TraitsImplementing<PaletteFromFile>();
+			var palettes = world.WorldActor.TraitsImplementing<IProvidesAssetBrowserPalettes>()
+				.SelectMany(p => p.PaletteNames);
 			dropdown.ShowDropDown("LABEL_DROPDOWN_TEMPLATE", 280, palettes, setupItem);
 			return true;
 		}

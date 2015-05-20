@@ -17,7 +17,8 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("Renders turrets for units with the Turreted trait.")]
-	public class WithTurretInfo : ITraitInfo, IRenderActorPreviewSpritesInfo, Requires<RenderSpritesInfo>, Requires<TurretedInfo>, Requires<IBodyOrientationInfo>
+	public class WithTurretInfo : UpgradableTraitInfo, ITraitInfo, IRenderActorPreviewSpritesInfo,
+		Requires<RenderSpritesInfo>, Requires<TurretedInfo>, Requires<IBodyOrientationInfo>
 	{
 		[Desc("Sequence name to use")]
 		public readonly string Sequence = "turret";
@@ -35,6 +36,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		public IEnumerable<IActorPreview> RenderPreviewSprites(ActorPreviewInitializer init, RenderSpritesInfo rs, string image, int facings, PaletteReference p)
 		{
+			if (UpgradeMinEnabledLevel > 0)
+				yield break;
+
 			var body = init.Actor.Traits.Get<BodyOrientationInfo>();
 			var t = init.Actor.Traits.WithInterface<TurretedInfo>()
 				.First(tt => tt.Turret == Turret);
@@ -44,27 +48,26 @@ namespace OpenRA.Mods.Common.Traits
 			var turretFacing = init.Contains<TurretFacingInit>() ? init.Get<TurretFacingInit, int>() : t.InitialFacing;
 
 			var anim = new Animation(init.World, image, () => turretFacing);
-			anim.Play(Sequence);
+			anim.Play(RenderSprites.NormalizeSequence(anim, init.GetDamageState(), Sequence));
 
 			var orientation = body.QuantizeOrientation(new WRot(WAngle.Zero, WAngle.Zero, WAngle.FromFacing(bodyFacing)), facings);
 			var offset = body.LocalToWorld(t.Offset.Rotate(orientation));
-			yield return new SpriteActorPreview(anim, offset, offset.Y + offset.Z + 1, p, rs.Scale);
+			yield return new SpriteActorPreview(anim, offset, -(offset.Y + offset.Z) + 1, p, rs.Scale);
 		}
 	}
 
-	public class WithTurret : ITick
+	public class WithTurret : UpgradableTrait<WithTurretInfo>, ITick
 	{
-		WithTurretInfo info;
 		RenderSprites rs;
 		IBodyOrientation body;
 		AttackBase ab;
 		Turreted t;
-		IEnumerable<Armament> arms;
+		Armament[] arms;
 		Animation anim;
 
 		public WithTurret(Actor self, WithTurretInfo info)
+			: base(info)
 		{
-			this.info = info;
 			rs = self.Trait<RenderSprites>();
 			body = self.Trait<IBodyOrientation>();
 
@@ -72,12 +75,12 @@ namespace OpenRA.Mods.Common.Traits
 			t = self.TraitsImplementing<Turreted>()
 				.First(tt => tt.Name == info.Turret);
 			arms = self.TraitsImplementing<Armament>()
-				.Where(w => w.Info.Turret == info.Turret);
+				.Where(w => w.Info.Turret == info.Turret).ToArray();
 
 			anim = new Animation(self.World, rs.GetImage(self), () => t.TurretFacing);
 			anim.Play(info.Sequence);
-			rs.Add("turret_{0}".F(info.Turret), new AnimationWithOffset(
-				anim, () => TurretOffset(self), null, () => false, p => ZOffsetFromCenter(self, p, 1)));
+			rs.Add(new AnimationWithOffset(
+				anim, () => TurretOffset(self), () => IsTraitDisabled, () => false, p => ZOffsetFromCenter(self, p, 1)));
 
 			// Restrict turret facings to match the sprite
 			t.QuantizedFacings = anim.CurrentSequence.Facings;
@@ -85,7 +88,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		WVec TurretOffset(Actor self)
 		{
-			if (!info.Recoils)
+			if (!Info.Recoils)
 				return t.Position(self);
 
 			var recoil = arms.Aggregate(WRange.Zero, (a, b) => a + b.Recoil);
@@ -97,10 +100,10 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void Tick(Actor self)
 		{
-			if (info.AimSequence == null)
+			if (Info.AimSequence == null)
 				return;
 
-			var sequence = ab.IsAttacking ? info.AimSequence : info.Sequence;
+			var sequence = ab.IsAttacking ? Info.AimSequence : Info.Sequence;
 			anim.ReplaceAnim(sequence);
 		}
 

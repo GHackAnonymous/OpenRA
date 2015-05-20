@@ -813,7 +813,6 @@ Rules:
 			Queue: Vehicle
 			BuildPaletteOrder: 30
 			Prerequisites: fix
-			Owner: allies
 		Valued:
 			Cost: 800
 		Tooltip:
@@ -881,12 +880,11 @@ Rules:
 		Building:
 			Adjacent: 99
 			TerrainTypes: Clear,Road
-		ProvidesCustomPrerequisite:
+		ProvidesPrerequisite:
 			Prerequisite: MNLYVV
 		Buildable:
 			Queue: Building
 			BuildPaletteOrder: 30
-			Owner: allies, soviet
 		Valued:
 			Cost: 30
 		Health:

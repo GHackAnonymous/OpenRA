@@ -16,7 +16,7 @@ namespace OpenRA.Graphics
 	public class Animation
 	{
 		readonly int defaultTick = 40; // 25 fps == 40 ms
-		public Sequence CurrentSequence { get; private set; }
+		public ISpriteSequence CurrentSequence { get; private set; }
 		public bool IsDecoration = false;
 		public Func<bool> Paused;
 
@@ -47,7 +47,7 @@ namespace OpenRA.Graphics
 			this.facingFunc = facingFunc;
 		}
 
-		int CurrentFrame { get { return backwards ? CurrentSequence.Start + CurrentSequence.Length - frame - 1 : frame; } }
+		public int CurrentFrame { get { return backwards ? CurrentSequence.Start + CurrentSequence.Length - frame - 1 : frame; } }
 		public Sprite Image { get { return CurrentSequence.GetSprite(CurrentFrame, facingFunc()); } }
 
 		public IEnumerable<IRenderable> Render(WPos pos, WVec offset, int zOffset, PaletteReference palette, float scale)
@@ -139,6 +139,24 @@ namespace OpenRA.Graphics
 			tickFunc = () => frame = func();
 		}
 
+		public void PlayFetchDirection(string sequenceName, Func<int> direction)
+		{
+			tickAlways = false;
+			CurrentSequence = sequenceProvider.GetSequence(name, sequenceName);
+			timeUntilNextFrame = CurrentSequence != null ? CurrentSequence.Tick : defaultTick;
+
+			frame = 0;
+			tickFunc = () =>
+			{
+				var d = direction();
+				if (d > 0 && ++frame >= CurrentSequence.Length)
+					frame = 0;
+
+				if (d < 0 && --frame < 0)
+					frame = CurrentSequence.Length - 1;
+			};
+		}
+
 		int timeUntilNextFrame;
 		Action tickFunc;
 
@@ -177,7 +195,7 @@ namespace OpenRA.Graphics
 			}
 		}
 
-		public Sequence GetSequence(string sequenceName)
+		public ISpriteSequence GetSequence(string sequenceName)
 		{
 			return sequenceProvider.GetSequence(name, sequenceName);
 		}

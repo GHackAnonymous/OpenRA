@@ -8,6 +8,7 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using OpenRA.Activities;
 using OpenRA.Graphics;
@@ -17,6 +18,13 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
+	public interface ISpriteBody
+	{
+		void PlayCustomAnimation(Actor self, string newAnimation, Action after);
+		void PlayCustomAnimationRepeating(Actor self, string name);
+		void PlayCustomAnimationBackwards(Actor self, string name, Action after);
+	}
+
 	public interface INotifyResourceClaimLost
 	{
 		void OnNotifyResourceClaimLost(Actor self, ResourceClaim claim, Actor claimer);
@@ -28,6 +36,7 @@ namespace OpenRA.Mods.Common.Traits
 	}
 
 	public interface INotifyAttack { void Attacking(Actor self, Target target, Armament a, Barrel barrel); }
+	public interface INotifyCharging { void Charging(Actor self, Target target); }
 	public interface INotifyChat { bool OnChat(string from, string message); }
 	public interface INotifyParachuteLanded { void OnLanded(); }
 	public interface IRenderActorPreviewInfo { IEnumerable<IActorPreview> RenderPreview(ActorPreviewInitializer init); }
@@ -70,5 +79,10 @@ namespace OpenRA.Mods.Common.Traits
 		bool CanGiveResource(int amount);
 		CVec DeliveryOffset { get; }
 		bool AllowDocking { get; }
+	}
+
+	public interface IProvidesAssetBrowserPalettes
+	{
+		IEnumerable<string> PaletteNames { get; }
 	}
 }

@@ -309,6 +309,9 @@ namespace OpenRA
 			using (new PerfTimer("LoadMaps"))
 				ModData.MapCache.LoadMaps();
 
+			if (Cursor != null)
+				Cursor.Dispose();
+
 			if (Settings.Graphics.HardwareCursors)
 			{
 				try
@@ -370,6 +373,11 @@ namespace OpenRA
 			}
 			else
 				ModData.LoadScreen.StartGame(args);
+		}
+
+		public static void LoadEditor(string mapUid)
+		{
+			StartGame(mapUid, WorldType.Editor);
 		}
 
 		public static void LoadShellMap()
@@ -494,7 +502,7 @@ namespace OpenRA
 				if (worldRenderer != null)
 				{
 					Renderer.BeginFrame(worldRenderer.Viewport.TopLeft, worldRenderer.Viewport.Zoom);
-					Sound.SetListenerPosition(worldRenderer.Position(worldRenderer.Viewport.CenterLocation));
+					Sound.SetListenerPosition(worldRenderer.Viewport.CenterPosition);
 					worldRenderer.Draw();
 				}
 				else

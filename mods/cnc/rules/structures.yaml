@@ -1,9 +1,5 @@
 FACT:
 	Inherits: ^BaseBuilding
-	Buildable:
-		Queue: Building.GDI, Building.Nod
-		BuildPaletteOrder: 1000
-		Prerequisites: ~disabled
 	Valued:
 		Cost: 2000
 	Tooltip:
@@ -20,7 +16,7 @@ FACT:
 		Range: 10c0
 	Bib:
 	Production:
-		Produces: Building.GDI, Buildings.Nod, Defence.GDI, Defence.Nod
+		Produces: Building.GDI, Building.Nod, Defence.GDI, Defence.Nod
 	Transforms:
 		IntoActor: mcv
 		Offset: 1,1
@@ -28,7 +24,6 @@ FACT:
 	ProductionQueue@GDIBuilding:
 		Type: Building.GDI
 		Race: gdi
-		RequireOwner: false
 		Group: Building
 		BuildSpeed: .4
 		LowPowerSlowdown: 2
@@ -37,7 +32,6 @@ FACT:
 	ProductionQueue@NodBuilding:
 		Type: Building.Nod
 		Race: nod
-		RequireOwner: false
 		Group: Building
 		BuildSpeed: .4
 		LowPowerSlowdown: 2
@@ -46,7 +40,6 @@ FACT:
 	ProductionQueue@GDIDefense:
 		Type: Defence.GDI
 		Race: gdi
-		RequireOwner: false
 		Group: Defence
 		BuildSpeed: .4
 		LowPowerSlowdown: 3
@@ -55,7 +48,6 @@ FACT:
 	ProductionQueue@NodDefense:
 		Type: Defence.Nod
 		Race: nod
-		RequireOwner: false
 		Group: Defence
 		BuildSpeed: .4
 		LowPowerSlowdown: 3
@@ -76,6 +68,31 @@ FACT:
 	WithBuildingPlacedAnimation:
 	Power:
 		Amount: 0
+	ProvidesPrerequisite@buildingname:
+
+FACT.GDI:
+	Inherits: FACT
+	RenderBuilding:
+		Image: fact
+	Buildable:
+		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 1000
+		Prerequisites: ~disabled
+		ForceRace: gdi
+	Tooltip:
+		Name: Construction Yard (GDI)
+
+FACT.NOD:
+	Inherits: FACT
+	RenderBuilding:
+		Image: fact
+	Buildable:
+		Queue: Building.GDI, Building.Nod
+		BuildPaletteOrder: 1000
+		Prerequisites: ~disabled
+		ForceRace: nod
+	Tooltip:
+		Name: Construction Yard (Nod)
 
 NUKE:
 	Inherits: ^BaseBuilding
@@ -84,7 +101,7 @@ NUKE:
 	Tooltip:
 		Name: Power Plant
 		Description: Generates power
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: anypower
 	Buildable:
 		BuildPaletteOrder: 10
@@ -109,7 +126,7 @@ NUK2:
 	Tooltip:
 		Name: Advanced Power Plant
 		Description: Provides more power, cheaper than the \nstandard Power Plant
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: anypower
 	Buildable:
 		BuildPaletteOrder: 30
@@ -169,6 +186,7 @@ PROC:
 	WithResources:
 	Power:
 		Amount: -50
+	ProvidesPrerequisite@buildingname:
 
 SILO:
 	Inherits: ^BaseBuilding
@@ -212,7 +230,7 @@ PYLE:
 	Tooltip:
 		Name: Barracks
 		Description: Trains infantry
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: barracks
 	Buildable:
 		BuildPaletteOrder: 40
@@ -244,6 +262,7 @@ PYLE:
 	ProductionBar:
 	Power:
 		Amount: -20
+	ProvidesPrerequisite@buildingname:
 
 HAND:
 	Inherits: ^BaseBuilding
@@ -252,7 +271,7 @@ HAND:
 	Tooltip:
 		Name: Hand of Nod
 		Description: Trains infantry
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: barracks
 	Buildable:
 		BuildPaletteOrder: 40
@@ -281,6 +300,7 @@ HAND:
 	ProductionBar:
 	Power:
 		Amount: -20
+	ProvidesPrerequisite@buildingname:
 
 AFLD:
 	Inherits: ^BaseBuilding
@@ -289,7 +309,7 @@ AFLD:
 	Tooltip:
 		Name: Airstrip
 		Description: Provides a dropzone\nfor vehicle reinforcements
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: vehicleproduction
 	Buildable:
 		BuildPaletteOrder: 50
@@ -303,6 +323,8 @@ AFLD:
 	RevealsShroud:
 		Range: 7c0
 	Bib:
+	WithIdleOverlay@DISH:
+		Sequence: idle-dish
 	RallyPoint:
 		RallyPoint: 4,2
 	Exit@1:
@@ -321,6 +343,7 @@ AFLD:
 	ProductionBar:
 	Power:
 		Amount: -30
+	ProvidesPrerequisite@buildingname:
 
 WEAP:
 	Inherits: ^BaseBuilding
@@ -329,7 +352,7 @@ WEAP:
 	Tooltip:
 		Name: Weapons Factory
 		Description: Produces vehicles
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: vehicleproduction
 	Buildable:
 		BuildPaletteOrder: 50
@@ -343,13 +366,14 @@ WEAP:
 	RevealsShroud:
 		Range: 4c0
 	Bib:
-	-RenderBuilding:
-	RenderBuildingWarFactory:
+	WithProductionDoorOverlay:
+		Sequence: build-top
 	RallyPoint:
 		RallyPoint: 0,3
 	Exit@1:
 		SpawnOffset: -341,-341,0
 		ExitCell: 0,2
+		ExitDelay: 3
 	Production:
 		Produces: Vehicle.GDI
 	ProductionQueue:
@@ -361,6 +385,7 @@ WEAP:
 	ProductionBar:
 	Power:
 		Amount: -30
+	ProvidesPrerequisite@buildingname:
 
 HPAD:
 	Inherits: ^BaseBuilding
@@ -392,14 +417,12 @@ HPAD:
 		Type: Aircraft.GDI
 		Race: gdi
 		Group: Aircraft
-		RequireOwner: false
 		BuildSpeed: .4
 		LowPowerSlowdown: 3
 	ProductionQueue@Nod:
 		Type: Aircraft.Nod
 		Race: nod
 		Group: Aircraft
-		RequireOwner: false
 		BuildSpeed: .4
 		LowPowerSlowdown: 3
 	ProductionBar@GDI:
@@ -408,6 +431,7 @@ HPAD:
 		ProductionType: Aircraft.Nod
 	Power:
 		Amount: -10
+	ProvidesPrerequisite@buildingname:
 
 HQ:
 	Inherits: ^BaseBuilding
@@ -416,7 +440,7 @@ HQ:
 	Tooltip:
 		Name: Communications Center
 		Description: Provides radar & Air Strike support power. \nUnlocks higher-tech units & buildings.  \nRequires power to operate.
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: anyhq
 	Buildable:
 		BuildPaletteOrder: 70
@@ -487,6 +511,7 @@ FIX:
 	WithRepairAnimation:
 	Power:
 		Amount: -30
+	ProvidesPrerequisite@buildingname:
 
 EYE:
 	Inherits: ^BaseBuilding
@@ -495,7 +520,7 @@ EYE:
 	Tooltip:
 		Name: Advanced Communications Center
 		Description: Provides radar & Orbital Ion Cannon support power. \nUnlocks Mammoth Tank & Commando.  \nRequires power to operate.
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: anyhq
 	Buildable:
 		BuildPaletteOrder: 100
@@ -534,6 +559,7 @@ EYE:
 	SupportPowerChargeBar:
 	Power:
 		Amount: -200
+	ProvidesPrerequisite@buildingname:
 
 TMPL:
 	Inherits: ^BaseBuilding
@@ -542,7 +568,7 @@ TMPL:
 	Tooltip:
 		Name: Temple of Nod
 		Description: Provides Nuclear Strike support power. \nUnlocks Stealth Tank, Chem. Warrior & Obelisk of Light.  \nRequires power to operate.
-	ProvidesCustomPrerequisite:
+	ProvidesPrerequisite:
 		Prerequisite: anyhq
 	Buildable:
 		BuildPaletteOrder: 100
@@ -580,6 +606,7 @@ TMPL:
 	SupportPowerChargeBar:
 	Power:
 		Amount: -150
+	ProvidesPrerequisite@buildingname:
 
 GUN:
 	Inherits: ^BaseBuilding
@@ -696,12 +723,12 @@ OBLI:
 	Bib:
 		HasMinibib: Yes
 	RenderBuildingCharge:
-		ChargeAudio: obelpowr.aud
 	Armament:
 		Weapon: Laser
 		LocalOffset: 0,0,725
 		FireDelay: 0
 	AttackCharge:
+		ChargeAudio: obelpowr.aud
 		ReloadTime: 40
 		InitialChargeDelay: 50
 	AutoTarget:
@@ -879,7 +906,7 @@ BRIK:
 		CrushClasses: heavywall
 		-CrushSound:
 	SoundOnDamageTransition:
-		DestroyedSound: crumble.aud
+		DestroyedSounds: crumble.aud
 	LineBuild:
 		Range: 8
 		NodeTypes: concrete

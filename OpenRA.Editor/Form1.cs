@@ -126,8 +126,11 @@ namespace OpenRA.Editor
 
 			// upgrade maps that have no player definitions. editor doesnt care,
 			// but this breaks the game pretty badly.
-			if (map.Players.Count == 0)
-				map.MakeDefaultPlayers();
+			if (map.PlayerDefinitions.Count == 0)
+			{
+				var players = new MapPlayers(map.Rules, map.SpawnPoints.Value.Length);
+				map.PlayerDefinitions = players.ToMiniYaml();
+			}
 
 			PrepareMapResources(Game.ModData, map);
 
@@ -210,7 +213,7 @@ namespace OpenRA.Editor
 
 						var template = t.Value;
 						tilePalette.Controls.Add(ibox);
-						tt.SetToolTip(ibox, "{1}:{0} ({2}x{3})".F(template.Image, template.Id, template.Size.X, template.Size.Y));
+						tt.SetToolTip(ibox, "{1}:{0} ({2}x{3})".F(template.Images[0], template.Id, template.Size.X, template.Size.Y));
 					}
 					catch { }
 				}
@@ -238,7 +241,9 @@ namespace OpenRA.Editor
 					if (rsi != null && rsi.EditorPalette != null && rsi.EditorPalette.Contains("terrain"))
 						templatePalette = palette;
 
-					var template = RenderUtils.RenderActor(info, tileset, templatePalette);
+					var race = Program.Rules.Actors["world"].Traits.WithInterface<CountryInfo>().First().Race;
+					var sequenceProvider = Program.Rules.Sequences[tileset.Id];
+					var template = RenderUtils.RenderActor(info, sequenceProvider, tileset, templatePalette, race);
 					var ibox = new PictureBox
 					{
 						Image = template.Bitmap,
@@ -267,7 +272,7 @@ namespace OpenRA.Editor
 			{
 				try
 				{
-					var template = RenderUtils.RenderResourceType(a, tileset.Extensions, shadowedPalette);
+					var template = RenderUtils.RenderResourceType(a, tileset, shadowedPalette);
 					var ibox = new PictureBox
 					{
 						Image = template.Bitmap,
@@ -313,7 +318,7 @@ namespace OpenRA.Editor
 		void PopulateActorOwnerChooser()
 		{
 			actorOwnerChooser.Items.Clear();
-			actorOwnerChooser.Items.AddRange(surface1.Map.Players.Values.ToArray());
+			actorOwnerChooser.Items.AddRange(new MapPlayers(surface1.Map.PlayerDefinitions).Players.Values.ToArray());
 			actorOwnerChooser.SelectedIndex = 0;
 			surface1.NewActorOwner = ((PlayerReference)actorOwnerChooser.SelectedItem).Name;
 		}
@@ -410,8 +415,9 @@ namespace OpenRA.Editor
 					map.ResizeCordon((int)nmd.CordonLeft.Value, (int)nmd.CordonTop.Value,
 						(int)nmd.CordonRight.Value, (int)nmd.CordonBottom.Value);
 
-					map.Players.Clear();
-					map.MakeDefaultPlayers();
+					var players = new MapPlayers(map.Rules, map.SpawnPoints.Value.Length);
+					map.PlayerDefinitions = players.ToMiniYaml();
+
 					map.FixOpenAreas(Program.Rules);
 
 					NewMap(map);
@@ -500,8 +506,8 @@ namespace OpenRA.Editor
 		void SetupDefaultPlayers(object sender, EventArgs e)
 		{
 			dirty = true;
-			surface1.Map.Players.Clear();
-			surface1.Map.MakeDefaultPlayers();
+			var players = new MapPlayers(surface1.Map.Rules, surface1.Map.SpawnPoints.Value.Length);
+			surface1.Map.PlayerDefinitions = players.ToMiniYaml();
 
 			surface1.Chunks.Clear();
 			surface1.Invalidate();
@@ -575,10 +581,11 @@ namespace OpenRA.Editor
 
 		void AboutToolStripMenuItemClick(object sender, EventArgs e)
 		{
-			MessageBox.Show("OpenRA and OpenRA Editor are Free/Libre Open Source Software released under the GNU General Public License version 3. See AUTHORS and COPYING for details.",
-							"About",
-							MessageBoxButtons.OK,
-							MessageBoxIcon.Asterisk);
+			MessageBox.Show(
+				"OpenRA and OpenRA Editor are Free/Libre Open Source Software released under the GNU General Public License version 3. See AUTHORS and COPYING for details.",
+				"About",
+				MessageBoxButtons.OK,
+				MessageBoxIcon.Asterisk);
 		}
 
 		void HelpToolStripButton_Click(object sender, EventArgs e)

@@ -15,6 +15,8 @@ using OpenRA.Primitives;
 
 namespace OpenRA
 {
+	public interface ISuppressInitExport { }
+
 	public class ActorReference : IEnumerable
 	{
 		public string Type;
@@ -46,11 +48,17 @@ namespace OpenRA
 			return info;
 		}
 
-		public MiniYaml Save()
+		public MiniYaml Save(Func<object, bool> initFilter = null)
 		{
 			var ret = new MiniYaml(Type);
 			foreach (var init in InitDict)
 			{
+				if (init is ISuppressInitExport)
+					continue;
+
+				if (initFilter != null && !initFilter(init))
+					continue;
+
 				var initName = init.GetType().Name;
 				ret.Nodes.Add(new MiniYamlNode(initName.Substring(0, initName.Length - 4), FieldSaver.Save(init)));
 			}

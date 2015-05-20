@@ -76,10 +76,10 @@ Section "Game" GAME
 	File "${SRCDIR}\Mono.Nat.dll"
 	File "${SRCDIR}\AUTHORS"
 	File "${SRCDIR}\COPYING"
-	File "${SRCDIR}\README.md"
-	File "${SRCDIR}\CHANGELOG.md"
-	File "${SRCDIR}\CONTRIBUTING.md"
-	File "${SRCDIR}\DOCUMENTATION.md"
+	File "${SRCDIR}\README.html"
+	File "${SRCDIR}\CHANGELOG.html"
+	File "${SRCDIR}\CONTRIBUTING.html"
+	File "${SRCDIR}\DOCUMENTATION.html"
 	File "${SRCDIR}\OpenRA.ico"
 	File "${SRCDIR}\SharpFont.dll"
 	File "${SRCDIR}\SDL2-CS.dll"
@@ -93,15 +93,14 @@ Section "Game" GAME
 	File "${DEPSDIR}\soft_oal.dll"
 	File "${DEPSDIR}\SDL2.dll"
 	File "${DEPSDIR}\freetype6.dll"
-	File "${DEPSDIR}\zlib1.dll"
 	File "${DEPSDIR}\lua51.dll"
 
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\OpenRA.lnk" $OUTDIR\OpenRA.exe "" \
 			"$OUTDIR\OpenRA.exe" "" "" "" ""
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\README.lnk" $OUTDIR\README.md "" \
-			"$OUTDIR\README.md" "" "" "" ""
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\README.lnk" $OUTDIR\README.html "" \
+			"$OUTDIR\README.html" "" "" "" ""
 	!insertmacro MUI_STARTMENU_WRITE_END
 
 	SetOutPath "$INSTDIR\lua"
@@ -194,10 +193,10 @@ Function ${UN}Clean
 	Delete $INSTDIR\SharpFont.dll
 	Delete $INSTDIR\AUTHORS
 	Delete $INSTDIR\COPYING
-	Delete $INSTDIR\README.md
-	Delete $INSTDIR\CHANGELOG.md
-	Delete $INSTDIR\CONTRIBUTING.md
-	Delete $INSTDIR\DOCUMENTATION.md
+	Delete $INSTDIR\README.html
+	Delete $INSTDIR\CHANGELOG.html
+	Delete $INSTDIR\CONTRIBUTING.html
+	Delete $INSTDIR\DOCUMENTATION.html
 	Delete $INSTDIR\OpenRA.ico
 	Delete "$INSTDIR\global mix database.dat"
 	Delete $INSTDIR\MaxMind.Db.dll
@@ -211,7 +210,6 @@ Function ${UN}Clean
 	Delete $INSTDIR\lua51.dll
 	Delete $INSTDIR\eluant.dll
 	Delete $INSTDIR\freetype6.dll
-	Delete $INSTDIR\zlib1.dll
 	Delete $INSTDIR\SDL2-CS.dll
 	RMDir /r $INSTDIR\Support
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\OpenRA"

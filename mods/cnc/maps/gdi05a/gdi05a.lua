@@ -11,11 +11,6 @@ GdiTanks = { "mtnk", "mtnk" }
 GdiApc = { "apc" }
 GdiInfantry = { "e1", "e1", "e1", "e1", "e1", "e2", "e2", "e2", "e2", "e2" }
 GdiBase = { GdiNuke1, GdiNuke2, GdiProc, GdiSilo1, GdiSilo2, GdiPyle, GdiWeap, GdiHarv }
-GdiBaseDiscoveryTrigger =
-{
-	CPos.New(39, 54), CPos.New(48, 42), CPos.New(49, 42), CPos.New(50, 42), CPos.New(51, 42),
-	CPos.New(52, 42), CPos.New(53, 42), CPos.New(54, 42), CPos.New(55, 42), CPos.New(56, 42)
-}
 NodSams = { Sam1, Sam2, Sam3, Sam4 }
 CoreNodBase = { NodConYard, NodRefinery, HandOfNod, Airfield }
 
@@ -77,6 +72,7 @@ Attack = function()
 	local path = Utils.Random(AttackPaths)
 	Build(types[1], types[2], function(units)
 		Utils.Do(units, function(unit)
+			if unit.Owner ~= nod then return end
 			unit.Patrol(path, false)
 			Trigger.OnIdle(unit, unit.Hunt)
 		end)
@@ -88,6 +84,7 @@ end
 Grd1Action = function()
 	Build(Airfield, Grd1UnitTypes, function(units)
 		Utils.Do(units, function(unit)
+			if unit.Owner ~= nod then return end
 			Trigger.OnKilled(unit, function()
 				Trigger.AfterDelay(Grd1Delay[Map.Difficulty], Grd1Action)
 			end)
@@ -99,6 +96,7 @@ end
 Grd2Action = function()
 	Build(Airfield, Grd2UnitTypes, function(units)
 		Utils.Do(units, function(unit)
+			if unit.Owner ~= nod then return end
 			unit.Patrol(Grd2Path, true, DateTime.Seconds(5))
 		end)
 	end)
@@ -122,7 +120,11 @@ Grd3Action = function()
 	end
 end
 
-DiscoverGdiBase = function()
+DiscoverGdiBase = function(actor, discoverer)
+	if baseDiscovered or not discoverer == gdi then
+		return
+	end
+
 	Utils.Do(GdiBase, function(actor)
 		actor.Owner = gdi
 	end)
@@ -145,12 +147,7 @@ SetupWorld = function()
 	Reinforcements.Reinforce(gdi, GdiApc, { GdiApcEntry.Location, GdiApcRallyPoint.Location }, DateTime.Seconds(1), function(actor) actor.Stance = "Defend" end)
 	Reinforcements.Reinforce(gdi, GdiInfantry, { GdiInfantryEntry.Location, GdiInfantryRallyPoint.Location }, 15, function(actor) actor.Stance = "Defend" end)
 
-	Trigger.OnEnteredFootprint(GdiBaseDiscoveryTrigger, function(actor, id)
-		if actor.Owner == gdi then
-			DiscoverGdiBase()
-			Trigger.RemoveFootprintTrigger(id)
-		end
-	end)
+	Trigger.OnPlayerDiscovered(gdiBase, DiscoverGdiBase)
 
 	Utils.Do(Map.NamedActors, function(actor)
 		if actor.Owner == nod and actor.HasProperty("StartBuildingRepairs") then
@@ -186,6 +183,7 @@ SetupWorld = function()
 end
 
 WorldLoaded = function()
+	gdiBase = Player.GetPlayer("AbandonedBase")
 	gdi = Player.GetPlayer("GDI")
 	nod = Player.GetPlayer("Nod")
 

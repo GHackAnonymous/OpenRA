@@ -24,6 +24,14 @@ namespace OpenRA.Mods.Common.Traits
 		public object Create(ActorInitializer init) { return new Husk(init, this); }
 
 		public int GetInitialFacing() { return 128; }
+
+		public IReadOnlyDictionary<CPos, SubCell> OccupiedCells(ActorInfo info, CPos location, SubCell subCell = SubCell.Any)
+		{
+			var occupied = new Dictionary<CPos, SubCell>() { { location, SubCell.FullCell } };
+			return new ReadOnlyDictionary<CPos, SubCell>(occupied);
+		}
+
+		bool IOccupySpaceInfo.SharesCell { get { return false; } }
 	}
 
 	public class Husk : IPositionable, IFacing, ISync, INotifyCreated, INotifyAddedToWorld, INotifyRemovedFromWorld, IDisable
@@ -74,9 +82,8 @@ namespace OpenRA.Mods.Common.Traits
 			if (!checkTransientActors)
 				return SubCell.FullCell;
 
-			return !self.World.ActorMap.GetUnitsAt(cell)
-				.Where(x => x != ignoreActor)
-				.Any() ? SubCell.FullCell : SubCell.Invalid;
+			return self.World.ActorMap.GetUnitsAt(cell)
+				.All(x => x == ignoreActor) ? SubCell.FullCell : SubCell.Invalid;
 		}
 
 		public bool CanEnterCell(CPos a, Actor ignoreActor = null, bool checkTransientActors = true)

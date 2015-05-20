@@ -45,6 +45,21 @@ namespace OpenRA
 			Array.Copy(anotherLayer.entries, entries, entries.Length);
 		}
 
+		public static CellLayer<T> CreateInstance(Func<MPos, T> initialCellValueFactory, Size size, TileShape tileShape)
+		{
+			var cellLayer = new CellLayer<T>(tileShape, size);
+			for (var v = 0; v < size.Height; v++)
+			{
+				for (var u = 0; u < size.Width; u++)
+				{
+					var mpos = new MPos(u, v);
+					cellLayer[mpos] = initialCellValueFactory(mpos);
+				}
+			}
+
+			return cellLayer;
+		}
+
 		// Resolve an array index from cell coordinates
 		int Index(CPos cell)
 		{
@@ -100,7 +115,7 @@ namespace OpenRA
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			return (IEnumerator<T>)entries.GetEnumerator();
+			return ((IEnumerable<T>)entries).GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()

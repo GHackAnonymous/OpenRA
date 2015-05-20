@@ -25,6 +25,13 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int[] RepairBonuses = { 100, 150, 175, 200, 220, 240, 260, 280, 300 };
 		public readonly bool CancelWhenDisabled = false;
 
+		public readonly string IndicatorImage = "allyrepair";
+		public readonly string IndicatorSequence = "repair";
+
+		[Desc("Overrides the IndicatorPalettePrefix.")]
+		public readonly string IndicatorPalette = "";
+
+		[Desc("Suffixed by the interal repairing player name.")]
 		public readonly string IndicatorPalettePrefix = "player";
 
 		public object Create(ActorInitializer init) { return new RepairableBuilding(init.Self, this); }
@@ -34,15 +41,18 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		[Sync]
 		public int RepairersHash { get { return Repairers.Aggregate(0, (code, player) => code ^ Sync.HashPlayer(player)); } }
-		public List<Player> Repairers = new List<Player>();
+		public readonly List<Player> Repairers = new List<Player>();
 
 		readonly Health health;
 		public bool RepairActive = false;
+
+		readonly Predicate<Player> isNotActiveAlly;
 
 		public RepairableBuilding(Actor self, RepairableBuildingInfo info)
 			: base(info)
 		{
 			health = self.Trait<Health>();
+			isNotActiveAlly = player => player.WinState != WinState.Undefined || player.Stances[self.Owner] != Stance.Ally;
 		}
 
 		public void RepairBuilding(Actor self, Player player)
@@ -58,7 +68,7 @@ namespace OpenRA.Mods.Common.Traits
 					self.World.AddFrameEndTask(w =>
 					{
 						if (!self.IsDead)
-							w.Add(new RepairIndicator(self, Info.IndicatorPalettePrefix));
+							w.Add(new RepairIndicator(self));
 					});
 				}
 			}
@@ -81,8 +91,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			if (remainingTicks == 0)
 			{
-				Repairers = Repairers.Where(player => player.WinState == WinState.Undefined
-						&& player.Stances[self.Owner] == Stance.Ally).ToList();
+				Repairers.RemoveAll(isNotActiveAlly);
 
 				// If after the previous operation there's no repairers left, stop
 				if (!Repairers.Any()) return;

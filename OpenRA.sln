@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenRA.Mods.Cnc", "OpenRA.M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenRA.Editor", "OpenRA.Editor\OpenRA.Editor.csproj", "{00038B75-405B-44F5-8691-BD2546DBE224}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenRA.TilesetBuilder", "OpenRA.TilesetBuilder\OpenRA.TilesetBuilder.csproj", "{1A8E50CC-EE32-4E57-8842-0C39C8EA7541}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenRA.Utility", "OpenRA.Utility\OpenRA.Utility.csproj", "{F33337BE-CB69-4B24-850F-07D23E408DDF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenRA.Renderer.Null", "OpenRA.Renderer.Null\OpenRA.Renderer.Null.csproj", "{0C4AEC1A-E7D5-4114-8CCD-3EEC82872981}"
@@ -32,11 +30,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tiberian Dawn Lua scripts",
 		mods\cnc\maps\gdi04b\gdi04b.lua = mods\cnc\maps\gdi04b\gdi04b.lua
 		mods\cnc\maps\gdi04c\gdi04c.lua = mods\cnc\maps\gdi04c\gdi04c.lua
 		mods\cnc\maps\gdi05a\gdi05a.lua = mods\cnc\maps\gdi05a\gdi05a.lua
+		mods\cnc\maps\gdi05b\gdi05b.lua = mods\cnc\maps\gdi05b\gdi05b.lua
 		mods\cnc\maps\nod01\nod01.lua = mods\cnc\maps\nod01\nod01.lua
 		mods\cnc\maps\nod02a\nod02a.lua = mods\cnc\maps\nod02a\nod02a.lua
 		mods\cnc\maps\nod02b\nod02b.lua = mods\cnc\maps\nod02b\nod02b.lua
 		mods\cnc\maps\nod03a\nod03a.lua = mods\cnc\maps\nod03a\nod03a.lua
 		mods\cnc\maps\nod03b\nod03b.lua = mods\cnc\maps\nod03b\nod03b.lua
+		mods\cnc\maps\nod04a\nod04a.lua = mods\cnc\maps\nod04a\nod04a.lua
+		mods\cnc\maps\nod04b\nod04b.lua = mods\cnc\maps\nod04b\nod04b.lua
+		mods\cnc\maps\nod05\nod05.lua = mods\cnc\maps\nod05\nod05.lua
+		mods\cnc\maps\funpark01\scj01ea.lua = mods\cnc\maps\funpark01\scj01ea.lua
 		mods\cnc\maps\shellmap\shellmap.lua = mods\cnc\maps\shellmap\shellmap.lua
 	EndProjectSection
 EndProject
@@ -83,8 +86,6 @@ Global
 		{2881135D-4D62-493E-8F83-5EEE92CCC6BE}.Debug|x86.Build.0 = Debug|x86
 		{00038B75-405B-44F5-8691-BD2546DBE224}.Debug|x86.ActiveCfg = Debug|x86
 		{00038B75-405B-44F5-8691-BD2546DBE224}.Debug|x86.Build.0 = Debug|x86
-		{1A8E50CC-EE32-4E57-8842-0C39C8EA7541}.Debug|x86.ActiveCfg = Debug|x86
-		{1A8E50CC-EE32-4E57-8842-0C39C8EA7541}.Debug|x86.Build.0 = Debug|x86
 		{F33337BE-CB69-4B24-850F-07D23E408DDF}.Debug|x86.ActiveCfg = Debug|x86
 		{F33337BE-CB69-4B24-850F-07D23E408DDF}.Debug|x86.Build.0 = Debug|x86
 		{0C4AEC1A-E7D5-4114-8CCD-3EEC82872981}.Debug|x86.ActiveCfg = Debug|x86

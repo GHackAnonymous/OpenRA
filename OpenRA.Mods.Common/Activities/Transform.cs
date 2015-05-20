@@ -22,6 +22,7 @@ namespace OpenRA.Mods.Common.Activities
 		public CVec Offset = CVec.Zero;
 		public int Facing = 96;
 		public string[] Sounds = { };
+		public string Notification = null;
 		public int ForceHealthPercentage = 0;
 		public bool SkipMakeAnims = false;
 		public string Race = null;
@@ -51,6 +52,8 @@ namespace OpenRA.Mods.Common.Activities
 				foreach (var s in Sounds)
 					Sound.PlayToPlayer(self.Owner, s, self.CenterPosition);
 
+				Sound.PlayNotification(self.World.Map.Rules, self.Owner, "Speech", Notification, self.Owner.Country.Race);
+
 				var init = new TypeDictionary
 				{
 					new LocationInit(self.Location + Offset),
@@ -67,10 +70,7 @@ namespace OpenRA.Mods.Common.Activities
 				var health = self.TraitOrDefault<Health>();
 				if (health != null)
 				{
-					var newHP = (ForceHealthPercentage > 0)
-						? ForceHealthPercentage / 100f
-						: (float)health.HP / health.MaxHP;
-
+					var newHP = ForceHealthPercentage > 0 ? ForceHealthPercentage : (health.HP * 100) / health.MaxHP;
 					init.Add(new HealthInit(newHP));
 				}
 

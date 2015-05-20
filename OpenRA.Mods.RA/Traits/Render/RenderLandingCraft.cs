@@ -20,7 +20,7 @@ namespace OpenRA.Mods.RA.Traits
 		public readonly string OpenAnim = "open";
 		public readonly string UnloadAnim = "unload";
 
-		public override object Create(ActorInitializer init) { return new RenderLandingCraft(init.Self, this); }
+		public override object Create(ActorInitializer init) { return new RenderLandingCraft(init, this); }
 	}
 
 	public class RenderLandingCraft : RenderUnit
@@ -31,11 +31,11 @@ namespace OpenRA.Mods.RA.Traits
 		readonly IMove move;
 		bool open;
 
-		public RenderLandingCraft(Actor self, RenderLandingCraftInfo info)
-			: base(self)
+		public RenderLandingCraft(ActorInitializer init, RenderLandingCraftInfo info)
+			: base(init, info)
 		{
 			this.info = info;
-			this.self = self;
+			self = init.Self;
 			cargo = self.Trait<Cargo>();
 			move = self.Trait<IMove>();
 		}
@@ -58,7 +58,7 @@ namespace OpenRA.Mods.RA.Traits
 			PlayCustomAnimation(self, info.OpenAnim, () =>
 			{
 				if (DefaultAnimation.HasSequence(info.UnloadAnim))
-					PlayCustomAnimRepeating(self, info.UnloadAnim);
+					PlayCustomAnimationRepeating(self, info.UnloadAnim);
 			});
 		}
 
@@ -68,7 +68,7 @@ namespace OpenRA.Mods.RA.Traits
 				return;
 
 			open = false;
-			PlayCustomAnimBackwards(self, info.OpenAnim, null);
+			PlayCustomAnimationBackwards(self, info.OpenAnim, null);
 		}
 
 		public override void Tick(Actor self)

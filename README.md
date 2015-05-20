@@ -13,6 +13,7 @@ Join the [Forums](http://www.sleipnirstuff.com/forum/viewforum.php?f=80) for dis
 ## Play
 
 Distributed mods include a reimagining of
+
 * Command & Conquer: Red Alert
 * Command & Conquer: Tiberian Dawn
 * Dune 2000
@@ -20,7 +21,9 @@ Distributed mods include a reimagining of
 Check our [Playing the Game](https://github.com/OpenRA/OpenRA/wiki/Playing-the-game) Guide to win multiplayer matches.
 
 ## Contribute
+
 [![Bountysource](https://api.bountysource.com/badge/team?team_id=528&style=bounties_received)](https://www.bountysource.com/teams/openra/issues?utm_source=OpenRA&utm_medium=shield&utm_campaign=bounties_received) [![Issue Stats](http://issuestats.com/github/OpenRA/OpenRA/badge/pr)](http://issuestats.com/github/OpenRA/OpenRA) [![Issue Stats](http://issuestats.com/github/OpenRA/OpenRA/badge/issue)](http://issuestats.com/github/OpenRA/OpenRA)
+
 * Please read [INSTALL.md](https://github.com/OpenRA/OpenRA/blob/bleed/INSTALL.md) and [Compiling](http://wiki.openra.net/Compiling) on how to set up an OpenRA development environment.
 * See [Hacking](http://wiki.openra.net/Hacking) for an overview of the engine.
 * To get your patches merged, please adhere to the [Contributing](https://github.com/OpenRA/OpenRA/blob/bleed/CONTRIBUTING.md) guidelines.
@@ -28,7 +31,7 @@ Check our [Playing the Game](https://github.com/OpenRA/OpenRA/wiki/Playing-the-g
 ## Mapping
 
 * We offer a [Mapping](http://wiki.openra.net/Mapping) Tutorial as you can change gameplay drastically with custom rules.
-* For scripted mission have a look at the [Lua API](http://wiki.openra.net/New-Lua-API).
+* For scripted mission have a look at the [Lua API](http://wiki.openra.net/Lua-API).
 * If you want to share your maps with the community, upload them at the [OpenRA Resource Center](http://resource.openra.net).
 
 ## Modding
@@ -45,7 +48,7 @@ Check our [Playing the Game](https://github.com/OpenRA/OpenRA/wiki/Playing-the-g
 * Fund development by creating [Bounties](https://www.bountysource.com/trackers/36085-openra) on specific tasks.
 
 ## License
-Copyright 2007-2014 The OpenRA Developers (see [AUTHORS](https://github.com/OpenRA/OpenRA/blob/bleed/AUTHORS))
+Copyright 2007-2015 The OpenRA Developers (see [AUTHORS](https://github.com/OpenRA/OpenRA/blob/bleed/AUTHORS))
 This file is part of OpenRA, which is free software. It is made 
 available to you under the terms of the GNU General Public License
 as published by the Free Software Foundation. For more information,

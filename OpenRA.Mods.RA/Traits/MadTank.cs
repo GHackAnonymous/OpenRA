@@ -32,9 +32,11 @@ namespace OpenRA.Mods.RA.Traits
 		public readonly float2 ThumpShakeMultiplier = new float2(1, 0);
 		public readonly int ThumpShakeTime = 10;
 
+		[Desc("Measured in ticks.")]
 		public readonly int ChargeDelay = 96;
 		public readonly string ChargeSound = "madchrg2.aud";
 
+		[Desc("Measured in ticks.")]
 		public readonly int DetonationDelay = 42;
 		public readonly string DetonationSound = "madexplo.aud";
 		[WeaponReference]
@@ -145,7 +147,7 @@ namespace OpenRA.Mods.RA.Traits
 
 			self.World.AddFrameEndTask(w => EjectDriver());
 			if (info.ThumpSequence != null)
-				renderUnit.PlayCustomAnimRepeating(self, info.ThumpSequence);
+				renderUnit.PlayCustomAnimationRepeating(self, info.ThumpSequence);
 			deployed = true;
 			self.QueueActivity(new Wait(info.ChargeDelay, false));
 			self.QueueActivity(new CallFunc(() => Sound.Play(info.ChargeSound, self.CenterPosition)));

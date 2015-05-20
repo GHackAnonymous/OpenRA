@@ -9,6 +9,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using OpenRA.Graphics;
@@ -32,6 +33,8 @@ namespace OpenRA.Mods.Common.Widgets
 		readonly World world;
 		readonly WorldRenderer worldRenderer;
 		readonly RadarPings radarPings;
+
+		readonly HashSet<CPos> dirtyShroudCells = new HashSet<CPos>();
 
 		float radarMinimapHeight;
 		int frame;
@@ -64,11 +67,9 @@ namespace OpenRA.Mods.Common.Widgets
 
 			var width = world.Map.Bounds.Width;
 			var height = world.Map.Bounds.Height;
-			var size = Math.Max(width, height);
 			var rb = RenderBounds;
-
 			previewScale = Math.Min(rb.Width * 1f / width, rb.Height * 1f / height);
-			previewOrigin = new int2((int)(previewScale * (size - width) / 2), (int)(previewScale * (size - height) / 2));
+			previewOrigin = new int2((int)((rb.Width - previewScale * width) / 2), (int)((rb.Height - previewScale * height) / 2));
 			mapRect = new Rectangle(previewOrigin.X, previewOrigin.Y, (int)(previewScale * width), (int)(previewScale * height));
 
 			// The four layers are stored in a 2x2 grid within a single texture
@@ -81,8 +82,8 @@ namespace OpenRA.Mods.Common.Widgets
 			actorSprite = new Sprite(radarSheet, new Rectangle(0, height, width, height), TextureChannel.Alpha);
 
 			// Set initial terrain data
-			using (var bitmap = Minimap.TerrainBitmap(world.TileSet, world.Map))
-				OpenRA.Graphics.Util.FastCopyIntoSprite(terrainSprite, bitmap);
+			foreach (var cell in world.Map.Cells)
+				UpdateTerrainCell(cell);
 
 			world.Map.MapTiles.Value.CellEntryChanged += UpdateTerrainCell;
 			world.Map.CustomTerrain.CellEntryChanged += UpdateTerrainCell;
@@ -92,7 +93,16 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			var stride = radarSheet.Size.Width;
 			var uv = cell.ToMPos(world.Map);
-			var terrain = world.Map.GetTerrainInfo(cell);
+
+			var custom = world.Map.CustomTerrain[uv];
+			Color color;
+			if (custom == byte.MaxValue)
+			{
+				var type = world.TileSet.GetTileInfo(world.Map.MapTiles.Value[uv]);
+				color = type != null ? type.LeftColor : Color.Black;
+			}
+			else
+				color = world.TileSet[custom].Color;
 
 			var dx = terrainSprite.Bounds.Left - world.Map.Bounds.Left;
 			var dy = terrainSprite.Bounds.Top - world.Map.Bounds.Top;
@@ -102,7 +112,7 @@ namespace OpenRA.Mods.Common.Widgets
 				fixed (byte* colorBytes = &radarData[0])
 				{
 					var colors = (int*)colorBytes;
-					colors[(uv.V + dy) * stride + uv.U + dx] = terrain.Color.ToArgb();
+					colors[(uv.V + dy) * stride + uv.U + dx] = color.ToArgb();
 				}
 			}
 		}
@@ -128,6 +138,11 @@ namespace OpenRA.Mods.Common.Widgets
 					colors[(uv.V + dy) * stride + uv.U + dx] = color;
 				}
 			}
+		}
+
+		void MarkShroudDirty(IEnumerable<CPos> cellsChanged)
+		{
+			dirtyShroudCells.UnionWith(cellsChanged);
 		}
 
 		public override string GetCursor(int2 pos)
@@ -194,6 +209,15 @@ namespace OpenRA.Mods.Common.Widgets
 			if (world == null)
 				return;
 
+			if (renderShroud != null)
+			{
+				foreach (var cell in dirtyShroudCells)
+					UpdateShroudCell(cell);
+				dirtyShroudCells.Clear();
+			}
+
+			radarSheet.CommitData();
+
 			var o = new float2(mapRect.Location.X, mapRect.Location.Y + world.Map.Bounds.Height * previewScale * (1 - radarMinimapHeight) / 2);
 			var s = new float2(mapRect.Size.Width, mapRect.Size.Height * radarMinimapHeight);
 
@@ -255,7 +279,7 @@ namespace OpenRA.Mods.Common.Widgets
 				if (newRenderShroud != renderShroud)
 				{
 					if (renderShroud != null)
-						renderShroud.CellEntryChanged -= UpdateShroudCell;
+						renderShroud.CellsChanged -= MarkShroudDirty;
 
 					if (newRenderShroud != null)
 					{
@@ -264,8 +288,10 @@ namespace OpenRA.Mods.Common.Widgets
 							OpenRA.Graphics.Util.FastCopyIntoSprite(shroudSprite, bitmap);
 
 						// Update the notification binding
-						newRenderShroud.CellEntryChanged += UpdateShroudCell;
+						newRenderShroud.CellsChanged += MarkShroudDirty;
 					}
+
+					dirtyShroudCells.Clear();
 
 					renderShroud = newRenderShroud;
 				}
@@ -288,19 +314,16 @@ namespace OpenRA.Mods.Common.Widgets
 							if (!t.Actor.IsInWorld || world.FogObscures(t.Actor))
 								continue;
 
-							var color = t.Trait.RadarSignatureColor(t.Actor);
 							foreach (var cell in t.Trait.RadarSignatureCells(t.Actor))
 							{
-								var uv = cell.ToMPos(world.Map);
+								var uv = cell.First.ToMPos(world.Map);
 
 								if (world.Map.Bounds.Contains(uv.U, uv.V))
-									colors[(uv.V + dy) * stride + uv.U + dx] = color.ToArgb();
+									colors[(uv.V + dy) * stride + uv.U + dx] = cell.Second.ToArgb();
 							}
 						}
 					}
 				}
-
-				radarSheet.CommitData();
 			}
 
 			var targetFrame = enabled ? AnimationLength : 0;

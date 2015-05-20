@@ -43,6 +43,9 @@ namespace OpenRA.Mods.Common.Traits
 		public virtual object Create(ActorInitializer init) { return new Aircraft(init, this); }
 		public int GetInitialFacing() { return InitialFacing; }
 		public WRange GetCruiseAltitude() { return CruiseAltitude; }
+
+		public IReadOnlyDictionary<CPos, SubCell> OccupiedCells(ActorInfo info, CPos location, SubCell subCell = SubCell.Any) { return new ReadOnlyDictionary<CPos, SubCell>(); }
+		bool IOccupySpaceInfo.SharesCell { get { return false; } }
 	}
 
 	public class Aircraft : IFacing, IPositionable, ISync, INotifyKilled, IIssueOrder, IOrderVoice, INotifyAddedToWorld, INotifyRemovedFromWorld
@@ -95,7 +98,7 @@ namespace OpenRA.Mods.Common.Traits
 				return WVec.Zero;
 
 			return self.World.FindActorsInCircle(self.CenterPosition, info.IdealSeparation)
-				.Where(a => !a.IsDead && a.HasTrait<Aircraft>())
+				.Where(a => !a.IsDead && a.HasTrait<Aircraft>() && a.Info.Traits.Get<AircraftInfo>().CruiseAltitude == info.CruiseAltitude)
 				.Select(GetRepulsionForce)
 				.Aggregate(WVec.Zero, (a, b) => a + b);
 		}
@@ -203,7 +206,12 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool IsLeavingCell(CPos location, SubCell subCell = SubCell.Any) { return false; } // TODO: Handle landing
 		public SubCell GetValidSubCell(SubCell preferred) { return SubCell.Invalid; }
-		public SubCell GetAvailableSubCell(CPos a, SubCell preferredSubCell = SubCell.Any, Actor ignoreActor = null, bool checkTransientActors = true) { return SubCell.Invalid; } // Does not use any subcell
+		public SubCell GetAvailableSubCell(CPos a, SubCell preferredSubCell = SubCell.Any, Actor ignoreActor = null, bool checkTransientActors = true)
+		{
+			// Does not use any subcell
+			return SubCell.Invalid;
+		}
+
 		public bool CanEnterCell(CPos cell, Actor ignoreActor = null, bool checkTransientActors = true) { return true; }
 
 		public bool CanEnterTargetNow(Actor self, Target target)
@@ -302,6 +310,7 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		public string OrderID { get { return "Move"; } }
 		public int OrderPriority { get { return 4; } }
+		public bool OverrideSelection { get { return false; } }
 
 		readonly AircraftInfo info;
 

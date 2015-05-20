@@ -13,7 +13,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("Makes the unit automatically run around when taking damage.")]
-	class ScaredyCatInfo : ITraitInfo
+	class ScaredyCatInfo : ITraitInfo, Requires<MobileInfo>
 	{
 		[Desc("How long (in ticks) the actor should panic for.")]
 		public readonly int PanicLength = 25 * 10;
@@ -30,6 +30,7 @@ namespace OpenRA.Mods.Common.Traits
 	class ScaredyCat : ITick, INotifyIdle, INotifyDamage, INotifyAttack, ISpeedModifier, ISync, IRenderInfantrySequenceModifier
 	{
 		readonly ScaredyCatInfo info;
+		readonly Mobile mobile;
 		[Sync] readonly Actor self;
 		[Sync] int panicStartedTick;
 		bool Panicking { get { return panicStartedTick > 0; } }
@@ -41,6 +42,7 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			this.self = self;
 			this.info = info;
+			mobile = self.Trait<Mobile>();
 		}
 
 		public void Panic()
@@ -68,7 +70,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (!Panicking)
 				return;
 
-			self.Trait<Mobile>().Nudge(self, self, true);
+			mobile.Nudge(self, self, true);
 		}
 
 		public void Damaged(Actor self, AttackInfo e)

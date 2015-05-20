@@ -12,8 +12,9 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	public abstract class SupportPowerInfo : ITraitInfo
+	public abstract class SupportPowerInfo : UpgradableTraitInfo, ITraitInfo
 	{
+		[Desc("Measured in seconds.")]
 		public readonly int ChargeTime = 0;
 		public readonly string Icon = null;
 		public readonly string Description = "";
@@ -42,6 +43,8 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly string BeaconPosterPalette = "chrome";
 
 		public readonly bool DisplayRadarPing = false;
+
+		[Desc("Measured in ticks.")]
 		public readonly int RadarPingDuration = 5 * 25;
 
 		public readonly string OrderName;
@@ -50,15 +53,14 @@ namespace OpenRA.Mods.Common.Traits
 		public SupportPowerInfo() { OrderName = GetType().Name + "Order"; }
 	}
 
-	public class SupportPower
+	public class SupportPower : UpgradableTrait<SupportPowerInfo>
 	{
 		public readonly Actor Self;
-		public readonly SupportPowerInfo Info;
 		protected RadarPing ping;
 
 		public SupportPower(Actor self, SupportPowerInfo info)
+			: base(info)
 		{
-			Info = info;
 			Self = self;
 		}
 

@@ -175,34 +175,31 @@ namespace OpenRA
 						bitmap = Minimap.RenderMapPreview(modData.DefaultRules.TileSets[p.Map.Tileset], p.Map, modData.DefaultRules, true);
 					}
 
-					// Note: this is not generally thread-safe, but it works here because:
-					//   (a) This worker is the only thread writing to this sheet
-					//   (b) The main thread is the only thread reading this sheet
-					//   (c) The sheet is marked dirty after the write is completed,
-					//       which causes the main thread to copy this to the texture during
-					//       the next render cycle.
-					//   (d) Any partially written bytes from the next minimap is in an
-					//       unallocated area, and will be committed in the next cycle.
-					try
+					Game.RunAfterTick(() =>
 					{
-						p.SetMinimap(sheetBuilder.Add(bitmap));
-					}
-					finally
-					{
-						if (createdPreview)
-							bitmap.Dispose();
-					}
+						try
+						{
+							p.SetMinimap(sheetBuilder.Add(bitmap));
+						}
+						finally
+						{
+							if (createdPreview)
+								bitmap.Dispose();
+						}
+					});
 
 					// Yuck... But this helps the UI Jank when opening the map selector significantly.
 					Thread.Sleep(Environment.ProcessorCount == 1 ? 25 : 5);
 				}
 			}
 
-			sheetBuilder.Current.ReleaseBuffer();
-
 			// The buffer is not fully reclaimed until changes are written out to the texture.
 			// We will access the texture in order to force changes to be written out, allowing the buffer to be freed.
-			Game.RunAfterTick(() => sheetBuilder.Current.GetTexture());
+			Game.RunAfterTick(() =>
+			{
+				sheetBuilder.Current.ReleaseBuffer();
+				sheetBuilder.Current.GetTexture();
+			});
 			Log.Write("debug", "MapCache.LoadAsyncInternal ended");
 		}
 
@@ -223,7 +220,6 @@ namespace OpenRA
 					if (previewLoaderThread != null)
 						previewLoaderThread.Join();
 
-					sheetBuilder.Current.CreateBuffer();
 					previewLoaderThread = new Thread(LoadAsyncInternal)
 					{
 						Name = "Map Preview Loader",
@@ -250,7 +246,20 @@ namespace OpenRA
 
 		public void Dispose()
 		{
-			sheetBuilder.Dispose();
+			if (previewLoaderThread == null)
+			{
+				sheetBuilder.Dispose();
+				return;
+			}
+
+			// We need to let the loader thread exit before we can dispose our sheet builder.
+			// Ideally we should dispose our resources before returning, but we don't to block waiting on the loader thread to exit.
+			// Instead, we'll queue disposal to be run once it has exited.
+			ThreadPool.QueueUserWorkItem(_ =>
+			{
+				previewLoaderThread.Join();
+				Game.RunAfterTick(sheetBuilder.Dispose);
+			});
 		}
 	}
 }

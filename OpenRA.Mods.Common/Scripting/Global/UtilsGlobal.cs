@@ -12,6 +12,7 @@ using System.Linq;
 using Eluant;
 using OpenRA.Scripting;
 using OpenRA.Traits;
+using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Scripting
 {
@@ -59,6 +60,12 @@ namespace OpenRA.Mods.Common.Scripting
 			return true;
 		}
 
+		[Desc("Returns the first n values from a collection.")]
+		public LuaValue[] Take(int n, LuaValue[] source)
+		{
+			return source.Take(n).ToArray();
+		}
+
 		[Desc("Skips over the first numElements members of a table and return the rest.")]
 		public LuaTable Skip(LuaTable table, int numElements)
 		{
@@ -89,6 +96,12 @@ namespace OpenRA.Mods.Common.Scripting
 				return low;
 
 			return Context.World.SharedRandom.Next(low, high);
+		}
+
+		[Desc("Returns the ticks formatted to HH:MM:SS.")]
+		public string FormatTime(int ticks, bool leadingMinuteZero = true)
+		{
+			return WidgetUtils.FormatTime(ticks, leadingMinuteZero);
 		}
 	}
 }

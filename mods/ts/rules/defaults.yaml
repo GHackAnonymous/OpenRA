@@ -16,12 +16,22 @@
 	GivesBuildableArea:
 	Capturable:
 	SoundOnDamageTransition:
-		DamagedSound: expnew01.aud
-		DestroyedSound: crmble2.aud
+		DamagedSounds: expnew01.aud
+		DestroyedSounds: crmble2.aud
 	RenderBuilding:
 	WithBuildingExplosion:
+	WithDeathAnimation:
+		DeathSequence: dead
+		UseDeathTypeSuffix: false
 	RepairableBuilding:
+		IndicatorPalette: mouse
 	EngineerRepairable:
+	EmitInfantryOnSell@gdi:
+		ActorTypes: e1, e1, e2, medic
+		Races: gdi
+	EmitInfantryOnSell@nod:
+		ActorTypes: e1, e1, e1, e3, e3
+		Races: nod
 	MustBeDestroyed:
 		RequiredForShortGame: true
 	GivesExperience:
@@ -64,6 +74,7 @@
 	-UpdatesPlayerStatistics:
 	-CombatDebugOverlay:
 	-WithMakeAnimation:
+	-WithDeathAnimation:
 	Health:
 		HP: 900
 	Armor:
@@ -75,6 +86,35 @@
 	RenderBuilding:
 		Palette: terrain
 
+^CivBillboard:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1, 1
+	Armor:
+		Type: heavy
+	Health:
+		HP: 400
+	EditorTilesetFilter:
+		RequireTilesets: TEMPERAT
+
+^Crate:
+	Tooltip:
+		Name: Crate
+	Crate:
+		Lifetime: 180
+		TerrainTypes: Clear, Rough, Road, DirtRoad, Tiberium, BlueTiberium
+	RenderSprites:
+		Palette: terrain
+	WithCrateBody:
+		Images: crate
+	Selectable:
+		Selectable: false
+		Bounds: 25,25,-1,-1
+	ProximityCaptor:
+		Types: Crate
+	BodyOrientation:
+
 ^Wall:
 	AppearsOnRadar:
 	Building:
@@ -84,11 +124,11 @@
 		Adjacent: 7
 		TerrainTypes: Clear, Road
 	SoundOnDamageTransition:
-		DamagedSound: expnew01.aud
-		DestroyedSound: crmble2.aud
+		DamagedSounds: expnew01.aud
+		DestroyedSounds: crmble2.aud
 	Crushable:
 		CrushClasses: wall
-	BlocksBullets:
+	BlocksProjectiles:
 	LineBuild:
 		Range: 8
 		NodeTypes: wall
@@ -119,6 +159,13 @@
 		CloakDelay: 90
 	MustBeDestroyed:
 
+^BuildingPlug:
+	Building:
+		BuildSounds: place2.aud
+	KillsSelf:
+		RemoveInstead: true
+	RenderSprites:
+
 ^Infantry:
 	AppearsOnRadar:
 	Health:
@@ -144,7 +191,8 @@
 		Voice: Infantry
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
-	RenderInfantry:
+	RenderSprites:
+	WithInfantryBody:
 	WithDeathAnimation:
 	AutoTarget:
 	AttackMove:
@@ -211,22 +259,15 @@
 		Cost: 10
 	Tooltip:
 		Name: Civilian
-	Buildable:
-		Queue: Infantry
-		BuildPaletteOrder: 1000
-		Owner: gdi, nod
 	Health:
 		HP: 50
 	Mobile:
 		Speed: 71
 	RevealsShroud:
 		Range: 2c0
-	Armament:
-		Weapon: Pistola
-	AttackFrontal:
 	ProximityCaptor:
 		Types: CivilianInfantry
-	RenderInfantry:
+	WithInfantryBody:
 	ScaredyCat:
 	-MustBeDestroyed:
 
@@ -277,6 +318,10 @@
 	ActorLostNotification:
 	ProximityCaptor:
 		Types: Vehicle
+	Capturable:
+		Type: Vehicle
+		CaptureThreshold: 1
+		CancelActivity: True
 	GivesBounty:
 	UpdatesPlayerStatistics:
 	CombatDebugOverlay:
@@ -357,6 +402,10 @@
 	ActorLostNotification:
 	ProximityCaptor:
 		Types: Vehicle
+	Capturable:
+		Type: Vehicle
+		CaptureThreshold: 1
+		CancelActivity: True
 	GivesBounty:
 	UpdatesPlayerStatistics:
 	CombatDebugOverlay:
@@ -401,11 +450,10 @@
 	Selectable:
 		Voice: Heli
 	Helicopter:
-		RepairBuildings:
+		RepairBuildings: gadept
 		RearmBuildings:
 		LandWhenIdle: no
-	Buildable:
-		Queue: Aircraft
+		CruiseAltitude: 2048
 	HiddenUnderFog:
 	AttackMove:
 	GainsExperience:
@@ -437,6 +485,16 @@
 	Guardable:
 	UpgradeManager:
 	MustBeDestroyed:
+
+^Plane:
+	Inherits: ^Helicopter
+	-Helicopter:
+	Plane:
+		RepairBuildings: gadept
+		RearmBuildings: gahpad, nahpad
+		LandWhenIdle: no
+		CruiseAltitude: 2560
+	ReturnOnIdle:
 
 ^BlossomTree:
 	Tooltip:
@@ -491,3 +549,4 @@
 		Footprint: x
 		Dimensions: 1, 1
 	BodyOrientation:
+

@@ -49,6 +49,11 @@ Background@WORLD_TOOLTIP:
 			Y: 22
 			Height: 23
 			Font: Bold
+		Label@EXTRA:
+			X: 7
+			Y: 50
+			Height: 5
+			Font: Bold
 
 Background@SPAWN_TOOLTIP:
 	Logic: SpawnSelectorTooltipLogic
@@ -176,8 +181,13 @@ Background@SUPPORT_POWER_TOOLTIP:
 			Y: 2
 			Height: 20
 			Font: Bold
+		Label@HOTKEY:
+			Visible: false
+			Y: 2
+			Height: 20
+			TextColor: 255,255,0
+			Font: Bold
 		Label@TIME:
-			X: 20
 			Y: 8
 			Font: TinyBold
 			VAlign: Top

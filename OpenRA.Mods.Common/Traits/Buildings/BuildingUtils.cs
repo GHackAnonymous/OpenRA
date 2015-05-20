@@ -27,6 +27,13 @@ namespace OpenRA.Mods.Common.Traits
 			if (!bi.AllowInvalidPlacement && world.ActorMap.GetUnitsAt(cell).Any(a => a != toIgnore))
 				return false;
 
+			var tile = world.Map.MapTiles.Value[cell];
+			var tileInfo = world.TileSet.GetTileInfo(tile);
+
+			// TODO: This is bandaiding over bogus tilesets.
+			if (tileInfo != null && tileInfo.RampType > 0)
+				return false;
+
 			return bi.TerrainTypes.Contains(world.Map.GetTerrainInfo(cell).Type);
 		}
 

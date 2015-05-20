@@ -33,27 +33,50 @@ namespace OpenRA
 		public readonly string InternalName;
 		public readonly CountryInfo Country;
 		public readonly bool NonCombatant = false;
-		public readonly bool Spectating = false;
 		public readonly bool Playable = true;
 		public readonly int ClientIndex;
 		public readonly PlayerReference PlayerReference;
+
+		// The country (including Random, etc) that was selected in the lobby
+		public readonly CountryInfo DisplayCountry;
 
 		public WinState WinState = WinState.Undefined;
 		public bool IsBot;
 		public int SpawnPoint;
 		public bool HasObjectives = false;
+		public bool Spectating;
 
 		public Shroud Shroud;
 		public World World { get; private set; }
 
-		static CountryInfo ChooseCountry(World world, string name)
+		CountryInfo ChooseCountry(World world, string name, bool requireSelectable = true)
 		{
 			var selectableCountries = world.Map.Rules.Actors["world"].Traits
-				.WithInterface<CountryInfo>().Where(c => c.Selectable)
+				.WithInterface<CountryInfo>().Where(c => !requireSelectable || c.Selectable)
 				.ToList();
 
-			return selectableCountries.FirstOrDefault(c => c.Race == name)
+			var selected = selectableCountries.FirstOrDefault(c => c.Race == name)
 				?? selectableCountries.Random(world.SharedRandom);
+
+			// Don't loop infinite
+			for (var i = 0; i <= 10 && selected.RandomRaceMembers.Any(); i++)
+			{
+				var race = selected.RandomRaceMembers.Random(world.SharedRandom);
+				selected = selectableCountries.FirstOrDefault(c => c.Race == race);
+
+				if (selected == null)
+					throw new YamlException("Unknown race: {0}".F(race));
+			}
+
+			return selected;
+		}
+
+		CountryInfo ChooseDisplayCountry(World world, string race)
+		{
+			var countries = world.Map.Rules.Actors["world"].Traits
+				.WithInterface<CountryInfo>();
+
+			return countries.FirstOrDefault(c => c.Race == race) ?? countries.First();
 		}
 
 		public Player(World world, Session.Client client, Session.Slot slot, PlayerReference pr)
@@ -70,7 +93,8 @@ namespace OpenRA
 				Color = client.Color;
 				PlayerName = client.Name;
 				botType = client.Bot;
-				Country = ChooseCountry(world, client.Country);
+				Country = ChooseCountry(world, client.Race, !pr.LockRace);
+				DisplayCountry = ChooseDisplayCountry(world, client.Race);
 			}
 			else
 			{
@@ -82,7 +106,8 @@ namespace OpenRA
 				Playable = pr.Playable;
 				Spectating = pr.Spectating;
 				botType = pr.Bot;
-				Country = ChooseCountry(world, pr.Race);
+				Country = ChooseCountry(world, pr.Race, false);
+				DisplayCountry = ChooseDisplayCountry(world, pr.Race);
 			}
 
 			PlayerActor = world.CreateActor("Player", new TypeDictionary { new OwnerInit(this) });

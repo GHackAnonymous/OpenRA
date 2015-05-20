@@ -30,7 +30,7 @@ namespace OpenRA.Mods.Common.AI
 
 		protected static CPos RandomBuildingLocation(Squad squad)
 		{
-			var location = squad.Bot.BaseCenter;
+			var location = squad.Bot.GetRandomBaseCenter();
 			var buildings = squad.World.ActorsWithTrait<Building>()
 				.Where(a => a.Actor.Owner == squad.Bot.Player).Select(a => a.Actor).ToList();
 			if (buildings.Count > 0)
@@ -69,7 +69,7 @@ namespace OpenRA.Mods.Common.AI
 
 			var arms = a.TraitsImplementing<Armament>();
 			foreach (var arm in arms)
-				if (arm.Weapon.ValidTargets.Intersect(targetable.TargetTypes).Any())
+				if (arm.Weapon.IsValidTarget(targetable.TargetTypes))
 					return true;
 
 			return false;

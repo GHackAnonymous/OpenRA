@@ -110,7 +110,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			Func<string, ScrollItemWidget, ScrollItemWidget> setupItem = (race, itemTemplate) =>
 			{
 				var item = ScrollItemWidget.Setup(itemTemplate,
-					() => client.Country == race,
+					() => client.Race == race,
 					() => orderManager.IssueOrder(Order.Command("race {0} {1}".F(client.Index, race))));
 				var country = countries[race];
 				item.Get<LabelWidget>("LABEL").GetText = () => country.Name;
@@ -121,7 +121,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				return item;
 			};
 
-			var options = countries.GroupBy(c => c.Value.Side).ToDictionary(g => g.Key ?? "", g => g.Select(c => c.Key));
+			var options = countries.Where(c => c.Value.Selectable).GroupBy(c => c.Value.Side)
+				.ToDictionary(g => g.Key ?? "", g => g.Select(c => c.Key));
 
 			dropdown.ShowDropDown("RACE_DROPDOWN_TEMPLATE", 150, options, setupItem);
 		}
@@ -236,14 +237,16 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		public static string LookupCountry(string ip)
 		{
+			const string Unknown = "Unknown Location";
+
 			try
 			{
-				return Game.GeoIpDatabase.Country(ip).Country.Name;
+				return Game.GeoIpDatabase.Country(ip).Country.Name ?? Unknown;
 			}
 			catch (Exception e)
 			{
 				Log.Write("geoip", "LookupCountry failed: {0}", e);
-				return "Unknown Location";
+				return Unknown;
 			}
 		}
 
@@ -398,7 +401,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var dropdown = parent.Get<DropDownButtonWidget>("FACTION");
 			dropdown.IsDisabled = () => s.LockRace || orderManager.LocalClient.IsReady;
 			dropdown.OnMouseDown = _ => ShowRaceDropDown(dropdown, c, orderManager, countries);
-			var factionDescription = countries[c.Country].Description;
+			var factionDescription = countries[c.Race].Description;
 			dropdown.GetTooltipText = () => factionDescription;
 			SetupFactionWidget(dropdown, s, c, countries);
 		}
@@ -407,9 +410,9 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			Dictionary<string, LobbyCountry> countries)
 		{
 			var factionName = parent.Get<LabelWidget>("FACTIONNAME");
-			factionName.GetText = () => countries[c.Country].Name;
+			factionName.GetText = () => countries[c.Race].Name;
 			var factionFlag = parent.Get<ImageWidget>("FACTIONFLAG");
-			factionFlag.GetImageName = () => c.Country;
+			factionFlag.GetImageName = () => c.Race;
 			factionFlag.GetImageCollection = () => "flags";
 		}
 
@@ -464,8 +467,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		public static void AddPlayerFlagAndName(ScrollItemWidget template, Player player)
 		{
 			var flag = template.Get<ImageWidget>("FLAG");
-			flag.GetImageName = () => player.Country.Race;
 			flag.GetImageCollection = () => "flags";
+			if (player.World.RenderPlayer != null && player.World.RenderPlayer.Stances[player] != Stance.Ally)
+				flag.GetImageName = () => player.DisplayCountry.Race;
+			else
+				flag.GetImageName = () => player.Country.Race;
 
 			var playerName = template.Get<LabelWidget>("PLAYER");
 			var client = player.World.LobbyInfo.ClientWithIndex(player.ClientIndex);

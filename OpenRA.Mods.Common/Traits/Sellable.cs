@@ -8,8 +8,10 @@
  */
 #endregion
 
+using System;
 using System.Linq;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Mods.Common.Orders;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
@@ -20,13 +22,22 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int RefundPercent = 50;
 		public readonly string[] SellSounds = { };
 
-		public object Create(ActorInitializer init) { return new Sellable(this); }
+		public object Create(ActorInitializer init) { return new Sellable(init.Self, this); }
 	}
 
-	public class Sellable : UpgradableTrait<SellableInfo>, IResolveOrder
+	public class Sellable : UpgradableTrait<SellableInfo>, IResolveOrder, IProvideTooltipInfo
 	{
-		public Sellable(SellableInfo info)
-			: base(info) { }
+		readonly Actor self;
+		readonly Lazy<Health> health;
+		readonly SellableInfo info;
+
+		public Sellable(Actor self, SellableInfo info)
+			: base(info)
+		{
+			this.self = self;
+			this.info = info;
+			health = Exts.Lazy(() => self.TraitOrDefault<Health>());
+		}
 
 		public void ResolveOrder(Actor self, Order order)
 		{
@@ -45,7 +56,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			self.CancelActivity();
 
-			foreach (var s in Info.SellSounds)
+			foreach (var s in info.SellSounds)
 				Sound.PlayToPlayer(self.Owner, s, self.CenterPosition);
 
 			foreach (var ns in self.TraitsImplementing<INotifySold>())
@@ -53,9 +64,31 @@ namespace OpenRA.Mods.Common.Traits
 
 			var makeAnimation = self.TraitOrDefault<WithMakeAnimation>();
 			if (makeAnimation != null)
-				makeAnimation.Reverse(self, new Sell());
+				makeAnimation.Reverse(self, new Sell(self), false);
 			else
-				self.QueueActivity(new Sell());
+				self.QueueActivity(false, new Sell(self));
+		}
+
+		public bool IsTooltipVisible(Player forPlayer)
+		{
+			if (self.World.OrderGenerator is SellOrderGenerator)
+				return forPlayer == self.Owner;
+			return false;
+		}
+
+		public string TooltipText
+		{
+			get
+			{
+				var sellValue = self.GetSellValue() * info.RefundPercent / 100;
+				if (health.Value != null)
+				{
+					sellValue *= health.Value.HP;
+					sellValue /= health.Value.MaxHP;
+				}
+
+				return "Refund: $" + sellValue;
+			}
 		}
 	}
 }

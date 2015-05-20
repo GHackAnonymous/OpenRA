@@ -42,7 +42,7 @@ namespace OpenRA.Mods.Common.Traits
 				.First(tt => tt.Turret == armament.Turret);
 
 			var anim = new Animation(init.World, image, () => t.InitialFacing);
-			anim.Play(Sequence);
+			anim.Play(RenderSprites.NormalizeSequence(anim, init.GetDamageState(), Sequence));
 
 			var turretOrientation = body.QuantizeOrientation(new WRot(WAngle.Zero, WAngle.Zero, WAngle.FromFacing(t.InitialFacing)), facings);
 			var turretOffset = body.LocalToWorld(t.Offset.Rotate(turretOrientation));
@@ -73,7 +73,7 @@ namespace OpenRA.Mods.Common.Traits
 			var rs = self.Trait<RenderSprites>();
 			anim = new Animation(self.World, rs.GetImage(self), () => turreted.TurretFacing);
 			anim.Play(info.Sequence);
-			rs.Add("barrel_{0}".F(info.Barrel), new AnimationWithOffset(
+			rs.Add(new AnimationWithOffset(
 				anim, () => BarrelOffset(), null, () => false, p => WithTurret.ZOffsetFromCenter(self, p, 0)));
 
 			// Restrict turret facings to match the sprite

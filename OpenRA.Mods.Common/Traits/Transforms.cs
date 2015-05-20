@@ -18,11 +18,32 @@ namespace OpenRA.Mods.Common.Traits
 	[Desc("Actor becomes a specified actor type when this trait is triggered.")]
 	public class TransformsInfo : ITraitInfo
 	{
-		[ActorReference] public readonly string IntoActor = null;
+		[Desc("Actor to transform into."), ActorReference]
+		public readonly string IntoActor = null;
+
+		[Desc("Offset to spawn the transformed actor relative to the current cell.")]
 		public readonly CVec Offset = CVec.Zero;
+
+		[Desc("Facing that the actor must face before transforming.")]
 		public readonly int Facing = 96;
+
+		[Desc("Sounds to play when transforming.")]
 		public readonly string[] TransformSounds = { };
+
+		[Desc("Sounds to play when the transformation is blocked.")]
 		public readonly string[] NoTransformSounds = { };
+
+		[Desc("Notification to play when transforming.")]
+		public readonly string TransformNotification = null;
+
+		[Desc("Notification to play when the transformation is blocked.")]
+		public readonly string NoTransformNotification = null;
+
+		[Desc("Cursor to display when able to (un)deploy the actor.")]
+		public readonly string DeployCursor = "deploy";
+
+		[Desc("Cursor to display when unable to (un)deploy the actor.")]
+		public readonly string DeployBlockedCursor = "deploy-blocked";
 
 		public virtual object Create(ActorInitializer init) { return new Transforms(init, this); }
 	}
@@ -31,14 +52,14 @@ namespace OpenRA.Mods.Common.Traits
 	{
 		readonly Actor self;
 		readonly TransformsInfo info;
-		readonly BuildingInfo bi;
+		readonly BuildingInfo buildingInfo;
 		readonly string race;
 
 		public Transforms(ActorInitializer init, TransformsInfo info)
 		{
 			self = init.Self;
 			this.info = info;
-			bi = self.World.Map.Rules.Actors[info.IntoActor].Traits.GetOrDefault<BuildingInfo>();
+			buildingInfo = self.World.Map.Rules.Actors[info.IntoActor].Traits.GetOrDefault<BuildingInfo>();
 			race = init.Contains<RaceInit>() ? init.Get<RaceInit, string>() : self.Owner.Country.Race;
 		}
 
@@ -49,16 +70,17 @@ namespace OpenRA.Mods.Common.Traits
 
 		bool CanDeploy()
 		{
-			var b = self.TraitOrDefault<Building>();
-			if (b != null && b.Locked)
+			var building = self.TraitOrDefault<Building>();
+			if (building != null && building.Locked)
 				return false;
 
-			return bi == null || self.World.CanPlaceBuilding(info.IntoActor, bi, self.Location + info.Offset, self);
+			return buildingInfo == null || self.World.CanPlaceBuilding(info.IntoActor, buildingInfo, self.Location + info.Offset, self);
 		}
 
 		public IEnumerable<IOrderTargeter> Orders
 		{
-			get { yield return new DeployOrderTargeter("DeployTransform", 5, () => CanDeploy()); }
+			get { yield return new DeployOrderTargeter("DeployTransform", 5,
+				() => CanDeploy() ? info.DeployCursor : info.DeployBlockedCursor); }
 		}
 
 		public Order IssueOrder(Actor self, IOrderTargeter order, Target target, bool queued)
@@ -71,12 +93,13 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void DeployTransform(bool queued)
 		{
-			var b = self.TraitOrDefault<Building>();
-
-			if (!CanDeploy() || (b != null && !b.Lock()))
+			var building = self.TraitOrDefault<Building>();
+			if (!CanDeploy() || (building != null && !building.Lock()))
 			{
 				foreach (var s in info.NoTransformSounds)
 					Sound.PlayToPlayer(self.Owner, s);
+
+				Sound.PlayNotification(self.World.Map.Rules, self.Owner, "Speech", info.NoTransformNotification, self.Owner.Country.Race);
 
 				return;
 			}
@@ -90,7 +113,15 @@ namespace OpenRA.Mods.Common.Traits
 			foreach (var nt in self.TraitsImplementing<INotifyTransform>())
 				nt.BeforeTransform(self);
 
-			var transform = new Transform(self, info.IntoActor) { Offset = info.Offset, Facing = info.Facing, Sounds = info.TransformSounds, Race = race };
+			var transform = new Transform(self, info.IntoActor)
+			{
+				Offset = info.Offset,
+				Facing = info.Facing,
+				Sounds = info.TransformSounds,
+				Notification = info.TransformNotification,
+				Race = race
+			};
+
 			var makeAnimation = self.TraitOrDefault<WithMakeAnimation>();
 			if (makeAnimation != null)
 				makeAnimation.Reverse(self, transform);

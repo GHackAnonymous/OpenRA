@@ -21,14 +21,32 @@ namespace OpenRA.Mods.Common.Traits
 	[Desc("This actor can transport Passenger actors.")]
 	public class CargoInfo : ITraitInfo, Requires<IOccupySpaceInfo>
 	{
+		[Desc("The maximum sum of Passenger.Weight that this actor can support.")]
 		public readonly int MaxWeight = 0;
+
+		[Desc("Number of pips to display when this actor is selected.")]
 		public readonly int PipCount = 0;
+
+		[Desc("`Passenger.CargoType`s that can be loaded into this actor.")]
 		public readonly string[] Types = { };
+
+		[Desc("A list of actor types that are initially spawned into this actor.")]
 		public readonly string[] InitialUnits = { };
+
+		[Desc("When this actor is sold should all of its passengers be unloaded?")]
 		public readonly bool EjectOnSell = true;
+
+		[Desc("Terrain types that this actor is allowed to eject actors onto. Leave empty for all terrain types.")]
+		public readonly string[] UnloadTerrainTypes = { };
 
 		[Desc("Which direction the passenger will face (relative to the transport) when unloading.")]
 		public readonly int PassengerFacing = 128;
+
+		[Desc("Cursor to display when able to unload the passengers.")]
+		public readonly string UnloadCursor = "deploy";
+
+		[Desc("Cursor to display when unable to unload the passengers.")]
+		public readonly string UnloadBlockedCursor = "deploy-blocked";
 
 		public object Create(ActorInitializer init) { return new Cargo(init, this); }
 	}
@@ -40,6 +58,7 @@ namespace OpenRA.Mods.Common.Traits
 		readonly Stack<Actor> cargo = new Stack<Actor>();
 		readonly HashSet<Actor> reserves = new HashSet<Actor>();
 		readonly Lazy<IFacing> facing;
+		readonly bool checkTerrainType;
 
 		int totalWeight = 0;
 		int reservedWeight = 0;
@@ -56,6 +75,7 @@ namespace OpenRA.Mods.Common.Traits
 			self = init.Self;
 			Info = info;
 			Unloading = false;
+			checkTerrainType = info.UnloadTerrainTypes.Length > 0;
 
 			if (init.Contains<RuntimeCargoInit>())
 			{
@@ -99,7 +119,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		public IEnumerable<IOrderTargeter> Orders
 		{
-			get { yield return new DeployOrderTargeter("Unload", 10, CanUnload); }
+			get { yield return new DeployOrderTargeter("Unload", 10,
+				() => CanUnload() ? Info.UnloadCursor : Info.UnloadBlockedCursor); }
 		}
 
 		public Order IssueOrder(Actor self, IOrderTargeter order, Target target, bool queued)
@@ -120,7 +141,7 @@ namespace OpenRA.Mods.Common.Traits
 				Unloading = true;
 				self.CancelActivity();
 				if (helicopter != null)
-					self.QueueActivity(new HeliLand(true));
+					self.QueueActivity(new HeliLand(self, true));
 				self.QueueActivity(new UnloadCargo(self, true));
 			}
 		}
@@ -132,6 +153,14 @@ namespace OpenRA.Mods.Common.Traits
 
 		bool CanUnload()
 		{
+			if (checkTerrainType)
+			{
+				var terrainType = self.World.Map.GetTerrainInfo(self.Location).Type;
+
+				if (!Info.UnloadTerrainTypes.Contains(terrainType))
+					return false;
+			}
+
 			return !IsEmpty(self) && (helicopter == null || helicopter.CanLand(self.Location))
 				&& CurrentAdjacentCells != null && CurrentAdjacentCells.Any(c => Passengers.Any(p => p.Trait<IPositionable>().CanEnterCell(c)));
 		}
@@ -170,7 +199,7 @@ namespace OpenRA.Mods.Common.Traits
 			if (order.OrderString != "Unload")
 				return null;
 
-			return CanUnload() ? "deploy" : "deploy-blocked";
+			return CanUnload() ? Info.UnloadCursor : Info.UnloadBlockedCursor;
 		}
 
 		public string VoicePhraseForOrder(Actor self, Order order)
@@ -342,7 +371,7 @@ namespace OpenRA.Mods.Common.Traits
 	public interface INotifyPassengerEntered { void PassengerEntered(Actor self, Actor passenger); }
 	public interface INotifyPassengerExited { void PassengerExited(Actor self, Actor passenger); }
 
-	public class RuntimeCargoInit : IActorInit<Actor[]>
+	public class RuntimeCargoInit : IActorInit<Actor[]>, ISuppressInitExport
 	{
 		[FieldFromYamlKey]
 		readonly Actor[] value = { };

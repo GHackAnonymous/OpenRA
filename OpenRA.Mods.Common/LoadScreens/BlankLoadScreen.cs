@@ -8,8 +8,10 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenRA.FileFormats;
 using OpenRA.FileSystem;
 using OpenRA.Mods.Common.Widgets.Logic;
 using OpenRA.Widgets;
@@ -38,7 +40,7 @@ namespace OpenRA.Mods.Common.LoadScreens
 			// Check whether the mod content is installed
 			// TODO: The installation code has finally been beaten into shape, so we can
 			// finally move it all into the planned "Manage Content" panel in the modchooser mod.
-			var installData = Game.ModData.Manifest.ContentInstaller;
+			var installData = Game.ModData.Manifest.Get<ContentInstaller>();
 			var installModContent = !installData.TestFiles.All(f => GlobalFileSystem.Exists(f));
 			var installModMusic = args != null && args.Contains("Install.Music");
 
@@ -75,10 +77,20 @@ namespace OpenRA.Mods.Common.LoadScreens
 			}
 
 			// Load a replay directly
-			var replay = args != null ? args.GetValue("Launch.Replay", null) : null;
-			if (!string.IsNullOrEmpty(replay))
+			var replayFilename = args != null ? args.GetValue("Launch.Replay", null) : null;
+			if (!string.IsNullOrEmpty(replayFilename))
 			{
-				Game.JoinReplay(replay);
+				var replayMeta = ReplayMetadata.Read(replayFilename);
+				if (ReplayUtils.PromptConfirmReplayCompatibility(replayMeta, Game.LoadShellMap))
+					Game.JoinReplay(replayFilename);
+
+				if (replayMeta != null)
+				{
+					var mod = replayMeta.GameInfo.Mod;
+					if (mod != null && mod != Game.ModData.Manifest.Mod.Id && ModMetadata.AllMods.ContainsKey(mod))
+						Game.InitializeMod(mod, args);
+				}
+
 				return;
 			}
 

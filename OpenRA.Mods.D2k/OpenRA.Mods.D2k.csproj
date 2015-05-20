@@ -53,34 +53,27 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="System.Drawing" />
     <Reference Include="Eluant">
-      <HintPath>..\thirdparty\Eluant.dll</HintPath>
+      <HintPath>..\thirdparty\download\Eluant.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activities\CarryUnit.cs" />
+    <Compile Include="Activities\PickupUnit.cs" />
+    <Compile Include="Activities\DeliverUnit.cs" />
     <Compile Include="Activities\SwallowActor.cs" />
     <Compile Include="SpriteLoaders\R8Loader.cs" />
     <Compile Include="Traits\AttackSwallow.cs" />
-    <Compile Include="Traits\AutoCarryall.cs" />
+    <Compile Include="Traits\Carryall.cs" />
+    <Compile Include="Traits\Buildings\FreeActorWithDelivery.cs" />
+    <Compile Include="Traits\Buildings\ProductionFromMapEdge.cs" />
     <Compile Include="Traits\Buildings\DamagedWithoutFoundation.cs" />
     <Compile Include="Traits\Buildings\LaysTerrain.cs" />
     <Compile Include="Traits\Carryable.cs" />
-    <Compile Include="Traits\Render\WithBuildingPlacedOverlay.cs" />
+    <Compile Include="Traits\Player\HarvesterInsurance.cs" />
     <Compile Include="Traits\Render\WithCrumbleOverlay.cs" />
-    <Compile Include="Traits\Render\WithDockingOverlay.cs" />
     <Compile Include="Traits\Render\WithDeliveryOverlay.cs" />
-    <Compile Include="Traits\Render\WithProductionOverlay.cs" />
     <Compile Include="Traits\Sandworm.cs" />
     <Compile Include="Traits\TemporaryOwnerManager.cs" />
     <Compile Include="Traits\ThrowsShrapnel.cs" />
@@ -96,6 +89,8 @@
     <Compile Include="UtilityCommands\D2kMapImporter.cs" />
     <Compile Include="UtilityCommands\ImportD2kMapCommand.cs" />
     <Compile Include="Traits\Render\WithAttackOverlay.cs" />
+    <Compile Include="Traits\Render\WithDecorationCarryable.cs" />
+    <Compile Include="Traits\World\D2kEditorResourceLayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -112,11 +107,6 @@ cd "$(SolutionDir)"</PostBuildEvent>
     <ProjectReference Include="..\OpenRA.Mods.Common\OpenRA.Mods.Common.csproj">
       <Project>{fe6c8cc0-2f07-442a-b29f-17617b3b7fc6}</Project>
       <Name>OpenRA.Mods.Common</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\OpenRA.Mods.RA\OpenRA.Mods.RA.csproj">
-      <Project>{4A8A43B5-A9EF-4ED0-99DD-4BAB10A0DB6E}</Project>
-      <Name>OpenRA.Mods.RA</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

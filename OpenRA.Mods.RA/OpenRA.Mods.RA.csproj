@@ -51,101 +51,54 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="ICSharpCode.SharpZipLib">
-      <HintPath>..\thirdparty\ICSharpCode.SharpZipLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Eluant">
-      <HintPath>..\thirdparty\Eluant.dll</HintPath>
+      <HintPath>..\thirdparty\download\Eluant.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Traits\AcceptsSupplies.cs" />
-    <Compile Include="Activities\DonateSupplies.cs" />
     <Compile Include="Activities\Infiltrate.cs" />
     <Compile Include="Activities\LayMines.cs" />
     <Compile Include="Activities\Leap.cs" />
     <Compile Include="Activities\Teleport.cs" />
+    <Compile Include="Effects\GpsDot.cs" />
     <Compile Include="Effects\GpsSatellite.cs" />
     <Compile Include="Effects\SatelliteLaunch.cs" />
     <Compile Include="Effects\TeslaZap.cs" />
-    <Compile Include="Traits\Render\RenderUnitReload.cs" />
     <Compile Include="Graphics\TeslaZapRenderable.cs" />
-    <Compile Include="Traits\EjectOnDeath.cs" />
     <Compile Include="Traits\Attack\AttackLeap.cs" />
-    <Compile Include="Traits\PaletteEffects\ChronoshiftPaletteEffect.cs" />
-    <Compile Include="Traits\Chronoshiftable.cs" />
-    <Compile Include="Traits\DemoTruck.cs" />
-    <Compile Include="Effects\GpsDot.cs" />
-    <Compile Include="Traits\MadTank.cs" />
-    <Compile Include="Traits\Mine.cs" />
-    <Compile Include="Traits\Minelayer.cs" />
-    <Compile Include="Traits\PortableChrono.cs" />
-    <Compile Include="Traits\Render\RenderJammerCircle.cs" />
-    <Compile Include="Traits\Render\RenderDisguise.cs" />
-    <Compile Include="Traits\Render\RenderLandingCraft.cs" />
-    <Compile Include="Traits\Disguise.cs" />
-    <Compile Include="Traits\SupplyTruck.cs" />
-    <Compile Include="Traits\SupportPowers\ChronoshiftPower.cs" />
-    <Compile Include="Traits\SupportPowers\GpsPower.cs" />
-    <Compile Include="Traits\SupportPowers\ParatroopersPower.cs" />
     <Compile Include="Traits\Buildings\Fake.cs" />
+    <Compile Include="Traits\Buildings\ClonesProducedUnits.cs" />
+    <Compile Include="Traits\Chronoshiftable.cs" />
+    <Compile Include="Traits\Cloneable.cs" />
+    <Compile Include="Traits\DemoTruck.cs" />
+    <Compile Include="Traits\Disguise.cs" />
     <Compile Include="Traits\HarvesterHuskModifier.cs" />
-    <Compile Include="Traits\LeavesHusk.cs" />
-    <Compile Include="Traits\TargetableSubmarine.cs" />
-    <Compile Include="Traits\TransformOnPassenger.cs" />
-    <Compile Include="Widgets\Logic\MissionBrowserLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\DiplomacyLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\GameInfoLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\GameInfoBriefingLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\GameInfoObjectivesLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\GameInfoStatsLogic.cs" />
-    <Compile Include="Widgets\Logic\IngameMenuLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\LeaveMapLogic.cs" />
-    <Compile Include="Widgets\Logic\DownloadPackagesLogic.cs" />
-    <Compile Include="Widgets\Logic\MusicPlayerLogic.cs" />
-    <Compile Include="Widgets\Logic\ObserverStatsLogic.cs" />
-    <Compile Include="Widgets\Logic\OrderButtonsChromeLogic.cs" />
-    <Compile Include="Widgets\Logic\PerfDebugLogic.cs" />
-    <Compile Include="Widgets\ObserverProductionIconsWidget.cs" />
-    <Compile Include="Widgets\WorldCommandWidget.cs" />
-    <Compile Include="Traits\Render\RenderShroudCircle.cs" />
     <Compile Include="Traits\Infiltration\InfiltrateForCash.cs" />
     <Compile Include="Traits\Infiltration\InfiltrateForExploration.cs" />
     <Compile Include="Traits\Infiltration\InfiltrateForPowerOutage.cs" />
     <Compile Include="Traits\Infiltration\InfiltrateForSupportPower.cs" />
     <Compile Include="Traits\Infiltration\Infiltrates.cs" />
-    <Compile Include="Widgets\Logic\ObserverShroudSelectorLogic.cs" />
-    <Compile Include="Widgets\Logic\SpawnSelectorTooltipLogic.cs" />
-    <Compile Include="Widgets\Logic\CreditsLogic.cs" />
-    <Compile Include="Widgets\Logic\SimpleTooltipLogic.cs" />
-    <Compile Include="Widgets\Logic\WorldTooltipLogic.cs" />
-    <Compile Include="Widgets\Logic\InstallLogic.cs" />
-    <Compile Include="CombatDebugOverlay.cs" />
-    <Compile Include="Widgets\Logic\GameTimerLogic.cs" />
-    <Compile Include="Widgets\Logic\ReplayControlBarLogic.cs" />
-    <Compile Include="Traits\Attack\AttackGarrisoned.cs" />
-    <Compile Include="Widgets\Logic\ControlGroupLogic.cs" />
-    <Compile Include="Scripting\Properties\ChronosphereProperties.cs" />
-    <Compile Include="Widgets\Logic\InstallFromCDLogic.cs" />
-    <Compile Include="Widgets\Logic\InstallMusicLogic.cs" />
-    <Compile Include="Traits\Buildings\ClonesProducedUnits.cs" />
-    <Compile Include="Traits\Cloneable.cs" />
-    <Compile Include="Widgets\Logic\Ingame\IngameCashCounterLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\IngamePowerCounterLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\IngamePowerBarLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\IngameSiloBarLogic.cs" />
-    <Compile Include="Widgets\Logic\Ingame\AddRaceSuffixLogic.cs" />
-    <Compile Include="Widgets\Logic\ClassicProductionLogic.cs" />
-    <Compile Include="Widgets\Logic\DebugMenuLogic.cs" />
-    <Compile Include="Scripting\Properties\HarvesterProperties.cs" />
-    <Compile Include="Scripting\Properties\TransportProperties.cs" />
     <Compile Include="Traits\InvulnerabilityUpgrade.cs" />
+    <Compile Include="Traits\MadTank.cs" />
+    <Compile Include="Traits\Mine.cs" />
+    <Compile Include="Traits\Minelayer.cs" />
+    <Compile Include="Traits\PaletteEffects\ChronoshiftPaletteEffect.cs" />
+    <Compile Include="Traits\PortableChrono.cs" />
+    <Compile Include="Traits\Render\RenderJammerCircle.cs" />
+    <Compile Include="Traits\Render\RenderLandingCraft.cs" />
+    <Compile Include="Traits\Render\RenderShroudCircle.cs" />
+    <Compile Include="Traits\Render\RenderUnitReload.cs" />
+    <Compile Include="Traits\SupportPowers\ChronoshiftPower.cs" />
+    <Compile Include="Traits\SupportPowers\GpsPower.cs" />
+    <Compile Include="Traits\SupportPowers\ParatroopersPower.cs" />
+    <Compile Include="Traits\LeavesHusk.cs" />
+    <Compile Include="Traits\TargetableSubmarine.cs" />
+    <Compile Include="Scripting\Properties\ChronosphereProperties.cs" />
+    <Compile Include="Scripting\Properties\ParadropProperties.cs" />
+    <Compile Include="Scripting\Properties\ParatroopersProperties.cs" />
+    <Compile Include="Traits\Render\WithDisguisingInfantryBody.cs" />
+    <Compile Include="Traits\Render\WithDecorationDisguised.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenRA.Game\OpenRA.Game.csproj">

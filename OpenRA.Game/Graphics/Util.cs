@@ -64,18 +64,33 @@ namespace OpenRA.Graphics
 
 		public static void FastCopyIntoSprite(Sprite dest, Bitmap src)
 		{
-			var data = dest.Sheet.GetData();
-			var dataStride = dest.Sheet.Size.Width * 4;
-			var x = dest.Bounds.Left * 4;
-			var width = dest.Bounds.Width * 4;
-			var y = dest.Bounds.Top;
-			var height = dest.Bounds.Height;
+			var createdTempBitmap = false;
+			if (src.PixelFormat != PixelFormat.Format32bppArgb)
+			{
+				src = src.CloneWith32bbpArgbPixelFormat();
+				createdTempBitmap = true;
+			}
 
-			var bd = src.LockBits(src.Bounds(),
-				ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-			for (var row = 0; row < height; row++)
-				Marshal.Copy(IntPtr.Add(bd.Scan0, row * bd.Stride), data, (y + row) * dataStride + x, width);
-			src.UnlockBits(bd);
+			try
+			{
+				var data = dest.Sheet.GetData();
+				var dataStride = dest.Sheet.Size.Width * 4;
+				var x = dest.Bounds.Left * 4;
+				var width = dest.Bounds.Width * 4;
+				var y = dest.Bounds.Top;
+				var height = dest.Bounds.Height;
+
+				var bd = src.LockBits(src.Bounds(),
+					ImageLockMode.ReadWrite, src.PixelFormat);
+				for (var row = 0; row < height; row++)
+					Marshal.Copy(IntPtr.Add(bd.Scan0, row * bd.Stride), data, (y + row) * dataStride + x, width);
+				src.UnlockBits(bd);
+			}
+			finally
+			{
+				if (createdTempBitmap)
+					src.Dispose();
+			}
 		}
 
 		public static float[] IdentityMatrix()

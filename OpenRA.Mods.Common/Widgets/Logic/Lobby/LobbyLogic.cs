@@ -144,9 +144,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			colorPreview = lobby.Get<ColorPreviewManagerWidget>("COLOR_MANAGER");
 			colorPreview.Color = Game.Settings.Player.Color;
 
-			countries.Add("random", new LobbyCountry { Name = "Any" });
-			foreach (var c in modRules.Actors["world"].Traits.WithInterface<CountryInfo>().Where(c => c.Selectable))
-				countries.Add(c.Race, new LobbyCountry { Name = c.Name, Side = c.Side, Description = c.Description });
+			foreach (var c in modRules.Actors["world"].Traits.WithInterface<CountryInfo>())
+				countries.Add(c.Race, new LobbyCountry { Selectable = c.Selectable, Name = c.Name, Side = c.Side, Description = c.Description });
 
 			var gameStarting = false;
 			Func<bool> configurationDisabled = () => !Game.IsHost || gameStarting ||
@@ -409,8 +408,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					return selectedClass != null ? selectedClass : c;
 				};
 
-				startingUnits.IsDisabled = () => Map.Status != MapStatus.Available || !Map.Map.Options.ConfigurableStartingUnits || configurationDisabled();
-				startingUnits.GetText = () => Map.Status != MapStatus.Available || !Map.Map.Options.ConfigurableStartingUnits ? "Not Available" : className(orderManager.LobbyInfo.GlobalSettings.StartingUnitsClass);
+				startingUnits.IsDisabled = () => Map.Status != MapStatus.Available ||
+					!Map.Map.Options.ConfigurableStartingUnits || configurationDisabled();
+				startingUnits.GetText = () => Map.Status != MapStatus.Available ||
+					!Map.Map.Options.ConfigurableStartingUnits ? "Not Available" : className(orderManager.LobbyInfo.GlobalSettings.StartingUnitsClass);
 				startingUnits.OnMouseDown = _ =>
 				{
 					var options = classes.Select(c => new DropDownOption
@@ -436,8 +437,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var startingCash = optionsBin.GetOrNull<DropDownButtonWidget>("STARTINGCASH_DROPDOWNBUTTON");
 			if (startingCash != null)
 			{
-				startingCash.IsDisabled = () => Map.Status != MapStatus.Available || Map.Map.Options.StartingCash.HasValue || configurationDisabled();
-				startingCash.GetText = () => Map.Status != MapStatus.Available || Map.Map.Options.StartingCash.HasValue ? "Not Available" : "${0}".F(orderManager.LobbyInfo.GlobalSettings.StartingCash);
+				startingCash.IsDisabled = () => Map.Status != MapStatus.Available ||
+					Map.Map.Options.StartingCash.HasValue || configurationDisabled();
+				startingCash.GetText = () => Map.Status != MapStatus.Available ||
+					Map.Map.Options.StartingCash.HasValue ? "Not Available" : "${0}".F(orderManager.LobbyInfo.GlobalSettings.StartingCash);
 				startingCash.OnMouseDown = _ =>
 				{
 					var options = modRules.Actors["player"].Traits.Get<PlayerResourcesInfo>().SelectableCash.Select(c => new DropDownOption
@@ -464,8 +467,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				var techTraits = modRules.Actors["player"].Traits.WithInterface<ProvidesTechPrerequisiteInfo>().ToList();
 				techLevel.IsVisible = () => techTraits.Count > 0;
 				optionsBin.GetOrNull<LabelWidget>("TECHLEVEL_DESC").IsVisible = () => techTraits.Count > 0;
-				techLevel.IsDisabled = () => Map.Status != MapStatus.Available || Map.Map.Options.TechLevel != null || configurationDisabled() || techTraits.Count <= 1;
-				techLevel.GetText = () => Map.Status != MapStatus.Available || Map.Map.Options.TechLevel != null ? "Not Available" : "{0}".F(orderManager.LobbyInfo.GlobalSettings.TechLevel);
+				techLevel.IsDisabled = () => Map.Status != MapStatus.Available ||
+					Map.Map.Options.TechLevel != null || configurationDisabled() || techTraits.Count <= 1;
+				techLevel.GetText = () => Map.Status != MapStatus.Available ||
+					Map.Map.Options.TechLevel != null ? "Not Available" : "{0}".F(orderManager.LobbyInfo.GlobalSettings.TechLevel);
 				techLevel.OnMouseDown = _ =>
 				{
 					var options = techTraits.Select(c => new DropDownOption
@@ -824,6 +829,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 	public class LobbyCountry
 	{
+		public bool Selectable;
 		public string Name;
 		public string Description;
 		public string Side;

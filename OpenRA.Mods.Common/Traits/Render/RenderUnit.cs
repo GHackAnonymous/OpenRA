@@ -15,29 +15,34 @@ namespace OpenRA.Mods.Common.Traits
 {
 	public class RenderUnitInfo : RenderSimpleInfo, Requires<IFacingInfo>
 	{
-		public override object Create(ActorInitializer init) { return new RenderUnit(init.Self); }
+		public override object Create(ActorInitializer init) { return new RenderUnit(init, this); }
 	}
 
-	public class RenderUnit : RenderSimple
+	public class RenderUnit : RenderSimple, ISpriteBody
 	{
-		public RenderUnit(Actor self)
-			: base(self) { }
+		readonly RenderUnitInfo info;
 
-		public void PlayCustomAnimation(Actor self, string newAnim, Action after)
+		public RenderUnit(ActorInitializer init, RenderUnitInfo info)
+			: base(init, info)
 		{
-			DefaultAnimation.PlayThen(newAnim, () => { DefaultAnimation.Play("idle"); if (after != null) after(); });
+			this.info = info;
 		}
 
-		public void PlayCustomAnimRepeating(Actor self, string name)
+		public void PlayCustomAnimation(Actor self, string newAnimation, Action after)
+		{
+			DefaultAnimation.PlayThen(newAnimation, () => { DefaultAnimation.Play(info.Sequence); if (after != null) after(); });
+		}
+
+		public void PlayCustomAnimationRepeating(Actor self, string name)
 		{
 			DefaultAnimation.PlayThen(name,
-				() => PlayCustomAnimRepeating(self, name));
+				() => PlayCustomAnimationRepeating(self, name));
 		}
 
-		public void PlayCustomAnimBackwards(Actor self, string name, Action after)
+		public void PlayCustomAnimationBackwards(Actor self, string name, Action after)
 		{
 			DefaultAnimation.PlayBackwardsThen(name,
-				() => { DefaultAnimation.PlayRepeating("idle"); if (after != null) after(); });
+				() => { DefaultAnimation.PlayRepeating(info.Sequence); if (after != null) after(); });
 		}
 	}
 }

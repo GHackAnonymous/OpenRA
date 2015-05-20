@@ -29,6 +29,8 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Sprite sequence name")]
 		public readonly string SmokeType = "smoke_m";
 
+		public readonly string SmokePalette = "effect";
+
 		public readonly string Palette = "terrain";
 
 		public object Create(ActorInitializer init) { return new SmudgeLayer(this); }
@@ -70,23 +72,34 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			// Add map smudges
-			foreach (var s in w.Map.Smudges.Value.Where(s => smudges.ContainsKey(s.Type)))
+			foreach (var s in w.Map.SmudgeDefinitions)
 			{
+				var name = s.Key;
+				var vals = name.Split(' ');
+				var type = vals[0];
+
+				if (!smudges.ContainsKey(type))
+					continue;
+
+				var loc = vals[1].Split(',');
+				var cell = new CPos(Exts.ParseIntegerInvariant(loc[0]), Exts.ParseIntegerInvariant(loc[1]));
+				var depth = Exts.ParseIntegerInvariant(vals[2]);
+
 				var smudge = new Smudge
 				{
-					Type = s.Type,
-					Depth = s.Depth,
-					Sprite = smudges[s.Type][s.Depth]
+					Type = type,
+					Depth = depth,
+					Sprite = smudges[type][depth]
 				};
 
-				tiles.Add((CPos)s.Location, smudge);
+				tiles.Add(cell, smudge);
 			}
 		}
 
 		public void AddSmudge(CPos loc)
 		{
 			if (Game.CosmeticRandom.Next(0, 100) <= Info.SmokePercentage)
-				world.AddFrameEndTask(w => w.Add(new Smoke(w, world.Map.CenterOfCell(loc), Info.SmokeType)));
+				world.AddFrameEndTask(w => w.Add(new Smoke(w, world.Map.CenterOfCell(loc), Info.SmokeType, Info.SmokePalette)));
 
 			if (!dirty.ContainsKey(loc) && !tiles.ContainsKey(loc))
 			{

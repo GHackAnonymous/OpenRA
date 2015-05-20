@@ -22,8 +22,10 @@ DOG:
 	Armament:
 		Weapon: DogJaw
 	AttackLeap:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
+	TargetableUnit:
+		TargetTypes: Ground, Infantry
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
 	IgnoresDisguise:
 	DetectCloaked:
 		Range: 5
@@ -54,9 +56,12 @@ E1:
 		MuzzleSequence: garrison-muzzle
 	AttackFrontal:
 	TakeCover:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 
 E2:
 	Inherits: ^Infantry
@@ -86,9 +91,12 @@ E2:
 		FireDelay: 15
 	AttackFrontal:
 	TakeCover:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 	Explodes:
 		Weapon: UnitExplodeSmall
 		Chance: 50
@@ -122,9 +130,12 @@ E3:
 		Weapon: Dragon
 	AttackFrontal:
 	TakeCover:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 
 E4:
 	Inherits: ^Infantry
@@ -137,7 +148,7 @@ E4:
 		Cost: 300
 	Tooltip:
 		Name: Flamethrower
-		Description: Advanced Anti-infantry unit.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles
+		Description: Advanced anti-structure unit.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles
 	Selectable:
 		Bounds: 12,17,0,-9
 	Health:
@@ -153,9 +164,12 @@ E4:
 		Weapon: Flamer
 	AttackFrontal:
 	TakeCover:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 
 E6:
 	Inherits: ^Infantry
@@ -183,10 +197,13 @@ E6:
 	ExternalCaptures:
 		Type: building
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
 	-AutoTarget:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 
 SPY:
 	Inherits: ^Infantry
@@ -214,28 +231,32 @@ SPY:
 	Passenger:
 		PipType: Yellow
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
 	Disguise:
 	Infiltrates:
 		Types: SpyInfiltrate
 	-AutoTarget:
-	-RenderInfantry:
-	RenderDisguise:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+	-WithInfantryBody:
+	WithDisguisingInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 	Armament:
 		Weapon: SilencedPPK
 	AttackFrontal:
 
 SPY.England:
 	Inherits: SPY
-	RenderDisguise:
-		Image: spy
+	WithDisguisingInfantryBody:
 	Buildable:
 		Prerequisites: ~infantry.england, dome, ~tent, ~techlevel.medium
 	Valued:
 		Cost: 250
 	DisguiseToolTip:
 		Name: British Spy
+	RenderSprites:
+		Image: spy
 
 E7:
 	Inherits: ^Infantry
@@ -249,7 +270,7 @@ E7:
 		Cost: 1200
 	Tooltip:
 		Name: Tanya
-		Description: Elite commando infantry, armed with \ndual pistols and C4.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles\n  Special Ability: Destroy Building with C4\n\nMaximum 1 can be trained
+		Description: Elite commando infantry. Armed with\ndual pistols and C4.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles\n  Special Ability: Destroy Building with C4\n\nMaximum 1 can be trained
 	Selectable:
 		Voice: TanyaVoice
 		Bounds: 12,17,0,-9
@@ -274,8 +295,11 @@ E7:
 		MuzzleSequence: garrison-muzzle
 	AttackFrontal:
 	TakeCover:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
 	AnnounceOnBuild:
 	AnnounceOnKill:
 
@@ -309,10 +333,13 @@ MEDI:
 		Cursor: heal
 		OutsideRangeCursor: heal
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
 	-AutoTarget:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		AttackAnimation: heal
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		AttackSequence: heal
 
 MECH:
 	Inherits: ^Infantry
@@ -346,10 +373,13 @@ MECH:
 	Captures:
 		CaptureTypes: husk
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
 	-AutoTarget:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		AttackAnimation: heal
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		AttackSequence: heal
 
 EINSTEIN:
 	Inherits: ^Infantry
@@ -369,7 +399,7 @@ EINSTEIN:
 	-AutoTarget:
 	ProximityCaptor:
 		Types: CivilianInfantry
-	RenderInfantry:
+	WithInfantryBody:
 	ScaredyCat:
 
 DELPHI:
@@ -390,7 +420,7 @@ DELPHI:
 	-AutoTarget:
 	ProximityCaptor:
 		Types: CivilianInfantry
-	RenderInfantry:
+	WithInfantryBody:
 	ScaredyCat:
 
 CHAN:
@@ -426,6 +456,9 @@ THF:
 	Infiltrates:
 		InfiltrateTypes: Cash
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
 	-AutoTarget:
 
 HIJACKER:
@@ -461,12 +494,12 @@ SHOK:
 		Queue: Infantry
 		BuildAtProductionType: Soldier
 		BuildPaletteOrder: 130
-		Prerequisites: ~barr, stek, tsla, ~techlevel.unrestricted
+		Prerequisites: ~barr, stek, tsla, ~infantry.russia, ~techlevel.unrestricted
 	Valued:
 		Cost: 400
 	Tooltip:
 		Name: Shock Trooper
-		Description: Infantry with tesla coils\n Strong vs Infantry\n Weak vs Vehicles
+		Description: Elite infantry with portable tesla coils.\n Strong vs Infantry\n Weak vs Aircraft
 	Selectable:
 		Voice: ShokVoice
 		Bounds: 12,17,0,-9
@@ -475,7 +508,7 @@ SHOK:
 	Mobile:
 		Speed: 56
 	RevealsShroud:
-		Range: 4c0
+		Range: 5c0
 	Armament@PRIMARY:
 		Weapon: PortaTesla
 		LocalOffset: 427,0,341
@@ -484,9 +517,12 @@ SHOK:
 		Weapon: PortaTesla
 	AttackFrontal:
 	TakeCover:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 
 SNIPER:
 	Inherits: ^Infantry
@@ -499,7 +535,7 @@ SNIPER:
 		Queue: Infantry
 		BuildAtProductionType: Soldier
 		BuildPaletteOrder: 80
-		Prerequisites: ~barr, dome, ~techlevel.medium
+		Prerequisites: ~disabled
 	Selectable:
 		Bounds: 12,17,0,-6
 	Mobile:
@@ -520,9 +556,12 @@ SNIPER:
 		MuzzleSequence: garrison-muzzle
 	AttackFrontal:
 	TakeCover:
-	RenderInfantry:
-		IdleAnimations: idle1,idle2
-		StandAnimations: stand,stand2
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle1,idle2
+		StandSequences: stand,stand2
 	Cloak:
 		InitialDelay: 250
 		CloakDelay: 120
@@ -583,6 +622,8 @@ Ant:
 	AttackFrontal:
 	Armament:
 		Weapon: mandible
+	TargetableUnit:
+		TargetTypes: Ground, Infantry
 	WithDeathAnimation:
 		UseDeathTypeSuffix: false
 

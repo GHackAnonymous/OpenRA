@@ -18,25 +18,25 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.RA.Traits
 {
-	class MinelayerInfo : ITraitInfo
+	public class MinelayerInfo : ITraitInfo
 	{
 		[ActorReference] public readonly string Mine = "minv";
 		[ActorReference] public readonly string[] RearmBuildings = { "fix" };
 
-		public readonly string RearmSound = "minelay1.aud";
+		public readonly string AmmoPoolName = "primary";
 
 		public readonly float MinefieldDepth = 1.5f;
 
 		public object Create(ActorInitializer init) { return new Minelayer(init.Self); }
 	}
 
-	class Minelayer : IIssueOrder, IResolveOrder, IPostRenderSelection, ISync
+	public class Minelayer : IIssueOrder, IResolveOrder, IPostRenderSelection, ISync
 	{
 		/* TODO: [Sync] when sync can cope with arrays! */
 		public CPos[] Minefield = null;
+		readonly Actor self;
+		readonly Sprite tile;
 		[Sync] CPos minefieldStart;
-		Actor self;
-		Sprite tile;
 
 		public Minelayer(Actor self)
 		{
@@ -80,7 +80,7 @@ namespace OpenRA.Mods.RA.Traits
 				minefieldStart = order.TargetLocation;
 				Minefield = new CPos[] { order.TargetLocation };
 				self.CancelActivity();
-				self.QueueActivity(new LayMines());
+				self.QueueActivity(new LayMines(self));
 			}
 
 			if (order.OrderString == "PlaceMinefield")
@@ -92,7 +92,7 @@ namespace OpenRA.Mods.RA.Traits
 					.Where(p => movement.CanEnterCell(p, null, false)).ToArray();
 
 				self.CancelActivity();
-				self.QueueActivity(new LayMines());
+				self.QueueActivity(new LayMines(self));
 			}
 		}
 
@@ -146,7 +146,7 @@ namespace OpenRA.Mods.RA.Traits
 
 			public IEnumerable<Order> Order(World world, CPos xy, MouseInput mi)
 			{
-				if (mi.Button == MouseButton.Left)
+				if (mi.Button == Game.Settings.Game.MouseButtonPreference.Cancel)
 				{
 					world.CancelInputMode();
 					yield break;
@@ -157,7 +157,7 @@ namespace OpenRA.Mods.RA.Traits
 					.MaxByOrDefault(a => a.Info.Traits.Contains<SelectableInfo>()
 						? a.Info.Traits.Get<SelectableInfo>().Priority : int.MinValue);
 
-				if (mi.Button == MouseButton.Right && underCursor == null)
+				if (mi.Button == Game.Settings.Game.MouseButtonPreference.Action && underCursor == null)
 				{
 					minelayer.World.CancelInputMode();
 					yield return new Order("PlaceMinefield", minelayer, false) { TargetLocation = xy };
@@ -197,6 +197,7 @@ namespace OpenRA.Mods.RA.Traits
 		{
 			public string OrderID { get { return "BeginMinefield"; } }
 			public int OrderPriority { get { return 5; } }
+			public bool OverrideSelection { get { return true; } }
 
 			public bool CanTarget(Actor self, Target target, List<Actor> othersAtTarget, TargetModifiers modifiers, ref string cursor)
 			{

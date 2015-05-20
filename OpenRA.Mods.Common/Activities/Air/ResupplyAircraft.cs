@@ -20,9 +20,15 @@ namespace OpenRA.Mods.Common.Activities
 {
 	public class ResupplyAircraft : Activity
 	{
+		readonly Aircraft aircraft;
+
+		public ResupplyAircraft(Actor self)
+		{
+			aircraft = self.Trait<Aircraft>();
+		}
+
 		public override Activity Tick(Actor self)
 		{
-			var aircraft = self.Trait<Aircraft>();
 			var host = aircraft.GetActorBelow();
 
 			if (host == null)

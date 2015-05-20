@@ -22,14 +22,14 @@ using OpenRA.Traits;
 
 namespace OpenRA
 {
-	public enum WorldType { Regular, Shellmap }
+	public enum WorldType { Regular, Shellmap, Editor }
 
 	public class World
 	{
 		class ActorIDComparer : IComparer<Actor>
 		{
 			public static readonly ActorIDComparer Instance = new ActorIDComparer();
-			private ActorIDComparer() { }
+			ActorIDComparer() { }
 			public int Compare(Actor x, Actor y) { return x.ActorID.CompareTo(y.ActorID); }
 		}
 
@@ -114,8 +114,11 @@ namespace OpenRA
 		}
 
 		public readonly Actor WorldActor;
+
 		public readonly Map Map;
+
 		public readonly TileSet TileSet;
+
 		public readonly ActorMap ActorMap;
 		public readonly ScreenMap ScreenMap;
 		public readonly WorldType Type;
@@ -167,7 +170,8 @@ namespace OpenRA
 			TileSet = map.Rules.TileSets[Map.Tileset];
 			SharedRandom = new MersenneTwister(orderManager.LobbyInfo.GlobalSettings.RandomSeed);
 
-			WorldActor = CreateActor("World", new TypeDictionary());
+			var worldActorType = type == WorldType.Editor ? "EditorWorld" : "World";
+			WorldActor = CreateActor(worldActorType, new TypeDictionary());
 			ActorMap = WorldActor.Trait<ActorMap>();
 			ScreenMap = WorldActor.Trait<ScreenMap>();
 
@@ -185,6 +189,9 @@ namespace OpenRA
 
 			gameInfo = new GameInformation
 			{
+				Mod = Game.ModData.Manifest.Mod.Id,
+				Version = Game.ModData.Manifest.Mod.Version,
+
 				MapUid = Map.Uid,
 				MapTitle = Map.Title
 			};
@@ -192,8 +199,16 @@ namespace OpenRA
 
 		public void LoadComplete(WorldRenderer wr)
 		{
+			// ScreenMap must be initialized before anything else
+			using (new Support.PerfTimer("ScreenMap.WorldLoaded"))
+				ScreenMap.WorldLoaded(this, wr);
+
 			foreach (var wlh in WorldActor.TraitsImplementing<IWorldLoaded>())
 			{
+				// These have already been initialized
+				if (wlh == ScreenMap)
+					continue;
+
 				using (new Support.PerfTimer(wlh.GetType().Name + ".WorldLoaded"))
 					wlh.WorldLoaded(this, wr);
 			}

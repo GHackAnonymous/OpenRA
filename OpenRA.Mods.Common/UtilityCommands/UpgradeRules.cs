@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -30,6 +31,18 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		{
 			input = string.Join(", ", input.Split(',')
 				.Select(s => ((int)Math.Round(FieldLoader.GetValue<float>("(float value)", s) * 100)).ToString()));
+		}
+
+		internal static void ConvertFloatToIntPercentage(ref string input)
+		{
+			var value = float.Parse(input, CultureInfo.InvariantCulture);
+
+			if (value < 1)
+				value = (int)Math.Round(value * 100, 0);
+			else
+				value = (int)Math.Round(value, 0);
+
+			input = value.ToString();
 		}
 
 		internal static void ConvertPxToRange(ref string input)
@@ -707,6 +720,229 @@ namespace OpenRA.Mods.Common.UtilityCommands
 						node.Key = "Refinery";
 				}
 
+				// Append an 's' as the fields were changed from string to string[]
+				if (engineVersion < 20150311)
+				{
+					if (depth == 2 && parentKey == "SoundOnDamageTransition")
+					{
+						if (node.Key == "DamagedSound")
+							node.Key = "DamagedSounds";
+						else if (node.Key == "DestroyedSound")
+							node.Key = "DestroyedSounds";
+					}
+				}
+
+				if (engineVersion < 20150321)
+				{
+					// Note: These rules are set up to do approximately the right thing for maps, but
+					// mods need additional manual tweaks. This is the best we can do without having
+					// much smarter rules parsing, because we currently can't reason about inherited traits.
+					if (depth == 0)
+					{
+						var childKeys = new[] { "MinIdleWaitTicks", "MaxIdleWaitTicks", "MoveAnimation", "AttackAnimation", "IdleAnimations", "StandAnimations" };
+
+						var ri = node.Value.Nodes.FirstOrDefault(n => n.Key.StartsWith("RenderInfantry"));
+						if (ri != null)
+						{
+							ri.Key = "WithInfantryBody";
+
+							var rsNodes = ri.Value.Nodes.Where(n => !childKeys.Contains(n.Key)).ToList();
+							if (rsNodes.Any())
+								node.Value.Nodes.Add(new MiniYamlNode("RenderSprites", new MiniYaml("", rsNodes)));
+
+							ri.Value.Nodes.RemoveAll(n => rsNodes.Contains(n));
+						}
+
+						var rri = node.Value.Nodes.FirstOrDefault(n => n.Key.StartsWith("-RenderInfantry"));
+						if (rri != null)
+							rri.Key = "-WithInfantryBody";
+
+						var rdi = node.Value.Nodes.FirstOrDefault(n => n.Key.StartsWith("RenderDisguise"));
+						if (rdi != null)
+						{
+							rdi.Key = "WithDisguisingInfantryBody";
+
+							var rsNodes = rdi.Value.Nodes.Where(n => !childKeys.Contains(n.Key)).ToList();
+							if (rsNodes.Any())
+								node.Value.Nodes.Add(new MiniYamlNode("RenderSprites", new MiniYaml("", rsNodes)));
+
+							rdi.Value.Nodes.RemoveAll(n => rsNodes.Contains(n));
+						}
+
+						var rrdi = node.Value.Nodes.FirstOrDefault(n => n.Key.StartsWith("-RenderDisguise"));
+						if (rrdi != null)
+							rrdi.Key = "-WithDisguisingInfantryBody";
+					}
+
+					if (depth == 2 && node.Key == "MoveAnimation")
+						node.Key = "MoveSequence";
+
+					if (depth == 2 && node.Key == "AttackAnimation")
+						node.Key = "AttackSequence";
+
+					if (depth == 2 && node.Key == "IdleAnimations")
+						node.Key = "IdleSequences";
+
+					if (depth == 2 && node.Key == "StandAnimations")
+						node.Key = "StandSequences";
+				}
+
+				if (engineVersion < 20150323)
+				{
+					// Moved Reloads functionality to LimitedAmmo and refactored the latter into AmmoPool
+					if (depth == 0)
+					{
+						var actorTraits = node.Value.Nodes;
+						var limitedAmmo = actorTraits.FirstOrDefault(l => l.Key == "LimitedAmmo");
+						var reloads = actorTraits.FirstOrDefault(r => r.Key == "Reloads");
+
+						if (reloads != null)
+						{
+							var reloadsFields = reloads.Value.Nodes;
+							var limitedAmmoFields = limitedAmmo.Value.Nodes;
+							var count = reloadsFields.FirstOrDefault(c => c.Key == "Count");
+							var period = reloadsFields.FirstOrDefault(p => p.Key == "Period");
+							var resets = reloadsFields.FirstOrDefault(res => res.Key == "ResetOnFire");
+
+							var reloadsCount = count != null ? FieldLoader.GetValue<int>("Count", count.Value.Value) : -1;
+							var reloadsPeriod = period != null ? FieldLoader.GetValue<int>("Period", period.Value.Value) : 50;
+							var reloadsResetOnFire = resets != null ? FieldLoader.GetValue<bool>("ResetOnFire", resets.Value.Value) : false;
+
+							limitedAmmoFields.Add(new MiniYamlNode("SelfReloads", "true"));
+							limitedAmmoFields.Add(new MiniYamlNode("ReloadCount", reloadsCount.ToString()));
+							limitedAmmoFields.Add(new MiniYamlNode("SelfReloadTicks", reloadsPeriod.ToString()));
+							limitedAmmoFields.Add(new MiniYamlNode("ResetOnFire", reloadsResetOnFire.ToString()));
+
+							node.Value.Nodes.RemoveAll(n => n.Key == "Reloads");
+							node.Value.Nodes.RemoveAll(n => n.Key == "-Reloads");
+						}
+					}
+
+					// Moved RearmSound from Minelayer to LimitedAmmo/AmmoPool
+					if (depth == 0)
+					{
+						var actorTraits = node.Value.Nodes;
+						var limitedAmmo = actorTraits.FirstOrDefault(la => la.Key == "LimitedAmmo");
+						var minelayer = actorTraits.FirstOrDefault(ml => ml.Key == "Minelayer");
+
+						if (minelayer != null)
+						{
+							var minelayerFields = minelayer.Value.Nodes;
+							var limitedAmmoFields = limitedAmmo.Value.Nodes;
+							var rearmSound = minelayerFields.FirstOrDefault(rs => rs.Key == "RearmSound");
+							var minelayerRearmSound = rearmSound != null ? FieldLoader.GetValue<string>("RearmSound", rearmSound.Value.Value) : "minelay1.aud";
+
+							limitedAmmoFields.Add(new MiniYamlNode("RearmSound", minelayerRearmSound.ToString()));
+							minelayerFields.Remove(rearmSound);
+						}
+					}
+
+					// Rename LimitedAmmo to AmmoPool
+					if (node.Key == "LimitedAmmo")
+						node.Key = "AmmoPool";
+				}
+
+				if (engineVersion < 20150326)
+				{
+					// Rename BlocksBullets to BlocksProjectiles
+					if (node.Key == "BlocksBullets")
+						node.Key = "BlocksProjectiles";
+				}
+
+				if (engineVersion < 20150425)
+				{
+					if (depth == 0)
+					{
+						var warFact = node.Value.Nodes.FirstOrDefault(n => n.Key.StartsWith("RenderBuildingWarFactory"));
+						if (warFact != null)
+						{
+							warFact.Key = "RenderBuilding";
+
+							if (node.Value.Nodes.Any(w => w.Key == "-RenderBuilding"))
+								node.Value.Nodes.RemoveAll(p => p.Key == "-RenderBuilding");
+
+							var doorOverlay = new MiniYamlNode("WithProductionDoorOverlay", "");
+							doorOverlay.Value.Nodes.Add(new MiniYamlNode("Sequence", "build-top"));
+							node.Value.Nodes.Add(doorOverlay);
+						}
+					}
+				}
+
+				if (engineVersion < 20150426)
+				{
+					// Add DamageModifiers to TakeCover with a "Prone50Percent" default
+					// Add ProneTriggers to TakeCover with a "TriggerProne" default
+					if (node.Key == "TakeCover")
+					{
+						var percent = new MiniYamlNode("Prone50Percent", "50");
+						var dictionary = new MiniYamlNode("DamageModifiers", "");
+						dictionary.Value.Nodes.Add(percent);
+
+						if (node.Value.Nodes.All(x => x.Key != "DamageModifiers"))
+							node.Value.Nodes.Add(dictionary);
+
+						node.Value.Nodes.Add(new MiniYamlNode("DamageTriggers", "TriggerProne"));
+					}
+				}
+
+				if (engineVersion < 20150427)
+					if (node.Key.StartsWith("WithRotor"))
+						node.Value.Nodes.RemoveAll(p => p.Key == "Id");
+
+				if (engineVersion < 20150430)
+				{
+					if (node.Key.StartsWith("ProductionQueue@") || node.Key.StartsWith("ClassicProductionQueue@"))
+						node.Value.Nodes.RemoveAll(n => n.Key == "RequireOwner");
+
+					if (node.Key == "Buildable")
+					{
+						var removed = node.Value.Nodes.RemoveAll(n => n.Key == "Owner");
+						if (removed > 0)
+						{
+							Console.WriteLine("The 'Owner' field has been removed.");
+							Console.WriteLine("Please use prerequisites instead.");
+						}
+					}
+				}
+
+				if (engineVersion < 20150501)
+				{
+					// Change RenderFlare to RenderSprites + WithSpriteBody
+					var flares = node.Value.Nodes.Where(x => x.Key == "RenderFlare");
+					if (flares.Any())
+					{
+						flares.Do(x => x.Key = "RenderSprites");
+						node.Value.Nodes.Add(new MiniYamlNode("WithSpriteBody", "", new List<MiniYamlNode>
+						{
+							new MiniYamlNode("StartSequence", "open")
+						}));
+					}
+
+					// Change WithFire to RenderSprites + WithSpriteBody
+					var fire = node.Value.Nodes.Where(x => x.Key == "WithFire");
+					if (fire.Any())
+					{
+						fire.Do(x => x.Key = "RenderSprites");
+						node.Value.Nodes.Add(new MiniYamlNode("WithSpriteBody", "", new List<MiniYamlNode>
+						{
+							new MiniYamlNode("StartSequence", "fire-start"),
+							new MiniYamlNode("Sequence", "fire-loop")
+						}));
+					}
+				}
+
+				if (engineVersion < 20150504)
+				{
+					// Made buildings grant prerequisites explicitly.
+					if (depth == 0 && node.Value.Nodes.Exists(n => n.Key == "Inherits" &&
+						(n.Value.Value == "^Building" || n.Value.Value == "^BaseBuilding")))
+						node.Value.Nodes.Add(new MiniYamlNode("ProvidesCustomPrerequisite@buildingname", ""));
+
+					// Rename the ProvidesCustomPrerequisite trait.
+					if (node.Key.StartsWith("ProvidesCustomPrerequisite"))
+						node.Key = node.Key.Replace("ProvidesCustomPrerequisite", "ProvidesPrerequisite");
+				}
+
 				UpgradeActorRules(engineVersion, ref node.Value.Nodes, node, depth + 1);
 			}
 		}
@@ -781,8 +1017,11 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					// Split out the warheads to individual warhead types.
 					if (depth == 0)
 					{
-						var validTargets = node.Value.Nodes.FirstOrDefault(n => n.Key == "ValidTargets"); // Weapon's ValidTargets need to be copied to the warheads, so find it
-						var invalidTargets = node.Value.Nodes.FirstOrDefault(n => n.Key == "InvalidTargets"); // Weapon's InvalidTargets need to be copied to the warheads, so find it
+						// Weapon's ValidTargets need to be copied to the warheads, so find it
+						var validTargets = node.Value.Nodes.FirstOrDefault(n => n.Key == "ValidTargets");
+
+						// Weapon's InvalidTargets need to be copied to the warheads, so find it
+						var invalidTargets = node.Value.Nodes.FirstOrDefault(n => n.Key == "InvalidTargets");
 
 						var warheadCounter = 0;
 						foreach (var curNode in node.Value.Nodes.ToArray())
@@ -958,7 +1197,8 @@ namespace OpenRA.Mods.Common.UtilityCommands
 
 									var newYaml = new List<MiniYamlNode>();
 
-									var keywords = new List<string> { "Explosion", "ImpactSound", "Delay", "ValidTargets", "InvalidTargets", "ValidImpactTypes", "InvalidImpactTypes" };
+									var keywords = new List<string> { "Explosion", "ImpactSound", "Delay",
+										"ValidTargets", "InvalidTargets", "ValidImpactTypes", "InvalidImpactTypes" };
 
 									foreach (var keyword in keywords)
 									{
@@ -979,7 +1219,8 @@ namespace OpenRA.Mods.Common.UtilityCommands
 
 									var newYaml = new List<MiniYamlNode>();
 
-									var keywords = new List<string> { "WaterExplosion", "WaterImpactSound", "Delay", "ValidTargets", "InvalidTargets", "ValidImpactTypes", "InvalidImpactTypes" };
+									var keywords = new List<string> { "WaterExplosion", "WaterImpactSound", "Delay",
+										"ValidTargets", "InvalidTargets", "ValidImpactTypes", "InvalidImpactTypes" };
 
 									foreach (var keyword in keywords)
 									{
@@ -1042,6 +1283,85 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					}
 				}
 
+				if (engineVersion < 20150326)
+				{
+					// Remove TurboBoost from missiles
+					if (depth == 1 && node.Key == "Projectile" && node.Value.Nodes.Exists(n => n.Key == "TurboBoost"))
+					{
+						node.Value.Nodes.RemoveAll(n => n.Key == "TurboBoost");
+						Console.WriteLine("'TurboBoost' has been removed.");
+						Console.WriteLine("If you want to reproduce its behavior, create a duplicate");
+						Console.WriteLine("of the weapon in question, change it to be anti-air only,");
+						Console.WriteLine("increase its speed, make the original weapon anti-ground only,");
+						Console.WriteLine("and add the new weapon as additional armament to the actor.");
+					}
+
+					// Rename ROT to RateOfTurn
+					if (depth == 2 && node.Key == "ROT")
+						node.Key = "RateOfTurn";
+
+					// Rename High to Blockable
+					if (depth == 2 && parentKey == "Projectile" && node.Key == "High")
+					{
+						var highField = node.Value.Value != null ? FieldLoader.GetValue<bool>("High", node.Value.Value) : false;
+						var blockable = !highField;
+
+						node.Value.Value = blockable.ToString().ToLowerInvariant();
+						node.Key = "Blockable";
+					}
+
+					// Move Palette from weapon to projectiles
+					if (depth == 0)
+					{
+						var weapons = node.Value.Nodes;
+						var palette = weapons.FirstOrDefault(p => p.Key == "Palette");
+						var projectile = weapons.FirstOrDefault(r => r.Key == "Projectile");
+
+						if (palette != null)
+						{
+							var projectileFields = projectile.Value.Nodes;
+							var paletteName = palette.Value.Value != null ? FieldLoader.GetValue<string>("Palette", palette.Value.Value) : "effect";
+
+							projectileFields.Add(new MiniYamlNode("Palette", paletteName.ToString()));
+							weapons.Remove(palette);
+						}
+					}
+				}
+
+				if (engineVersion < 20150421)
+				{
+					if (node.Key.StartsWith("Warhead") && node.Value.Value == "SpreadDamage")
+					{
+						// Add DamageTypes property to DamageWarheads with a default value "Prone50Percent"
+						if (node.Value.Nodes.All(x => x.Key != "DamageTypes"))
+						{
+							var damage = node.Value.Nodes.FirstOrDefault(x => x.Key == "Damage");
+							var damageValue = damage != null ? FieldLoader.GetValue<int>("Damage", damage.Value.Value) : -1;
+
+							var prone = node.Value.Nodes.FirstOrDefault(x => x.Key == "PreventProne");
+							var preventsProne = prone != null && FieldLoader.GetValue<bool>("PreventProne", prone.Value.Value);
+
+							var proneModifier = node.Value.Nodes.FirstOrDefault(x => x.Key == "ProneModifier");
+							var modifierValue = proneModifier == null ? "50" : proneModifier.Value.Value;
+
+							var value = new List<string>();
+
+							if (damageValue > 0)
+								value.Add("Prone{0}Percent".F(modifierValue));
+
+							if (!preventsProne)
+								value.Add("TriggerProne");
+
+							if (value.Any())
+								node.Value.Nodes.Add(new MiniYamlNode("DamageTypes", value.JoinWith(", ")));
+						}
+
+						// Remove obsolete PreventProne and ProneModifier
+						node.Value.Nodes.RemoveAll(x => x.Key == "PreventProne");
+						node.Value.Nodes.RemoveAll(x => x.Key == "ProneModifier");
+					}
+				}
+
 				UpgradeWeaponRules(engineVersion, ref node.Value.Nodes, node, depth + 1);
 			}
 		}
@@ -1058,6 +1378,10 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					if (depth == 2 && parentKey == "TerrainType" && node.Key.Split('@').First() == "Type")
 						addNodes.Add(new MiniYamlNode("TargetTypes", node.Value.Value == "Water" ? "Water" : "Ground"));
 				}
+
+				if (engineVersion < 20150330)
+					if (depth == 2 && node.Key == "Image")
+						node.Key = "Images";
 
 				UpgradeTileset(engineVersion, ref node.Value.Nodes, node, depth + 1);
 			}
@@ -1084,6 +1408,26 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				}
 
 				UpgradeCursors(engineVersion, ref node.Value.Nodes, node, depth + 1);
+			}
+		}
+
+		internal static void UpgradePlayers(int engineVersion, ref List<MiniYamlNode> nodes, MiniYamlNode parent, int depth)
+		{
+			foreach (var node in nodes)
+				UpgradePlayers(engineVersion, ref node.Value.Nodes, node, depth + 1);
+		}
+
+		internal static void UpgradeActors(int engineVersion, ref List<MiniYamlNode> nodes, MiniYamlNode parent, int depth)
+		{
+			foreach (var node in nodes)
+			{
+				if (engineVersion < 20150430)
+				{
+					if (node.Key == "Health")
+						ConvertFloatToIntPercentage(ref node.Value.Value);
+				}
+
+				UpgradeActors(engineVersion, ref node.Value.Nodes, node, depth + 1);
 			}
 		}
 	}

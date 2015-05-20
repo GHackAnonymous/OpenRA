@@ -35,6 +35,12 @@ namespace OpenRA.Mods.RA.Traits
 		[Desc("Display rectangles indicating the current charge status")]
 		public readonly int Pips = 2;
 
+		[Desc("Cursor to display when able to deploy the actor.")]
+		public readonly string DeployCursor = "deploy";
+
+		[Desc("Cursor to display when unable to deploy the actor.")]
+		public readonly string DeployBlockedCursor = "deploy-blocked";
+
 		public object Create(ActorInitializer init) { return new PortableChrono(this); }
 	}
 
@@ -59,7 +65,8 @@ namespace OpenRA.Mods.RA.Traits
 			get
 			{
 				yield return new PortableChronoOrderTargeter();
-				yield return new DeployOrderTargeter("PortableChronoDeploy", 5, () => CanTeleport);
+				yield return new DeployOrderTargeter("PortableChronoDeploy", 5,
+					() => CanTeleport ? Info.DeployCursor : Info.DeployBlockedCursor);
 			}
 		}
 
@@ -119,6 +126,7 @@ namespace OpenRA.Mods.RA.Traits
 		public string OrderID { get { return "PortableChronoTeleport"; } }
 		public int OrderPriority { get { return 5; } }
 		public bool IsQueued { get; protected set; }
+		public bool OverrideSelection { get { return true; } }
 
 		public bool CanTarget(Actor self, Target target, List<Actor> othersAtTarget, TargetModifiers modifiers, ref string cursor)
 		{
@@ -153,7 +161,7 @@ namespace OpenRA.Mods.RA.Traits
 
 		public IEnumerable<Order> Order(World world, CPos xy, MouseInput mi)
 		{
-			if (mi.Button == MouseButton.Left)
+			if (mi.Button == Game.Settings.Game.MouseButtonPreference.Cancel)
 			{
 				world.CancelInputMode();
 				yield break;

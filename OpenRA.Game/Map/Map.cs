@@ -9,9 +9,9 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -113,10 +113,46 @@ namespace OpenRA
 
 	public class Map
 	{
+		static readonly int[][] CellCornerHalfHeights = new int[][]
+		{
+			// Flat
+			new[] { 0, 0, 0, 0 },
+
+			// Slopes (two corners high)
+			new[] { 0, 0, 1, 1 },
+			new[] { 1, 0, 0, 1 },
+			new[] { 1, 1, 0, 0 },
+			new[] { 0, 1, 1, 0 },
+
+			// Slopes (one corner high)
+			new[] { 0, 0, 0, 1 },
+			new[] { 1, 0, 0, 0 },
+			new[] { 0, 1, 0, 0 },
+			new[] { 0, 0, 1, 0 },
+
+			// Slopes (three corners high)
+			new[] { 1, 0, 1, 1 },
+			new[] { 1, 1, 0, 1 },
+			new[] { 1, 1, 1, 0 },
+			new[] { 0, 1, 1, 1 },
+
+			// Slopes (two corners high, one corner double high)
+			new[] { 1, 0, 1, 2 },
+			new[] { 2, 1, 0, 1 },
+			new[] { 1, 2, 1, 0 },
+			new[] { 0, 1, 2, 1 },
+
+			// Slopes (two corners high, alternating)
+			new[] { 1, 0, 1, 0 },
+			new[] { 0, 1, 0, 1 },
+			new[] { 1, 0, 1, 0 },
+			new[] { 0, 1, 0, 1 }
+		};
+
 		public const int MaxTilesInCircleRange = 50;
 		public readonly TileShape TileShape;
-		[FieldLoader.Ignore]
-		public readonly WVec[] SubCellOffsets;
+
+		[FieldLoader.Ignore] public readonly WVec[] SubCellOffsets;
 		public readonly SubCell DefaultSubCell;
 		public readonly SubCell LastSubCell;
 		[FieldLoader.Ignore] public IFolder Container;
@@ -137,10 +173,15 @@ namespace OpenRA
 		public Bitmap CustomPreview;
 		public bool InvalidCustomRules { get; private set; }
 
-		public WVec OffsetOfSubCell(SubCell subCell) { return SubCellOffsets[(int)subCell]; }
+		public WVec OffsetOfSubCell(SubCell subCell)
+		{
+			if (subCell == SubCell.Invalid || subCell == SubCell.Any)
+				return WVec.Zero;
 
-		[FieldLoader.LoadUsing("LoadOptions")]
-		public MapOptions Options;
+			return SubCellOffsets[(int)subCell];
+		}
+
+		[FieldLoader.LoadUsing("LoadOptions")] public MapOptions Options;
 
 		static object LoadOptions(MiniYaml y)
 		{
@@ -152,8 +193,7 @@ namespace OpenRA
 			return options;
 		}
 
-		[FieldLoader.LoadUsing("LoadVideos")]
-		public MapVideos Videos;
+		[FieldLoader.LoadUsing("LoadVideos")] public MapVideos Videos;
 
 		static object LoadVideos(MiniYaml y)
 		{
@@ -165,16 +205,11 @@ namespace OpenRA
 			return videos;
 		}
 
-		[FieldLoader.Ignore] public Lazy<Dictionary<string, ActorReference>> Actors;
-
-		public int PlayerCount { get { return Players.Count(p => p.Value.Playable); } }
-
 		public Rectangle Bounds;
 
-		// Yaml map data
-		[FieldLoader.Ignore] public Dictionary<string, PlayerReference> Players = new Dictionary<string, PlayerReference>();
-		[FieldLoader.Ignore] public Lazy<List<SmudgeReference>> Smudges;
+		public Lazy<CPos[]> SpawnPoints;
 
+		// Yaml map data
 		[FieldLoader.Ignore] public List<MiniYamlNode> RuleDefinitions = new List<MiniYamlNode>();
 		[FieldLoader.Ignore] public List<MiniYamlNode> SequenceDefinitions = new List<MiniYamlNode>();
 		[FieldLoader.Ignore] public List<MiniYamlNode> VoxelSequenceDefinitions = new List<MiniYamlNode>();
@@ -182,6 +217,10 @@ namespace OpenRA
 		[FieldLoader.Ignore] public List<MiniYamlNode> VoiceDefinitions = new List<MiniYamlNode>();
 		[FieldLoader.Ignore] public List<MiniYamlNode> NotificationDefinitions = new List<MiniYamlNode>();
 		[FieldLoader.Ignore] public List<MiniYamlNode> TranslationDefinitions = new List<MiniYamlNode>();
+		[FieldLoader.Ignore] public List<MiniYamlNode> PlayerDefinitions = new List<MiniYamlNode>();
+
+		[FieldLoader.Ignore] public List<MiniYamlNode> ActorDefinitions = new List<MiniYamlNode>();
+		[FieldLoader.Ignore] public List<MiniYamlNode> SmudgeDefinitions = new List<MiniYamlNode>();
 
 		// Binary map data
 		[FieldLoader.Ignore] public byte TileFormat = 2;
@@ -199,6 +238,7 @@ namespace OpenRA
 		public Ruleset Rules { get { return rules != null ? rules.Value : null; } }
 		public SequenceProvider SequenceProvider { get { return Rules.Sequences[Tileset]; } }
 
+		public WVec[][] CellCorners { get; private set; }
 		[FieldLoader.Ignore] public CellRegion Cells;
 
 		public static Map FromTileset(TileSet tileset)
@@ -233,8 +273,8 @@ namespace OpenRA
 				MapResources = Exts.Lazy(() => new CellLayer<ResourceTile>(tileShape, size)),
 				MapTiles = makeMapTiles,
 				MapHeight = makeMapHeight,
-				Actors = Exts.Lazy(() => new Dictionary<string, ActorReference>()),
-				Smudges = Exts.Lazy(() => new List<SmudgeReference>())
+
+				SpawnPoints = Exts.Lazy(() => new CPos[0])
 			};
 
 			map.PostInit();
@@ -284,36 +324,17 @@ namespace OpenRA
 					Visibility = MapVisibility.MissionSelector;
 			}
 
-			// Load players
-			foreach (var my in nd["Players"].ToDictionary().Values)
+			SpawnPoints = Exts.Lazy(() =>
 			{
-				var player = new PlayerReference(my);
-				Players.Add(player.Name, player);
-			}
-
-			Actors = Exts.Lazy(() =>
-			{
-				var ret = new Dictionary<string, ActorReference>();
-				foreach (var kv in nd["Actors"].ToDictionary())
-					ret.Add(kv.Key, new ActorReference(kv.Value.Value, kv.Value.ToDictionary()));
-				return ret;
-			});
-
-			// Smudges
-			Smudges = Exts.Lazy(() =>
-			{
-				var ret = new List<SmudgeReference>();
-				foreach (var name in nd["Smudges"].ToDictionary().Keys)
+				var spawns = new List<CPos>();
+				foreach (var kv in ActorDefinitions.Where(d => d.Value.Value == "mpspawn"))
 				{
-					var vals = name.Split(' ');
-					var loc = vals[1].Split(',');
-					ret.Add(new SmudgeReference(vals[0], new int2(
-							Exts.ParseIntegerInvariant(loc[0]),
-							Exts.ParseIntegerInvariant(loc[1])),
-							Exts.ParseIntegerInvariant(vals[2])));
+					var s = new ActorReference(kv.Value.Value, kv.Value.ToDictionary());
+
+					spawns.Add(s.InitDict.Get<LocationInit>().Value(null));
 				}
 
-				return ret;
+				return spawns.ToArray();
 			});
 
 			RuleDefinitions = MiniYaml.NodesOrEmpty(yaml, "Rules");
@@ -323,10 +344,14 @@ namespace OpenRA
 			VoiceDefinitions = MiniYaml.NodesOrEmpty(yaml, "Voices");
 			NotificationDefinitions = MiniYaml.NodesOrEmpty(yaml, "Notifications");
 			TranslationDefinitions = MiniYaml.NodesOrEmpty(yaml, "Translations");
+			PlayerDefinitions = MiniYaml.NodesOrEmpty(yaml, "Players");
 
-			MapTiles = Exts.Lazy(() => LoadMapTiles());
-			MapResources = Exts.Lazy(() => LoadResourceTiles());
-			MapHeight = Exts.Lazy(() => LoadMapHeight());
+			ActorDefinitions = MiniYaml.NodesOrEmpty(yaml, "Actors");
+			SmudgeDefinitions = MiniYaml.NodesOrEmpty(yaml, "Smudges");
+
+			MapTiles = Exts.Lazy(LoadMapTiles);
+			MapResources = Exts.Lazy(LoadResourceTiles);
+			MapHeight = Exts.Lazy(LoadMapHeight);
 
 			TileShape = Game.ModData.Manifest.TileShape;
 			SubCellOffsets = Game.ModData.Manifest.SubCellOffsets;
@@ -374,19 +399,23 @@ namespace OpenRA
 			CustomTerrain = new CellLayer<byte>(this);
 			foreach (var uv in Cells.MapCoords)
 				CustomTerrain[uv] = byte.MaxValue;
+
+			var leftDelta = TileShape == TileShape.Diamond ? new WVec(-512, 0, 0) : new WVec(-512, -512, 0);
+			var topDelta = TileShape == TileShape.Diamond ? new WVec(0, -512, 0) : new WVec(512, -512, 0);
+			var rightDelta = TileShape == TileShape.Diamond ? new WVec(512, 0, 0) : new WVec(512, 512, 0);
+			var bottomDelta = TileShape == TileShape.Diamond ? new WVec(0, 512, 0) : new WVec(-512, 512, 0);
+			CellCorners = CellCornerHalfHeights.Select(ramp => new WVec[]
+			{
+				leftDelta + new WVec(0, 0, 512 * ramp[0]),
+				topDelta + new WVec(0, 0, 512 * ramp[1]),
+				rightDelta + new WVec(0, 0, 512 * ramp[2]),
+				bottomDelta + new WVec(0, 0, 512 * ramp[3])
+			}).ToArray();
 		}
 
 		public Ruleset PreloadRules()
 		{
 			return rules.Value;
-		}
-
-		public CPos[] GetSpawnPoints()
-		{
-			return Actors.Value.Values
-				.Where(a => a.Type == "mpspawn")
-				.Select(a => (CPos)a.InitDict.Get<LocationInit>().Value(null))
-				.ToArray();
 		}
 
 		public void Save(string toPath)
@@ -420,13 +449,10 @@ namespace OpenRA
 
 			root.Add(new MiniYamlNode("Options", FieldSaver.SaveDifferences(Options, new MapOptions())));
 
-			root.Add(new MiniYamlNode("Players", null,
-				Players.Select(p => new MiniYamlNode("PlayerReference@{0}".F(p.Key), FieldSaver.SaveDifferences(p.Value, new PlayerReference()))).ToList()));
+			root.Add(new MiniYamlNode("Players", null, PlayerDefinitions));
 
-			root.Add(new MiniYamlNode("Actors", null,
-				Actors.Value.Select(x => new MiniYamlNode(x.Key, x.Value.Save())).ToList()));
-
-			root.Add(new MiniYamlNode("Smudges", MiniYaml.FromList<SmudgeReference>(Smudges.Value)));
+			root.Add(new MiniYamlNode("Actors", null, ActorDefinitions));
+			root.Add(new MiniYamlNode("Smudges", null, SmudgeDefinitions));
 			root.Add(new MiniYamlNode("Rules", null, RuleDefinitions));
 			root.Add(new MiniYamlNode("Sequences", null, SequenceDefinitions));
 			root.Add(new MiniYamlNode("VoxelSequences", null, VoxelSequenceDefinitions));
@@ -621,7 +647,7 @@ namespace OpenRA
 			//  - ax + by adds (a - b) * 512 + 512 to u
 			//  - ax + by adds (a + b) * 512 + 512 to v
 			var z = Contains(cell) ? 512 * MapHeight.Value[cell] : 0;
-			return new WPos(512 * (cell.X - cell.Y + 1), 512 * (cell.X + cell.Y + 1), z);
+			return new WPos(512 * (cell.X - cell.Y), 512 * (cell.X + cell.Y + 1), z);
 		}
 
 		public WPos CenterOfSubCell(CPos cell, SubCell subCell)
@@ -640,10 +666,10 @@ namespace OpenRA
 			// Convert from world position to diamond cell position:
 			// (a) Subtract (512, 512) to move the rotation center to the middle of the corner cell
 			// (b) Rotate axes by -pi/4
-			// (c) Add 512 to x (but not y) to realign the cell
+			// (c) Add (512, 512) to move back to the center of the cell
 			// (d) Divide by 1024 to find final cell coords
 			var u = (pos.Y + pos.X - 512) / 1024;
-			var v = (pos.Y - pos.X) / 1024;
+			var v = (pos.Y - pos.X - 512) / 1024;
 			return new CPos(u, v);
 		}
 
@@ -690,45 +716,6 @@ namespace OpenRA
 				using (var csp = SHA1.Create())
 					return new string(csp.ComputeHash(ms).SelectMany(a => a.ToString("x2")).ToArray());
 			}
-		}
-
-		public void MakeDefaultPlayers()
-		{
-			var firstRace = Rules.Actors["world"].Traits
-				.WithInterface<CountryInfo>().First(c => c.Selectable).Race;
-
-			if (!Players.ContainsKey("Neutral"))
-				Players.Add("Neutral", new PlayerReference
-				{
-					Name = "Neutral",
-					Race = firstRace,
-					OwnsWorld = true,
-					NonCombatant = true
-				});
-
-			var numSpawns = GetSpawnPoints().Length;
-			for (var index = 0; index < numSpawns; index++)
-			{
-				if (Players.ContainsKey("Multi{0}".F(index)))
-					continue;
-
-				var p = new PlayerReference
-				{
-					Name = "Multi{0}".F(index),
-					Race = "Random",
-					Playable = true,
-					Enemies = new[] { "Creeps" }
-				};
-				Players.Add(p.Name, p);
-			}
-
-			Players.Add("Creeps", new PlayerReference
-			{
-				Name = "Creeps",
-				Race = firstRace,
-				NonCombatant = true,
-				Enemies = Players.Where(p => p.Value.Playable).Select(p => p.Key).ToArray()
-			});
 		}
 
 		public void FixOpenAreas(Ruleset rules)
@@ -782,6 +769,19 @@ namespace OpenRA
 			var y = rand.Next(Bounds.Top, Bounds.Bottom);
 
 			return new MPos(x, y).ToCPos(this);
+		}
+
+		public CPos ChooseClosestEdgeCell(CPos pos)
+		{
+			var mpos = pos.ToMPos(this);
+
+			var horizontalBound = ((mpos.U - Bounds.Left) < Bounds.Width / 2) ? Bounds.Left : Bounds.Right;
+			var verticalBound = ((mpos.V - Bounds.Top) < Bounds.Height / 2) ? Bounds.Top : Bounds.Bottom;
+
+			var distX = Math.Abs(horizontalBound - mpos.U);
+			var distY = Math.Abs(verticalBound - mpos.V);
+
+			return distX < distY ? new MPos(horizontalBound, mpos.V).ToCPos(this) : new MPos(mpos.U, verticalBound).ToCPos(this);
 		}
 
 		public CPos ChooseRandomEdgeCell(MersenneTwister rand)

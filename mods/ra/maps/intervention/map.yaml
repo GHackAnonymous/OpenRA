@@ -2240,7 +2240,7 @@ Rules:
 		Captures:
 			CaptureTypes: building
 			Sabotage: False
-		RenderInfantry:
+		RenderSprites:
 			Image: e6
 	E6:
 		Buildable:
@@ -2254,15 +2254,15 @@ Rules:
 	WEAP:
 		Buildable:
 			Prerequisites: proc, ~techlevel.low, mainland
-		ProvidesCustomPrerequisite:
+		ProvidesPrerequisite:
 			Prerequisite: givefix
 	MAINLAND:
 		Tooltip:
 			Name: Reach the mainland
-		ProvidesCustomPrerequisite:
+		ProvidesPrerequisite:
 			Prerequisite: mainland
 	HPAD:
-		ProvidesCustomPrerequisite:
+		ProvidesPrerequisite:
 			Prerequisite: givefix
 	FIX:
 		Buildable:
@@ -2273,7 +2273,7 @@ Rules:
 	MIG:
 		Buildable:
 			Prerequisites: ~afld
-		LimitedAmmo:
+		AmmoPool:
 			Ammo: 2
 	HELI:
 		Buildable:
@@ -2403,6 +2403,7 @@ Weapons:
 	Maverick:
 		Warhead@1Dam: SpreadDamage
 			Damage: 175
+			DamageTypes: Prone50Percent, TriggerProne
 
 Voices:
 

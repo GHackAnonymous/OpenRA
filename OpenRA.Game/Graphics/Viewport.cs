@@ -105,7 +105,69 @@ namespace OpenRA.Graphics
 
 		public CPos ViewToWorld(int2 view)
 		{
+			var world = worldRenderer.Viewport.ViewToWorldPx(view);
+			var map = worldRenderer.World.Map;
+			var ts = Game.ModData.Manifest.TileSize;
+			var candidates = CandidateMouseoverCells(world);
+			var tileSet = worldRenderer.World.TileSet;
+
+			foreach (var uv in candidates)
+			{
+				// Coarse filter to nearby cells
+				var p = map.CenterOfCell(uv.ToCPos(map.TileShape));
+				var s = worldRenderer.ScreenPxPosition(p);
+				if (Math.Abs(s.X - world.X) <= ts.Width && Math.Abs(s.Y - world.Y) <= ts.Height)
+				{
+					var ramp = 0;
+					if (map.Contains(uv))
+					{
+						var tile = map.MapTiles.Value[uv];
+						var ti = tileSet.GetTileInfo(tile);
+						if (ti != null)
+							ramp = ti.RampType;
+					}
+
+					var corners = map.CellCorners[ramp];
+					var pos = map.CenterOfCell(uv.ToCPos(map));
+					var screen = corners.Select(c => worldRenderer.ScreenPxPosition(pos + c)).ToArray();
+
+					if (screen.PolygonContains(world))
+						return uv.ToCPos(map);
+				}
+			}
+
+			// Mouse is not directly over a cell (perhaps on a cliff)
+			// Try and find the closest cell
+			if (candidates.Any())
+			{
+				return candidates.OrderBy(uv =>
+				{
+					var p = map.CenterOfCell(uv.ToCPos(map.TileShape));
+					var s = worldRenderer.ScreenPxPosition(p);
+					var dx = Math.Abs(s.X - world.X);
+					var dy = Math.Abs(s.Y - world.Y);
+
+					return dx * dx + dy * dy;
+				}).First().ToCPos(map);
+			}
+
+			// Something is very wrong, but lets return something that isn't completely bogus and hope the caller can recover
 			return worldRenderer.World.Map.CellContaining(worldRenderer.Position(ViewToWorldPx(view)));
+		}
+
+		/// <summary> Returns an unfiltered list of all cells that could potentially contain the mouse cursor</summary>
+		IEnumerable<MPos> CandidateMouseoverCells(int2 world)
+		{
+			var map = worldRenderer.World.Map;
+			var minPos = worldRenderer.Position(world);
+
+			// Find all the cells that could potentially have been clicked
+			var a = map.CellContaining(minPos - new WVec(1024, 0, 0)).ToMPos(map.TileShape);
+			var b = map.CellContaining(minPos + new WVec(512, 512 * maxGroundHeight, 0)).ToMPos(map.TileShape);
+
+			for (var v = b.V; v >= a.V; v--)
+				for (var u = b.U; u >= a.U; u--)
+					yield return new MPos(u, v);
 		}
 
 		public int2 ViewToWorldPx(int2 view) { return (1f / Zoom * view.ToFloat2()).ToInt2() + TopLeft; }
@@ -163,16 +225,20 @@ namespace OpenRA.Graphics
 					var wtl = worldRenderer.Position(TopLeft);
 					var wbr = worldRenderer.Position(BottomRight);
 
-					// Visible rectangle in map coordinates
-					var ctl = new MPos(wtl.X / 1024, wtl.Y / 1024);
+					// Due to diamond tile staggering, we need to adjust the top-left bounds outwards by half a cell.
+					if (map.TileShape == TileShape.Diamond)
+						wtl -= new WVec(512, 512, 0);
+
+					// Visible rectangle in map coordinates.
 					var dy = map.TileShape == TileShape.Diamond ? 512 : 1024;
-					var cbr = new MPos((wbr.X + 1023) / 1024, (wbr.Y + dy - 1) / dy);
+					var ctl = new MPos(wtl.X / 1024, wtl.Y / dy);
+					var cbr = new MPos(wbr.X / 1024, wbr.Y / dy);
 
-					// Add a 1 cell cordon to prevent holes, then convert back to cell coordinates
-					var tl = map.Clamp(new MPos(ctl.U - 1, ctl.V - 1).ToCPos(map));
+					var tl = map.Clamp(ctl.ToCPos(map));
 
-					// Also need to account for height of cells in rows below the bottom
-					var br = map.Clamp(new MPos(cbr.U + 1, cbr.V + 2 + maxGroundHeight / 2).ToCPos(map));
+					// Also need to account for height of cells in rows below the bottom.
+					var heightPadding = map.TileShape == TileShape.Diamond ? 2 : 0;
+					var br = map.Clamp(new MPos(cbr.U, cbr.V + heightPadding + maxGroundHeight / 2).ToCPos(map));
 
 					cells = new CellRegion(map.TileShape, tl, br);
 					cellsDirty = false;

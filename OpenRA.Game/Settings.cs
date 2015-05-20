@@ -127,9 +127,12 @@ namespace OpenRA
 		public bool ViewportEdgeScroll = true;
 		public bool LockMouseWindow = false;
 		public MouseScrollType MouseScroll = MouseScrollType.Standard;
+		public MouseButtonPreference MouseButtonPreference = new MouseButtonPreference();
 		public float ViewportEdgeScrollStep = 10f;
 		public float UIScrollSpeed = 50f;
+		public int SelectionDeadzone = 24;
 
+		public bool UseClassicMouseStyle = false;
 		public bool AlwaysShowStatusBars = false;
 		public bool TeamHealthColors = false;
 
@@ -206,10 +209,28 @@ namespace OpenRA
 		public Hotkey ProductionTypeVehicleKey = new Hotkey(Keycode.Y, Modifiers.None);
 		public Hotkey ProductionTypeAircraftKey = new Hotkey(Keycode.U, Modifiers.None);
 		public Hotkey ProductionTypeNavalKey = new Hotkey(Keycode.I, Modifiers.None);
+		public Hotkey ProductionTypeTankKey = new Hotkey(Keycode.I, Modifiers.None);
+		public Hotkey ProductionTypeMerchantKey = new Hotkey(Keycode.O, Modifiers.None);
+
+		public Hotkey SupportPower01Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower02Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower03Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower04Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower05Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower06Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
 
 		public Hotkey GetProductionHotkey(int index)
 		{
 			var field = GetType().GetField("Production{0:D2}Key".F(index + 1));
+			if (field == null)
+				return Hotkey.Invalid;
+
+			return (Hotkey)field.GetValue(this);
+		}
+
+		public Hotkey GetSupportPowerHotkey(int index)
+		{
+			var field = GetType().GetField("SupportPower{0:D2}Key".F(index + 1));
 			if (field == null)
 				return Hotkey.Invalid;
 

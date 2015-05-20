@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using OpenRA.Activities;
+using OpenRA.Mods.Common.Pathfinder;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Primitives;
 using OpenRA.Traits;
@@ -24,7 +25,7 @@ namespace OpenRA.Mods.Common.Activities
 		static readonly List<CPos> NoPath = new List<CPos>();
 
 		readonly Mobile mobile;
-		readonly IEnumerable<IDisableMove> moveDisablers;
+		readonly IDisableMove[] moveDisablers;
 		readonly WRange nearEnough;
 		readonly Func<List<CPos>> getPath;
 		readonly Actor ignoredActor;
@@ -42,10 +43,10 @@ namespace OpenRA.Mods.Common.Activities
 		public Move(Actor self, CPos destination)
 		{
 			mobile = self.Trait<Mobile>();
-			moveDisablers = self.TraitsImplementing<IDisableMove>();
+			moveDisablers = self.TraitsImplementing<IDisableMove>().ToArray();
 
 			getPath = () =>
-				self.World.WorldActor.Trait<PathFinder>().FindPath(
+				self.World.WorldActor.Trait<IPathFinder>().FindPath(
 					PathSearch.FromPoint(self.World, mobile.Info, self, mobile.ToCell, destination, false)
 					.WithoutLaneBias());
 			this.destination = destination;
@@ -59,9 +60,9 @@ namespace OpenRA.Mods.Common.Activities
 		public Move(Actor self, CPos destination, WRange nearEnough)
 		{
 			mobile = self.Trait<Mobile>();
-			moveDisablers = self.TraitsImplementing<IDisableMove>();
+			moveDisablers = self.TraitsImplementing<IDisableMove>().ToArray();
 
-			getPath = () => self.World.WorldActor.Trait<PathFinder>()
+			getPath = () => self.World.WorldActor.Trait<IPathFinder>()
 				.FindUnitPath(mobile.ToCell, destination, self);
 			this.destination = destination;
 			this.nearEnough = nearEnough;
@@ -70,9 +71,9 @@ namespace OpenRA.Mods.Common.Activities
 		public Move(Actor self, CPos destination, SubCell subCell, WRange nearEnough)
 		{
 			mobile = self.Trait<Mobile>();
-			moveDisablers = self.TraitsImplementing<IDisableMove>();
+			moveDisablers = self.TraitsImplementing<IDisableMove>().ToArray();
 
-			getPath = () => self.World.WorldActor.Trait<PathFinder>()
+			getPath = () => self.World.WorldActor.Trait<IPathFinder>()
 				.FindUnitPathToRange(mobile.FromCell, subCell, self.World.Map.CenterOfSubCell(destination, subCell), nearEnough, self);
 			this.destination = destination;
 			this.nearEnough = nearEnough;
@@ -81,10 +82,10 @@ namespace OpenRA.Mods.Common.Activities
 		public Move(Actor self, CPos destination, Actor ignoredActor)
 		{
 			mobile = self.Trait<Mobile>();
-			moveDisablers = self.TraitsImplementing<IDisableMove>();
+			moveDisablers = self.TraitsImplementing<IDisableMove>().ToArray();
 
 			getPath = () =>
-				self.World.WorldActor.Trait<PathFinder>().FindPath(
+				self.World.WorldActor.Trait<IPathFinder>().FindPath(
 					PathSearch.FromPoint(self.World, mobile.Info, self, mobile.ToCell, destination, false)
 					.WithIgnoredActor(ignoredActor));
 
@@ -96,14 +97,14 @@ namespace OpenRA.Mods.Common.Activities
 		public Move(Actor self, Target target, WRange range)
 		{
 			mobile = self.Trait<Mobile>();
-			moveDisablers = self.TraitsImplementing<IDisableMove>();
+			moveDisablers = self.TraitsImplementing<IDisableMove>().ToArray();
 
 			getPath = () =>
 			{
 				if (!target.IsValidFor(self))
 					return NoPath;
 
-				return self.World.WorldActor.Trait<PathFinder>().FindUnitPathToRange(
+				return self.World.WorldActor.Trait<IPathFinder>().FindUnitPathToRange(
 					mobile.ToCell, mobile.ToSubCell, target.CenterPosition, range, self);
 			};
 
@@ -114,7 +115,7 @@ namespace OpenRA.Mods.Common.Activities
 		public Move(Actor self, Func<List<CPos>> getPath)
 		{
 			mobile = self.Trait<Mobile>();
-			moveDisablers = self.TraitsImplementing<IDisableMove>();
+			moveDisablers = self.TraitsImplementing<IDisableMove>().ToArray();
 
 			this.getPath = getPath;
 
@@ -132,7 +133,7 @@ namespace OpenRA.Mods.Common.Activities
 			return hash;
 		}
 
-		List<CPos> EvalPath(Actor self, Mobile mobile)
+		List<CPos> EvalPath()
 		{
 			var path = getPath().TakeWhile(a => a != mobile.ToCell).ToList();
 			mobile.PathHash = HashList(path);
@@ -155,7 +156,7 @@ namespace OpenRA.Mods.Common.Activities
 					return this;
 				}
 
-				path = EvalPath(self, mobile);
+				path = EvalPath();
 				SanityCheckPath(mobile);
 			}
 
@@ -167,7 +168,7 @@ namespace OpenRA.Mods.Common.Activities
 
 			destination = path[0];
 
-			var nextCell = PopPath(self, mobile);
+			var nextCell = PopPath(self);
 			if (nextCell == null)
 				return this;
 
@@ -180,10 +181,14 @@ namespace OpenRA.Mods.Common.Activities
 			else
 			{
 				mobile.SetLocation(mobile.FromCell, mobile.FromSubCell, nextCell.Value.First, nextCell.Value.Second);
+				var from = self.World.Map.CenterOfSubCell(mobile.FromCell, mobile.FromSubCell);
+				var to = Util.BetweenCells(self.World, mobile.FromCell, mobile.ToCell) +
+					(self.World.Map.OffsetOfSubCell(mobile.FromSubCell) +
+					self.World.Map.OffsetOfSubCell(mobile.ToSubCell)) / 2;
 				var move = new MoveFirstHalf(
 					this,
-					self.World.Map.CenterOfSubCell(mobile.FromCell, mobile.FromSubCell),
-					Util.BetweenCells(self.World, mobile.FromCell, mobile.ToCell) + (self.World.Map.OffsetOfSubCell(mobile.FromSubCell) + self.World.Map.OffsetOfSubCell(mobile.ToSubCell)) / 2,
+					from,
+					to,
 					mobile.Facing,
 					mobile.Facing,
 					0);
@@ -202,7 +207,7 @@ namespace OpenRA.Mods.Common.Activities
 				throw new InvalidOperationException("(Move) Sanity check failed");
 		}
 
-		Pair<CPos, SubCell>? PopPath(Actor self, Mobile mobile)
+		Pair<CPos, SubCell>? PopPath(Actor self)
 		{
 			if (path.Count == 0)
 				return null;
@@ -210,7 +215,7 @@ namespace OpenRA.Mods.Common.Activities
 			var nextCell = path[path.Count - 1];
 
 			// Next cell in the move is blocked by another actor
-			if (!mobile.CanEnterCell(nextCell, ignoredActor, true))
+			if (!mobile.CanMoveFreelyInto(nextCell, ignoredActor, true))
 			{
 				// Are we close enough?
 				var cellRange = nearEnough.Range / 1024;
@@ -246,7 +251,7 @@ namespace OpenRA.Mods.Common.Activities
 
 				// Calculate a new path
 				mobile.RemoveInfluence();
-				var newPath = EvalPath(self, mobile);
+				var newPath = EvalPath();
 				mobile.AddInfluence();
 
 				if (newPath.Count != 0)
@@ -310,13 +315,12 @@ namespace OpenRA.Mods.Common.Activities
 
 			public override Activity Tick(Actor self)
 			{
-				var mobile = self.Trait<Mobile>();
 				var ret = InnerTick(self, Move.mobile);
-				mobile.IsMoving = ret is MovePart;
+				Move.mobile.IsMoving = ret is MovePart;
 
 				if (moveFraction > MoveFractionTotal)
 					moveFraction = MoveFractionTotal;
-				UpdateCenterLocation(self, mobile);
+				UpdateCenterLocation(self, Move.mobile);
 
 				return ret;
 			}
@@ -372,7 +376,7 @@ namespace OpenRA.Mods.Common.Activities
 				var fromSubcellOffset = self.World.Map.OffsetOfSubCell(mobile.FromSubCell);
 				var toSubcellOffset = self.World.Map.OffsetOfSubCell(mobile.ToSubCell);
 
-				var nextCell = parent.PopPath(self, mobile);
+				var nextCell = parent.PopPath(self);
 				if (nextCell != null)
 				{
 					if (IsTurn(mobile, nextCell.Value.First))

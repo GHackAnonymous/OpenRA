@@ -19,10 +19,12 @@ namespace OpenRA.Mods.RA.Traits
 {
 	class ChronoshiftPowerInfo : SupportPowerInfo
 	{
-		[Desc("Cells")]
+		[Desc("Target actor selection radius in cells.")]
 		public readonly int Range = 1;
-		[Desc("Seconds")]
+
+		[Desc("Seconds until returning after teleportation.")]
 		public readonly int Duration = 30;
+
 		public readonly bool KillCargo = true;
 
 		public override object Create(ActorInitializer init) { return new ChronoshiftPower(init.Self, this); }
@@ -101,6 +103,10 @@ namespace OpenRA.Mods.RA.Traits
 
 			public SelectTarget(World world, string order, SupportPowerManager manager, ChronoshiftPower power)
 			{
+				// Clear selection if using Left-Click Orders
+				if (Game.Settings.Game.UseClassicMouseStyle)
+					manager.Self.World.Selection.Clear();
+
 				this.manager = manager;
 				this.order = order;
 				this.power = power;

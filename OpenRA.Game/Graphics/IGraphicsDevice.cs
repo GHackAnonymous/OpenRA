@@ -34,7 +34,18 @@ namespace OpenRA
 
 	public interface IHardwareCursor : IDisposable { }
 
-	public enum BlendMode : byte { None, Alpha, Additive, Subtractive, Multiply }
+	public enum BlendMode : byte
+	{
+		None,
+		Alpha,
+		Additive,
+		Subtractive,
+		Multiply,
+		SoftAdditive,
+		Translucency,
+		Multiplicative,
+		DoubleMultiplicative
+	}
 
 	public interface IGraphicsDevice : IDisposable
 	{
@@ -59,7 +70,7 @@ namespace OpenRA
 		void EnableDepthBuffer();
 		void DisableDepthBuffer();
 
-		void SetBlendMode(BlendMode mode);
+		void SetBlendMode(BlendMode mode, float alpha = 1f);
 
 		void GrabWindowMouseFocus();
 		void ReleaseWindowMouseFocus();
@@ -72,6 +83,7 @@ namespace OpenRA
 	{
 		void Bind();
 		void SetData(T[] vertices, int length);
+		void SetData(T[] vertices, int start, int length);
 	}
 
 	public interface IShader

@@ -8,6 +8,7 @@
  */
 #endregion
 
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using OpenRA.Activities;
@@ -70,30 +71,55 @@ namespace OpenRA.Mods.D2k.Activities
 			sandworm.IsAttacking = true;
 
 			foreach (var actor in lunch)
-				actor.World.AddFrameEndTask(_ => actor.Destroy());
+			{
+				var actor1 = actor;	// loop variable in closure hazard
+
+				actor.World.AddFrameEndTask(_ =>
+					{
+						actor1.Destroy();
+
+						// Harvester insurance
+						if (!actor1.HasTrait<Harvester>())
+							return;
+
+						var insurance = actor1.Owner.PlayerActor.TraitOrDefault<HarvesterInsurance>();
+
+						if (insurance != null)
+							actor1.World.AddFrameEndTask(__ => insurance.TryActivate());
+					});
+			}
 
 			positionable.SetPosition(worm, targetLocation);
-			foreach (var notify in worm.TraitsImplementing<INotifyAttack>())
-				notify.Attacking(worm, target, null, null);
-			PlayAttackAnimation(worm);
 
 			var attackPosition = worm.CenterPosition;
-			var affectedPlayers = lunch.Select(x => x.Owner).Distinct();
-			foreach (var affectedPlayer in affectedPlayers)
-				NotifyPlayer(affectedPlayer, attackPosition);
+			var affectedPlayers = lunch.Select(x => x.Owner).Distinct().ToList();
+
+			PlayAttack(worm, attackPosition, affectedPlayers);
+			foreach (var notify in worm.TraitsImplementing<INotifyAttack>())
+				notify.Attacking(worm, target, null, null);
 
 			return true;
 		}
 
-		void PlayAttackAnimation(Actor self)
+		// List because IEnumerable gets evaluated too late.
+		void PlayAttack(Actor self, WPos attackPosition, List<Player> affectedPlayers)
 		{
 			renderUnit.PlayCustomAnim(self, "mouth");
+			Sound.Play(swallow.Info.WormAttackSound, self.CenterPosition);
+
+			Game.RunAfterDelay(1000, () =>
+			{
+				foreach (var affectedPlayer in affectedPlayers)
+					NotifyPlayer(affectedPlayer, attackPosition);
+			});
 		}
 
 		void NotifyPlayer(Player player, WPos location)
 		{
 			Sound.PlayNotification(player.World.Map.Rules, player, "Speech", swallow.Info.WormAttackNotification, player.Country.Race);
-			radarPings.Add(() => true, location, Color.Red, 50);
+
+			if (player == player.World.RenderPlayer)
+				radarPings.Add(() => true, location, Color.Red, 50);
 		}
 
 		public override Activity Tick(Actor self)
@@ -113,11 +139,7 @@ namespace OpenRA.Mods.D2k.Activities
 				if (self.World.SharedRandom.Next() % 100 <= sandworm.Info.ChanceToDisappear)
 				{
 					self.CancelActivity();
-					self.World.AddFrameEndTask(w => w.Remove(self));
-
-					var wormManager = self.World.WorldActor.TraitOrDefault<WormManager>();
-					if (wormManager != null)
-						wormManager.DecreaseWormCount();
+					self.World.AddFrameEndTask(w => self.Kill(self));
 				}
 				else
 					renderUnit.DefaultAnimation.ReplaceAnim("idle");
