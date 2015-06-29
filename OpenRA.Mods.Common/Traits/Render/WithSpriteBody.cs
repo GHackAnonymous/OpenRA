@@ -9,44 +9,71 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using OpenRA.Graphics;
+using OpenRA.Mods.Common.Graphics;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("Default trait for rendering sprite-based actors.")]
-	class WithSpriteBodyInfo : UpgradableTraitInfo, ITraitInfo, Requires<RenderSpritesInfo>
+	public class WithSpriteBodyInfo : UpgradableTraitInfo, IRenderActorPreviewSpritesInfo, IQuantizeBodyOrientationInfo,
+		Requires<RenderSpritesInfo>
 	{
 		[Desc("Animation to play when the actor is created.")]
-		public readonly string StartSequence = null;
+		[SequenceReference] public readonly string StartSequence = null;
 
 		[Desc("Animation to play when the actor is idle.")]
-		public readonly string Sequence = "idle";
+		[SequenceReference] public readonly string Sequence = "idle";
 
-		public object Create(ActorInitializer init) { return new WithSpriteBody(init, this); }
-	}
+		public override object Create(ActorInitializer init) { return new WithSpriteBody(init, this); }
 
-	class WithSpriteBody : UpgradableTrait<WithSpriteBodyInfo>, ISpriteBody
-	{
-		readonly Animation body;
-		readonly WithSpriteBodyInfo info;
-
-		public WithSpriteBody(ActorInitializer init, WithSpriteBodyInfo info)
-			: base(info)
+		public virtual IEnumerable<IActorPreview> RenderPreviewSprites(ActorPreviewInitializer init, RenderSpritesInfo rs, string image, int facings, PaletteReference p)
 		{
-			this.info = info;
+			var anim = new Animation(init.World, image);
+			anim.PlayRepeating(RenderSprites.NormalizeSequence(anim, init.GetDamageState(), Sequence));
 
-			var rs = init.Self.Trait<RenderSprites>();
-			body = new Animation(init.Self.World, rs.GetImage(init.Self));
-			PlayCustomAnimation(init.Self, info.StartSequence, () => body.PlayRepeating(info.Sequence));
-			rs.Add(new AnimationWithOffset(body, null, () => IsTraitDisabled));
+			yield return new SpriteActorPreview(anim, WVec.Zero, 0, p, rs.Scale);
 		}
 
-		public void PlayCustomAnimation(Actor self, string newAnimation, Action after)
+		public virtual int QuantizedBodyFacings(ActorInfo ai, SequenceProvider sequenceProvider, string race)
 		{
-			body.PlayThen(newAnimation, () =>
+			return 1;
+		}
+	}
+
+	public class WithSpriteBody : UpgradableTrait<WithSpriteBodyInfo>, ISpriteBody, INotifyDamageStateChanged
+	{
+		public readonly Animation DefaultAnimation;
+
+		public WithSpriteBody(ActorInitializer init, WithSpriteBodyInfo info)
+			: this(init, info, () => 0) { }
+
+		protected WithSpriteBody(ActorInitializer init, WithSpriteBodyInfo info, Func<int> baseFacing)
+			: base(info)
+		{
+			var rs = init.Self.Trait<RenderSprites>();
+
+			DefaultAnimation = new Animation(init.World, rs.GetImage(init.Self), baseFacing);
+			rs.Add(new AnimationWithOffset(DefaultAnimation, null, () => IsTraitDisabled));
+
+			if (Info.StartSequence != null)
+				PlayCustomAnimation(init.Self, Info.StartSequence,
+					() => DefaultAnimation.PlayRepeating(NormalizeSequence(init.Self, Info.Sequence)));
+			else
+				DefaultAnimation.PlayRepeating(NormalizeSequence(init.Self, Info.Sequence));
+		}
+
+		public string NormalizeSequence(Actor self, string sequence)
+		{
+			return RenderSprites.NormalizeSequence(DefaultAnimation, self.GetDamageState(), sequence);
+		}
+
+		public void PlayCustomAnimation(Actor self, string name, Action after = null)
+		{
+			DefaultAnimation.PlayThen(NormalizeSequence(self, name), () =>
 			{
-				body.Play(info.Sequence);
+				DefaultAnimation.Play(NormalizeSequence(self, Info.Sequence));
 				if (after != null)
 					after();
 			});
@@ -54,17 +81,24 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void PlayCustomAnimationRepeating(Actor self, string name)
 		{
-			body.PlayThen(name, () => PlayCustomAnimationRepeating(self, name));
+			DefaultAnimation.PlayThen(name,
+				() => PlayCustomAnimationRepeating(self, name));
 		}
 
-		public void PlayCustomAnimationBackwards(Actor self, string name, Action after)
+		public void PlayCustomAnimationBackwards(Actor self, string name, Action after = null)
 		{
-			body.PlayBackwardsThen(name, () =>
+			DefaultAnimation.PlayBackwardsThen(NormalizeSequence(self, name), () =>
 			{
-				body.PlayRepeating(info.Sequence);
+				DefaultAnimation.PlayRepeating(NormalizeSequence(self, Info.Sequence));
 				if (after != null)
 					after();
 			});
+		}
+
+		public virtual void DamageStateChanged(Actor self, AttackInfo e)
+		{
+			if (DefaultAnimation.CurrentSequence != null)
+				DefaultAnimation.ReplaceAnim(NormalizeSequence(self, DefaultAnimation.CurrentSequence.Name));
 		}
 	}
 }

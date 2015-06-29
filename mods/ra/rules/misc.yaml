@@ -1,4 +1,5 @@
 MINP:
+	HiddenUnderShroud:
 	Mine:
 		CrushClasses: mine
 		DetonateClasses: mine
@@ -27,6 +28,7 @@ MINP:
 		OccupiesSpace: true
 
 MINV:
+	HiddenUnderShroud:
 	Mine:
 		CrushClasses: mine
 		DetonateClasses: mine
@@ -152,7 +154,8 @@ MONEYCRATE:
 		SelectionShares: 1
 		UseCashTick: true
 	WithCrateBody:
-		Images: wcrate
+	RenderSprites:
+		Image: wcrate
 
 HEALCRATE:
 	Inherits: ^Crate
@@ -164,6 +167,7 @@ HEALCRATE:
 		Effect: heal
 
 CAMERA:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	Health:
@@ -179,6 +183,7 @@ CAMERA:
 		Image: camera
 
 camera.paradrop:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	Health:
@@ -190,6 +195,7 @@ camera.paradrop:
 	BodyOrientation:
 
 SONAR:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	Health:
@@ -206,8 +212,6 @@ SONAR:
 FLARE:
 	Immobile:
 		OccupiesSpace: false
-	Health:
-		HP: 1000
 	RevealsShroud:
 		Range: 3c0
 	RenderSprites:
@@ -217,11 +221,11 @@ FLARE:
 	HiddenUnderFog:
 	Tooltip:
 		Name: Flare
-	ProximityCaptor:
-		Types: Flare
+		ShowOwnerRow: false
 	BodyOrientation:
 
 MINE:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Ore Mine
 	RenderBuilding:
@@ -232,14 +236,12 @@ MINE:
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Ore
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: true
 	AutoTargetIgnore:
 	BodyOrientation:
 	SeedsResource:
 
 GMINE:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Gem Mine
 	RenderBuilding:
@@ -250,15 +252,13 @@ GMINE:
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Gems
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: false
 	AutoTargetIgnore:
 	BodyOrientation:
 	SeedsResource:
 		ResourceType: Gems
 
 RAILMINE:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Abandoned Mine
 	RenderBuilding:
@@ -266,13 +266,13 @@ RAILMINE:
 	Building:
 		Footprint: xx
 		Dimensions: 2,1
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: false
 	AutoTargetIgnore:
 	BodyOrientation:
+	EditorTilesetFilter:
+		ExcludeTilesets: INTERIOR
 
 QUEE:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Queen Ant
 	Building:
@@ -283,11 +283,9 @@ QUEE:
 	BodyOrientation:
 	EditorTilesetFilter:
 		RequireTilesets: INTERIOR
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: true
 
 LAR1:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Ant Larva
 	Building:
@@ -299,11 +297,9 @@ LAR1:
 	BodyOrientation:
 	EditorTilesetFilter:
 		RequireTilesets: INTERIOR
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: true
 
 LAR2:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Ant Larvae
 	Building:
@@ -315,11 +311,9 @@ LAR2:
 	BodyOrientation:
 	EditorTilesetFilter:
 		RequireTilesets: INTERIOR
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: true
 
 powerproxy.parabombs:
+	AlwaysVisible:
 	AirstrikePower:
 		Icon: parabombs
 		Description: Parabombs (Single Use)
@@ -334,6 +328,7 @@ powerproxy.parabombs:
 		CameraActor: camera
 
 powerproxy.sonarpulse:
+	AlwaysVisible:
 	SpawnActorPower:
 		Icon: sonar
 		Description: Sonar Pulse
@@ -348,6 +343,7 @@ powerproxy.sonarpulse:
 		EffectPalette: moveflash
 
 powerproxy.paratroopers:
+	AlwaysVisible:
 	ParatroopersPower:
 		Icon: paratroopers
 		Description: Paratroopers
@@ -361,12 +357,14 @@ powerproxy.paratroopers:
 		BeaconPoster: pinficon
 
 mpspawn:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	RenderEditorOnly:
 	BodyOrientation:
 
 waypoint:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	RenderEditorOnly:

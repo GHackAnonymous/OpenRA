@@ -109,7 +109,7 @@ VoxelSequences:
 	./mods/ts/sequences/voxels.yaml
 
 TileSets:
-	./mods/ts/tilesets/temperat.yaml
+	./mods/ts/tilesets/temperate.yaml
 	./mods/ts/tilesets/snow.yaml
 
 TileSize: 48,24
@@ -194,9 +194,11 @@ ContentInstaller:
 	TestFiles: cache.mix, conquer.mix, isosnow.mix, isotemp.mix, local.mix, sidec01.mix, sidec02.mix, sno.mix, snow.mix, sounds.mix, speech01.mix, tem.mix, temperat.mix
 	PackageMirrorList: http://www.openra.net/packages/ts-mirrors.txt
 	DiskTestFiles: MULTI.MIX, INSTALL/TIBSUN.MIX
-	CopyFilesFromCD: INSTALL/TIBSUN.MIX, SCORES.MIX, MULTI.MIX
+	CopyFilesFromCD:
+		.: INSTALL/TIBSUN.MIX, SCORES.MIX, MULTI.MIX
 	PackageToExtractFromCD: INSTALL/TIBSUN.MIX:CRC32
-	ExtractFilesFromCD: cache.mix, conquer.mix, isosnow.mix, isotemp.mix, local.mix, sidec01.mix, sidec02.mix, sno.mix, snow.mix, sounds.mix, speech01.mix, tem.mix, temperat.mix
+	ExtractFilesFromCD:
+		.: cache.mix, conquer.mix, isosnow.mix, isotemp.mix, local.mix, sidec01.mix, sidec02.mix, sno.mix, snow.mix, sounds.mix, speech01.mix, tem.mix, temperat.mix
 	ShippedSoundtracks: 2
 	MusicPackageMirrorList: http://www.openra.net/packages/ts-music-mirrors.txt
 
@@ -250,8 +252,8 @@ SpriteFormats: ShpTS, TmpTS, ShpTD
 
 SpriteSequenceFormat: TilesetSpecificSpriteSequence
 	TilesetExtensions:
-		TEMPERAT: .tem
+		TEMPERATE: .tem
 		SNOW: .sno
 	TilesetCodes:
-		TEMPERAT: t
+		TEMPERATE: t
 		SNOW: a

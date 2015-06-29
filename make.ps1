@@ -18,6 +18,11 @@ function FindMSBuild
 	return $null
 }
 
+function UtilityNotFound
+{
+	echo "OpenRA.Utility.exe could not be found. Build the project first using the `"all`" command."
+}
+
 if ($args.Length -eq 0)
 {
 	echo "Command list:"
@@ -72,9 +77,9 @@ elseif ($command -eq "clean")
 	{
 		$proc = Start-Process $msBuild $msBuildArguments -NoNewWindow -PassThru -Wait
 		rm *.dll
-		rm *.config
+		rm *.dll.config
 		rm mods/*/*.dll
-		if (Test-Path -Path thirdparty/download/)
+		if (Test-Path thirdparty/download/)
 		{
 			rmdir thirdparty/download -Recurse -Force
 		}
@@ -116,54 +121,83 @@ elseif ($command -eq "dependencies")
 	cd thirdparty
 	./fetch-thirdparty-deps.ps1
 	cp download/*.dll ..
+	cp download/GeoLite2-Country.mmdb.gz ..
 	cp download/windows/*.dll ..
 	cd ..
 	echo "Dependencies copied."
+	
+	$dep = "Microsoft Visual C++ 201"
+	$results = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | select DisplayName | Where-Object {$_.DisplayName -like $("$dep*")}
+	if (!($results -is [array]) -and !$results.DisplayName)
+	{
+		Write-Host "Warning! Freetype6.dll requires Microsoft Visual C++ 2010 x86 Redistributable!" -Foreground "Red"
+	}
 }
 elseif ($command -eq "test")
 {
-	echo "Testing mods..."
-	echo "Testing Red Alert mod MiniYAML..."
-	./OpenRA.Utility.exe ra --check-yaml
-	echo "Testing Tiberian Dawn mod MiniYAML..."
-	./OpenRA.Utility.exe cnc --check-yaml
-	echo "Testing Dune 2000 mod MiniYAML..."
-	./OpenRA.Utility.exe d2k --check-yaml
-	echo "Testing Tiberian Sun mod MiniYAML..."
-	./OpenRA.Utility.exe ts --check-yaml
+	if (Test-Path OpenRA.Utility.exe)
+	{
+		echo "Testing mods..."
+		echo "Testing Red Alert mod MiniYAML..."
+		./OpenRA.Utility.exe ra --check-yaml
+		echo "Testing Tiberian Dawn mod MiniYAML..."
+		./OpenRA.Utility.exe cnc --check-yaml
+		echo "Testing Dune 2000 mod MiniYAML..."
+		./OpenRA.Utility.exe d2k --check-yaml
+		echo "Testing Tiberian Sun mod MiniYAML..."
+		./OpenRA.Utility.exe ts --check-yaml
+	}
+	else
+	{
+		UtilityNotFound
+	}
 }
 elseif ($command -eq "check")
 {
-	echo "Checking for code style violations in OpenRA.Renderer.Null..."
-	./OpenRA.Utility.exe ra --check-code-style OpenRA.Renderer.Null
-	echo "Checking for code style violations in OpenRA.GameMonitor..."
-	./OpenRA.Utility.exe ra --check-code-style OpenRA.GameMonitor
-	echo "Checking for code style violations in OpenRA.Game..."
-	./OpenRA.Utility.exe ra --check-code-style OpenRA.Game
-	echo "Checking for code style violations in OpenRA.Mods.Common..."
-	./OpenRA.Utility.exe ra --check-code-style OpenRA.Mods.Common
-	echo "Checking for code style violations in OpenRA.Mods.RA..."
-	./OpenRA.Utility.exe ra --check-code-style OpenRA.Mods.RA
-	echo "Checking for code style violations in OpenRA.Mods.Cnc..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Mods.Cnc
-	echo "Checking for code style violations in OpenRA.Mods.D2k..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Mods.D2k
-	echo "Checking for code style violations in OpenRA.Mods.TS..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Mods.TS
-	echo "Checking for code style violations in OpenRA.Editor..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Editor
-	echo "Checking for code style violations in OpenRA.Renderer.Sdl2..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Renderer.Sdl2
-	echo "Checking for code style violations in OpenRA.Utility..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Utility
-	echo "Checking for code style violations in OpenRA.Test..."
-	./OpenRA.Utility.exe cnc --check-code-style OpenRA.Test
+	if (Test-Path OpenRA.Utility.exe)
+	{
+		echo "Checking for code style violations in OpenRA.Renderer.Null..."
+		./OpenRA.Utility.exe ra --check-code-style OpenRA.Renderer.Null
+		echo "Checking for code style violations in OpenRA.GameMonitor..."
+		./OpenRA.Utility.exe ra --check-code-style OpenRA.GameMonitor
+		echo "Checking for code style violations in OpenRA.Game..."
+		./OpenRA.Utility.exe ra --check-code-style OpenRA.Game
+		echo "Checking for code style violations in OpenRA.Mods.Common..."
+		./OpenRA.Utility.exe ra --check-code-style OpenRA.Mods.Common
+		echo "Checking for code style violations in OpenRA.Mods.RA..."
+		./OpenRA.Utility.exe ra --check-code-style OpenRA.Mods.RA
+		echo "Checking for code style violations in OpenRA.Mods.Cnc..."
+		./OpenRA.Utility.exe cnc --check-code-style OpenRA.Mods.Cnc
+		echo "Checking for code style violations in OpenRA.Mods.D2k..."
+		./OpenRA.Utility.exe cnc --check-code-style OpenRA.Mods.D2k
+		echo "Checking for code style violations in OpenRA.Mods.TS..."
+		./OpenRA.Utility.exe cnc --check-code-style OpenRA.Mods.TS
+		echo "Checking for code style violations in OpenRA.Editor..."
+		./OpenRA.Utility.exe cnc --check-code-style OpenRA.Editor
+		echo "Checking for code style violations in OpenRA.Renderer.Sdl2..."
+		./OpenRA.Utility.exe cnc --check-code-style OpenRA.Renderer.Sdl2
+		echo "Checking for code style violations in OpenRA.Utility..."
+		./OpenRA.Utility.exe cnc --check-code-style OpenRA.Utility
+		echo "Checking for code style violations in OpenRA.Test..."
+		./OpenRA.Utility.exe cnc --check-code-style OpenRA.Test
+	}
+	else
+	{
+		UtilityNotFound
+	}
 }
 elseif ($command -eq "docs")
 {
-	./make.ps1 version
-	./OpenRA.Utility.exe d2k --docs | Out-File -Encoding "UTF8" DOCUMENTATION.md
-	./OpenRA.Utility.exe ra --lua-docs | Out-File -Encoding "UTF8" Lua-API.md
+	if (Test-Path OpenRA.Utility.exe)
+	{
+		./make.ps1 version
+		./OpenRA.Utility.exe all --docs | Out-File -Encoding "UTF8" DOCUMENTATION.md
+		./OpenRA.Utility.exe ra --lua-docs | Out-File -Encoding "UTF8" Lua-API.md
+	}
+	else
+	{
+		UtilityNotFound
+	}
 }
 else
 {

@@ -60,7 +60,6 @@ Players:
 		OwnsWorld: True
 		NonCombatant: True
 		Race: allies
-		Enemies: Turkey
 	PlayerReference@Ukraine:
 		Name: Ukraine
 		Race: soviet
@@ -71,7 +70,7 @@ Players:
 		Name: Turkey
 		Race: soviet
 		ColorRamp: 14,123,167
-		Enemies: Greece, BadGuy, USSR, Ukraine, Neutral, Outpost
+		Enemies: Greece, BadGuy, USSR, Ukraine, Outpost
 	PlayerReference@Outpost:
 		Name: Outpost
 		NonCombatant: True
@@ -2208,8 +2207,7 @@ Rules:
 			MuzzleSequence: muzzle
 		AttackTurreted:
 		WithMuzzleFlash:
-		RenderUnit:
-			Image: 4TNK
+		WithFacingSpriteBody:
 		WithTurret:
 		AutoTarget:
 		Explodes:
@@ -2225,16 +2223,21 @@ Rules:
 		Selectable:
 			Bounds: 44,38,0,-4
 		-EjectOnDeath:
+		AutoSelectionSize:
+		RenderSprites:
+			Image: 4TNK
 	5TNK.Husk:
 		Inherits: ^Husk
 		Tooltip:
 			Name: Husk (Super Tank)
-		RenderUnit:
-			Image: 4TNK
+		WithFacingSpriteBody:
 		ThrowsParticle@turret:
 			Anim: turret
 		Health:
 			HP: 2000
+		AutoSelectionSize:
+		RenderSprites:
+			Image: 4TNK
 	DOME.NoInfiltrate:
 		Inherits: DOME
 		Buildable:
@@ -2251,16 +2254,20 @@ Rules:
 		Inherits: 3TNK
 		Buildable:
 			Prerequisites: ~disabled
-		RenderUnit:
-			Image: 3TNK
+		WithFacingSpriteBody:
 		-EjectOnDeath:
+		AutoSelectionSize:
+		RenderSprites:
+			Image: 3TNK
 	BADTRUK:
 		Inherits: TRUK
 		Buildable:
 			Prerequisites: ~disabled
-		RenderUnit:
-			Image: TRUK
+		WithFacingSpriteBody:
 		-EjectOnDeath:
+		AutoSelectionSize:
+		RenderSprites:
+			Image: TRUK
 	SS:
 		Buildable:
 			Prerequisites: ~disabled
@@ -2342,6 +2349,9 @@ Rules:
 	SHOK:
 		Buildable:
 			Prerequisites: ~disabled
+	HIJACKER:
+		Buildable:
+			Prerequisites: ~disabled
 	STNK:
 		Buildable:
 			Prerequisites: ~disabled
@@ -2375,14 +2385,13 @@ Weapons:
 		Warhead@1Dam: SpreadDamage
 			Spread: 128
 			Damage: 50
-			DeathType: 4
 			InvalidTargets: Air, Infantry
 			Versus:
 				None: 20
 				Wood: 75
 				Light: 75
 				Concrete: 50
-			DamageTypes: Prone50Percent, TriggerProne
+			DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 		Warhead@2Smu: LeaveSmudge
 			SmudgeType: Crater
 		Warhead@3EffGround: CreateEffect

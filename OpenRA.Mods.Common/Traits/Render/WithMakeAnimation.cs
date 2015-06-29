@@ -17,10 +17,11 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
+	[Desc("Replaces the sprite during construction.")]
 	public class WithMakeAnimationInfo : ITraitInfo, Requires<BuildingInfo>, Requires<RenderBuildingInfo>
 	{
 		[Desc("Sequence name to use")]
-		public readonly string Sequence = "make";
+		[SequenceReference] public readonly string Sequence = "make";
 
 		public object Create(ActorInitializer init) { return new WithMakeAnimation(init, this); }
 	}

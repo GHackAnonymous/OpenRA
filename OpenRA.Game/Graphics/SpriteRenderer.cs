@@ -21,7 +21,6 @@ namespace OpenRA.Graphics
 		readonly Vertex[] vertices;
 		Sheet currentSheet;
 		BlendMode currentBlend = BlendMode.Alpha;
-		float currentAlpha = 1f;
 		int nv = 0;
 
 		public SpriteRenderer(Renderer renderer, IShader shader)
@@ -37,14 +36,9 @@ namespace OpenRA.Graphics
 			{
 				shader.SetTexture("DiffuseTexture", currentSheet.GetTexture());
 
-				renderer.Device.SetBlendMode(currentBlend, currentAlpha);
-				shader.Render(() =>
-				{
-					var vb = renderer.GetTempVertexBuffer();
-					vb.SetData(vertices, nv);
-					renderer.DrawBatch(vb, 0, nv, PrimitiveType.QuadList);
-				});
-				renderer.Device.SetBlendMode(BlendMode.None, currentAlpha);
+				renderer.Device.SetBlendMode(currentBlend);
+				shader.Render(() => renderer.DrawBatch(vertices, nv, PrimitiveType.QuadList));
+				renderer.Device.SetBlendMode(BlendMode.None);
 
 				nv = 0;
 				currentSheet = null;
@@ -55,10 +49,9 @@ namespace OpenRA.Graphics
 		{
 			renderer.CurrentBatchRenderer = this;
 
-			if (s.Alpha != currentAlpha || s.BlendMode != currentBlend || s.Sheet != currentSheet || nv + 4 > renderer.TempBufferSize)
+			if (s.BlendMode != currentBlend || s.Sheet != currentSheet || nv + 4 > renderer.TempBufferSize)
 				Flush();
 
-			currentAlpha = s.Alpha;
 			currentBlend = s.BlendMode;
 			currentSheet = s.Sheet;
 		}
@@ -105,10 +98,10 @@ namespace OpenRA.Graphics
 			nv += 4;
 		}
 
-		public void DrawVertexBuffer(IVertexBuffer<Vertex> buffer, int start, int length, PrimitiveType type, Sheet sheet)
+		public void DrawVertexBuffer(IVertexBuffer<Vertex> buffer, int start, int length, PrimitiveType type, Sheet sheet, BlendMode blendMode)
 		{
 			shader.SetTexture("DiffuseTexture", sheet.GetTexture());
-			renderer.Device.SetBlendMode(BlendMode.Alpha);
+			renderer.Device.SetBlendMode(blendMode);
 			shader.Render(() => renderer.DrawBatch(buffer, start, length, type));
 			renderer.Device.SetBlendMode(BlendMode.None);
 		}

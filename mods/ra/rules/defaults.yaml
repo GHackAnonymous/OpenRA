@@ -19,6 +19,16 @@
 		DamageCooldown: 125
 		UpgradeTypes: selfheal
 		UpgradeMinEnabledLevel: 1
+	WithRankDecoration:
+		Image: rank
+		Sequence: rank
+		Palette: effect
+		ReferencePoint: Bottom, Right
+		Offset: 2, 2
+		UpgradeTypes: rank
+		ZOffset: 256
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 4
 
 ^IronCurtainable:
 	UpgradeOverlay@IRONCURTAIN:
@@ -48,7 +58,7 @@
 		ROT: 5
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
+		Bounds: 24, 24
 	TargetableUnit:
 		TargetTypes: Ground, Repair, Vehicle
 	Repairable:
@@ -81,8 +91,8 @@
 	CaptureNotification:
 		Notification: UnitStolen
 	MustBeDestroyed:
-	AnnounceOnSeen:
-		Notification: EnemyDetected
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Tank:
 	Inherits@1: ^ExistsInWorld
@@ -101,7 +111,7 @@
 		ROT: 5
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
+		Bounds: 24, 24
 	TargetableUnit:
 		TargetTypes: Ground, C4, Repair, Tank
 	Repairable:
@@ -138,13 +148,15 @@
 		ParachuteOffset: 0,0,200
 		KilledOnImpassableTerrain: true
 		ParachuteSequence: parach
+		ParachuteOpenSequence: open
+		ParachuteIdleSequence: idle
 		ShadowSequence:
 		GroundCorpseSequence:
 		GroundCorpsePalette:
 		WaterCorpseSequence:
 		WaterCorpsePalette:
-	AnnounceOnSeen:
-		Notification: EnemyDetected
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Infantry:
 	Inherits@1: ^ExistsInWorld
@@ -168,12 +180,24 @@
 			Beach: 80
 	SelectionDecorations:
 	Selectable:
-		Voice: GenericVoice
+		Bounds: 12,18,0,-8
 	TargetableUnit:
 		TargetTypes: Ground, Infantry, Disguise
+	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
 	RenderSprites:
 	WithInfantryBody:
 	WithDeathAnimation:
+		DeathTypes:
+			DefaultDeath: 1
+			BulletDeath: 2
+			SmallExplosionDeath: 3
+			ExplosionDeath: 4
+			FireDeath: 5
+			ElectricityDeath: 6
+		CrushedSequence: die-crushed
 	AutoTarget:
 	AttackMove:
 	Passenger:
@@ -202,25 +226,28 @@
 		Upgrades: hospitalheal
 		Prerequisites: hosp
 	DeathSounds@NORMAL:
-		DeathTypes: 1, 2, 3, 4
+		DeathTypes: DefaultDeath, BulletDeath, SmallExplosionDeath, ExplosionDeath
 	DeathSounds@BURNED:
-		DeathSound: Burned
-		DeathTypes: 5
+		Voice: Burned
+		DeathTypes: FireDeath
 	DeathSounds@ZAPPED:
-		DeathSound: Zapped
-		DeathTypes: 6
+		Voice: Zapped
+		DeathTypes: ElectricityDeath
 	Parachutable:
 		ParachuteOffset: 0,0,427
 		KilledOnImpassableTerrain: true
 		ParachuteSequence: parach
+		ParachuteOpenSequence: open
+		ParachuteIdleSequence: idle
 		ShadowSequence: parach-shadow
 		GroundImpactSound: squishy2.aud
 		WaterImpactSound: splash9.aud
+		WaterCorpseSequence: small_splash
 	Cloneable:
 		Types: Infantry
 	MustBeDestroyed:
-	AnnounceOnSeen:
-		Notification: EnemyDetected
+	Voiced:
+		VoiceSet: GenericVoice
 
 ^Ship:
 	Inherits@1: ^ExistsInWorld
@@ -232,7 +259,7 @@
 			Water: 100
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
+		Bounds: 24,24
 	TargetableUnit:
 		TargetTypes: Ground, Water, Repair
 	HiddenUnderFog:
@@ -250,8 +277,10 @@
 	Tooltip:
 		GenericName: Ship
 	MustBeDestroyed:
-	AnnounceOnSeen:
-		Notification: EnemyDetected
+	EditorTilesetFilter:
+		ExcludeTilesets: INTERIOR
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Plane:
 	Inherits@1: ^ExistsInWorld
@@ -261,7 +290,7 @@
 		UseLocation: true
 	SelectionDecorations:
 	Selectable:
-		Voice: GenericVoice
+		Bounds: 24,24
 	TargetableAircraft:
 		TargetTypes: Air
 		GroundedTargetTypes: Ground, Repair
@@ -286,8 +315,8 @@
 		GenericName: Plane
 	WithShadow:
 	MustBeDestroyed:
-	AnnounceOnSeen:
-		Notification: EnemyDetected
+	Voiced:
+		VoiceSet: GenericVoice
 
 ^Helicopter:
 	Inherits: ^Plane
@@ -296,8 +325,6 @@
 	GpsDot:
 		String: Helicopter
 	Hovers:
-	AnnounceOnSeen:
-		Notification: EnemyDetected
 
 ^Building:
 	Inherits@1: ^ExistsInWorld
@@ -328,8 +355,6 @@
 	MustBeDestroyed:
 		RequiredForShortGame: true
 	CaptureNotification:
-	EditorAppearance:
-		RelativeToTopLeft: true
 	ShakeOnDeath:
 	ProximityCaptor:
 		Types: Building
@@ -377,9 +402,6 @@
 	RenderBuildingWall:
 		Palette: effect
 	GivesExperience:
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: false
 	AutoTargetIgnore:
 	ProximityCaptor:
 		Types: Wall
@@ -444,8 +466,7 @@
 ^CivInfantry:
 	Inherits: ^Infantry
 	Selectable:
-		Voice: CivilianMaleVoice
-		Bounds: 12,17,0,-9
+		Class: CivInfantry
 	Valued:
 		Cost: 70
 	Tooltip:
@@ -464,13 +485,16 @@
 		Types: CivilianInfantry
 	WithInfantryBody:
 	ScaredyCat:
+	Voiced:
+		VoiceSet: CivilianMaleVoice
+	-TakeCover:
 
 ^CivBuilding:
 	Inherits: ^TechBuilding
 	RenderBuilding:
 		Palette: terrain
-	EditorAppearance:
-		UseTerrainPalette: true
+	EditorTilesetFilter:
+		ExcludeTilesets: INTERIOR
 
 ^CivField:
 	Inherits: ^CivBuilding
@@ -481,6 +505,8 @@
 	-Demolishable:
 	ProximityCaptor:
 		Types: CivilianField
+	EditorTilesetFilter:
+		ExcludeTilesets: INTERIOR
 
 ^Tree:
 	Tooltip:
@@ -493,9 +519,6 @@
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Tree
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: true
 	ProximityCaptor:
 		Types: Tree
 	Health:
@@ -507,11 +530,13 @@
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
+	EditorTilesetFilter:
+		ExcludeTilesets: INTERIOR
 
 ^Husk:
 	Husk:
 		AllowedTerrain: Clear, Rough, Road, Ore, Gems, Beach
-	RenderUnit:
+	WithFacingSpriteBody:
 	Health:
 		HP: 280
 	Armor:
@@ -537,6 +562,8 @@
 		ForceHealthPercentage: 25
 	DisabledOverlay:
 	ScriptTriggers:
+	AutoSelectionSize:
+	RenderSprites:
 
 ^HelicopterHusk:
 	Inherits: ^Husk
@@ -561,6 +588,7 @@
 	-TransformOnCapture:
 
 ^Bridge:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Bridge
 	TargetableBuilding:
@@ -590,22 +618,24 @@
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Tree
-	EditorAppearance:
-		RelativeToTopLeft: true
-		UseTerrainPalette: true
 	ProximityCaptor:
 		Types: Tree
 	BodyOrientation:
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
+	EditorTilesetFilter:
+		RequireTilesets: DESERT
 
 ^DesertCivBuilding:
 	Inherits: ^CivBuilding
 	RenderBuilding:
 		Palette: terrain
+	EditorTilesetFilter:
+		RequireTilesets: DESERT
 
 ^Crate:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Crate
 		GenericName: Crate
@@ -614,17 +644,20 @@
 		TerrainTypes: Clear, Rough, Road, Ore, Beach
 	RenderSprites:
 		Palette: effect
+		Image: scrate
 	WithCrateBody:
-		Images: scrate
 		XmasImages: xcratea, xcrateb, xcratec, xcrated
+		LandSequence: land
+		WaterSequence: water
 	Selectable:
 		Selectable: false
 		Bounds: 15,15,-1,-1
-	ProximityCaptor:
-		Types: Crate
-	BodyOrientation:
 	Parachutable:
 		KilledOnImpassableTerrain: false
 		ParachuteSequence: parach
+		ParachuteOpenSequence: open
+		ParachuteIdleSequence: idle
 	Passenger:
+	CustomSelectionSize:
+		CustomBounds: 16,16
 

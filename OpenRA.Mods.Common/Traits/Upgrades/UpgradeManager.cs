@@ -19,7 +19,7 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("Attach this to a unit to enable dynamic upgrades by warheads, experience, crates, support powers, etc.")]
-	public class UpgradeManagerInfo : ITraitInfo
+	public class UpgradeManagerInfo : ITraitInfo, Requires<IUpgradableInfo>
 	{
 		public object Create(ActorInitializer init) { return new UpgradeManager(init); }
 	}
@@ -125,6 +125,13 @@ namespace OpenRA.Mods.Common.Traits
 			NotifyUpgradeLevelChanged(s.Traits, self, upgrade, -1);
 		}
 
+		/// <summary>Returns true if the actor uses the given upgrade. Does not check the actual level of the upgrade.</summary>
+		public bool AcknowledgesUpgrade(Actor self, string upgrade)
+		{
+			return upgrades.Value.ContainsKey(upgrade);
+		}
+
+		/// <summary>Returns true only if the actor can accept another level of the upgrade.</summary>
 		public bool AcceptsUpgrade(Actor self, string upgrade)
 		{
 			UpgradeState s;

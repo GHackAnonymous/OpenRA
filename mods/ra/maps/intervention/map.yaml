@@ -2213,6 +2213,7 @@ Rules:
 		-ConquestVictoryConditions:
 		MissionObjectives:
 			EarlyGameOver: true
+		-EnemyWatcher:
 	World:
 		-CrateSpawner:
 		-SpawnMPUnits:
@@ -2257,6 +2258,7 @@ Rules:
 		ProvidesPrerequisite:
 			Prerequisite: givefix
 	MAINLAND:
+		AlwaysVisible:
 		Tooltip:
 			Name: Reach the mainland
 		ProvidesPrerequisite:
@@ -2268,6 +2270,7 @@ Rules:
 		Buildable:
 			Prerequisites: givefix
 	GIVEFIX:
+		AlwaysVisible:
 		Tooltip:
 			Name: Weapons Factory or Helipad
 	MIG:
@@ -2403,7 +2406,7 @@ Weapons:
 	Maverick:
 		Warhead@1Dam: SpreadDamage
 			Damage: 175
-			DamageTypes: Prone50Percent, TriggerProne
+			DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 
 Voices:
 

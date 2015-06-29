@@ -12,7 +12,7 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Traits
 {
-	public abstract class SupportPowerInfo : UpgradableTraitInfo, ITraitInfo
+	public abstract class SupportPowerInfo : UpgradableTraitInfo
 	{
 		[Desc("Measured in seconds.")]
 		public readonly int ChargeTime = 0;
@@ -21,6 +21,9 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly string LongDesc = "";
 		public readonly bool AllowMultiple = false;
 		public readonly bool OneShot = false;
+
+		[Desc("Cursor to display for using this support power.")]
+		public readonly string Cursor = "ability";
 
 		[Desc("If set to true, the support power will be fully charged when it becomes available. " +
 			"Normal rules apply for subsequent charges.")]
@@ -36,6 +39,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		public readonly bool DisplayTimer = false;
 
+		[Desc("Palette used for the icon.")]
+		public readonly string IconPalette = "chrome";
+
 		[Desc("Beacons are only supported on the Airstrike and Nuke powers")]
 		public readonly bool DisplayBeacon = false;
 		public readonly string BeaconPalettePrefix = "player";
@@ -48,7 +54,6 @@ namespace OpenRA.Mods.Common.Traits
 		public readonly int RadarPingDuration = 5 * 25;
 
 		public readonly string OrderName;
-		public abstract object Create(ActorInitializer init);
 
 		public SupportPowerInfo() { OrderName = GetType().Name + "Order"; }
 	}
@@ -56,12 +61,14 @@ namespace OpenRA.Mods.Common.Traits
 	public class SupportPower : UpgradableTrait<SupportPowerInfo>
 	{
 		public readonly Actor Self;
+		readonly SupportPowerInfo info;
 		protected RadarPing ping;
 
 		public SupportPower(Actor self, SupportPowerInfo info)
 			: base(info)
 		{
 			Self = self;
+			this.info = info;
 		}
 
 		public virtual void Charging(Actor self, string key)
@@ -89,7 +96,7 @@ namespace OpenRA.Mods.Common.Traits
 		public virtual IOrderGenerator OrderGenerator(string order, SupportPowerManager manager)
 		{
 			Sound.PlayToPlayer(manager.Self.Owner, Info.SelectTargetSound);
-			return new SelectGenericPowerTarget(order, manager, "ability", MouseButton.Left);
+			return new SelectGenericPowerTarget(order, manager, info.Cursor, MouseButton.Left);
 		}
 	}
 }

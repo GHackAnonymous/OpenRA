@@ -57,7 +57,7 @@ namespace OpenRA.Mods.Common.Effects
 			this.color = color;
 			this.target = args.PassiveTarget;
 
-			if (info.HitAnim != null)
+			if (!string.IsNullOrEmpty(info.HitAnim))
 				this.hitanim = new Animation(args.SourceActor.World, info.HitAnim);
 		}
 
@@ -85,8 +85,8 @@ namespace OpenRA.Mods.Common.Effects
 
 		public IEnumerable<IRenderable> Render(WorldRenderer wr)
 		{
-			if (wr.World.FogObscures(wr.World.Map.CellContaining(target)) &&
-				wr.World.FogObscures(wr.World.Map.CellContaining(args.Source)))
+			if (wr.World.FogObscures(target) &&
+				wr.World.FogObscures(args.Source))
 				yield break;
 
 			if (ticks < info.BeamDuration)

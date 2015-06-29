@@ -382,7 +382,7 @@ namespace OpenRA.Mods.Common.AI
 				case BuildingType.Defense:
 
 					// Build near the closest enemy structure
-					var closestEnemy = World.Actors.Where(a => !a.Destroyed && a.HasTrait<Building>() && Player.Stances[a.Owner] == Stance.Enemy)
+					var closestEnemy = World.Actors.Where(a => !a.Disposed && a.HasTrait<Building>() && Player.Stances[a.Owner] == Stance.Enemy)
 						.ClosestTo(World.Map.CenterOfCell(defenseCenter));
 
 					var targetCell = closestEnemy != null ? closestEnemy.Location : baseCenter;
@@ -664,7 +664,7 @@ namespace OpenRA.Mods.Common.AI
 			if (protectSq == null)
 				protectSq = RegisterNewSquad(SquadType.Protection, attacker);
 
-			if (!protectSq.TargetIsValid)
+			if (!protectSq.IsTargetValid)
 				protectSq.TargetActor = attacker;
 
 			if (!protectSq.IsValid)
@@ -926,7 +926,7 @@ namespace OpenRA.Mods.Common.AI
 
 		public void Damaged(Actor self, AttackInfo e)
 		{
-			if (!enabled)
+			if (!enabled || e.Attacker == null)
 				return;
 
 			if (e.Attacker.Owner.Stances[self.Owner] == Stance.Neutral)
@@ -944,13 +944,13 @@ namespace OpenRA.Mods.Common.AI
 				}
 			}
 
-			if (e.Attacker.Destroyed)
+			if (e.Attacker.Disposed)
 				return;
 
 			if (!e.Attacker.HasTrait<ITargetable>())
 				return;
 
-			if (e.Attacker != null && e.Damage > 0)
+			if (e.Damage > 0)
 				aggro[e.Attacker.Owner].Aggro += e.Damage;
 
 			// Protected harvesters or building

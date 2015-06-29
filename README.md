@@ -4,7 +4,7 @@ A Libre/Free Real Time Strategy game engine supporting early Westwood classics.
 
 * Website: [http://www.openra.net](http://www.openra.net)
 * IRC: \#openra on irc.freenode.net
-* Repository: [https://github.com/OpenRA/OpenRA](https://github.com/OpenRA/OpenRA) [![Travis CI build status](https://travis-ci.org/OpenRA/OpenRA.svg?branch=bleed)](https://travis-ci.org/OpenRA/OpenRA) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/axc9k6jd25ej2o4w?svg=true)](https://ci.appveyor.com/project/OpenRA/openra)
+* Repository: [https://github.com/OpenRA/OpenRA](https://github.com/OpenRA/OpenRA) [![Travis CI build status](https://travis-ci.org/OpenRA/OpenRA.svg?branch=bleed)](https://travis-ci.org/OpenRA/OpenRA) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/axc9k6jd25ej2o4w?svg=true)](https://ci.appveyor.com/project/OpenRA/openra) [![Coverity Scan Build Status](https://scan.coverity.com/projects/3650/badge.svg)](https://scan.coverity.com/projects/3650)
 
 Please read the [FAQ](http://wiki.openra.net/FAQ) in our [Wiki](http://wiki.openra.net) and report problems at [http://bugs.openra.net](http://bugs.openra.net).
 
@@ -22,11 +22,13 @@ Check our [Playing the Game](https://github.com/OpenRA/OpenRA/wiki/Playing-the-g
 
 ## Contribute
 
-[![Bountysource](https://api.bountysource.com/badge/team?team_id=528&style=bounties_received)](https://www.bountysource.com/teams/openra/issues?utm_source=OpenRA&utm_medium=shield&utm_campaign=bounties_received) [![Issue Stats](http://issuestats.com/github/OpenRA/OpenRA/badge/pr)](http://issuestats.com/github/OpenRA/OpenRA) [![Issue Stats](http://issuestats.com/github/OpenRA/OpenRA/badge/issue)](http://issuestats.com/github/OpenRA/OpenRA)
+[![Bountysource](https://api.bountysource.com/badge/team?team_id=528&style=bounties_received)](https://www.bountysource.com/teams/openra/issues?utm_source=OpenRA&utm_medium=shield&utm_campaign=bounties_received)
 
 * Please read [INSTALL.md](https://github.com/OpenRA/OpenRA/blob/bleed/INSTALL.md) and [Compiling](http://wiki.openra.net/Compiling) on how to set up an OpenRA development environment.
 * See [Hacking](http://wiki.openra.net/Hacking) for an overview of the engine.
 * To get your patches merged, please adhere to the [Contributing](https://github.com/OpenRA/OpenRA/blob/bleed/CONTRIBUTING.md) guidelines.
+
+[![Issue Stats](http://issuestats.com/github/OpenRA/OpenRA/badge/pr)](http://issuestats.com/github/OpenRA/OpenRA) [![Issue Stats](http://issuestats.com/github/OpenRA/OpenRA/badge/issue)](http://issuestats.com/github/OpenRA/OpenRA)
 
 ## Mapping
 

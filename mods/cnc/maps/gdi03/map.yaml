@@ -47,7 +47,6 @@ Players:
 		OwnsWorld: True
 		NonCombatant: True
 		Race: gdi
-		Enemies: Nod
 	PlayerReference@GDI:
 		Name: GDI
 		Playable: True
@@ -827,6 +826,7 @@ Rules:
 			Description: Provides an overview of the battlefield.\n  Requires power to operate.
 		-AirstrikePower:
 	airstrike.proxy:
+		AlwaysVisible:
 		AirstrikePower:
 			Icon: airstrike
 			StartFullyCharged: True

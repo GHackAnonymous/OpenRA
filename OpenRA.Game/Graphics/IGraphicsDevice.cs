@@ -41,8 +41,6 @@ namespace OpenRA
 		Additive,
 		Subtractive,
 		Multiply,
-		SoftAdditive,
-		Translucency,
 		Multiplicative,
 		DoubleMultiplicative
 	}
@@ -59,6 +57,7 @@ namespace OpenRA
 
 		void Clear();
 		void Present();
+		Bitmap TakeScreenshot();
 		void PumpInput(IInputHandler inputHandler);
 		string GetClipboardText();
 		void DrawPrimitives(PrimitiveType type, int firstVertex, int numVertices);
@@ -70,7 +69,7 @@ namespace OpenRA
 		void EnableDepthBuffer();
 		void DisableDepthBuffer();
 
-		void SetBlendMode(BlendMode mode, float alpha = 1f);
+		void SetBlendMode(BlendMode mode);
 
 		void GrabWindowMouseFocus();
 		void ReleaseWindowMouseFocus();
@@ -84,6 +83,7 @@ namespace OpenRA
 		void Bind();
 		void SetData(T[] vertices, int length);
 		void SetData(T[] vertices, int start, int length);
+		void SetData(IntPtr data, int start, int length);
 	}
 
 	public interface IShader

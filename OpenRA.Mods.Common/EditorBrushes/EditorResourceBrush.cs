@@ -82,20 +82,24 @@ namespace OpenRA.Mods.Common.Widgets
 
 		public bool AllowResourceAt(CPos cell)
 		{
-			if (!world.Map.Contains(cell))
+			var mapResources = world.Map.MapResources.Value;
+			if (!mapResources.Contains(cell))
 				return false;
 
 			var tile = world.Map.MapTiles.Value[cell];
 			var tileInfo = world.TileSet.GetTileInfo(tile);
+			if (tileInfo == null)
+				return false;
+
 			var terrainType = world.TileSet.TerrainInfo[tileInfo.TerrainType];
 
-			if (world.Map.MapResources.Value[cell].Type == ResourceType.ResourceType)
+			if (mapResources[cell].Type == ResourceType.ResourceType)
 				return false;
 
 			if (!ResourceType.AllowedTerrainTypes.Contains(terrainType.Type))
 				return false;
 
-			return ResourceType.AllowOnRamps || tileInfo == null || tileInfo.RampType == 0;
+			return ResourceType.AllowOnRamps || tileInfo.RampType == 0;
 		}
 
 		public void Tick()
@@ -106,7 +110,6 @@ namespace OpenRA.Mods.Common.Widgets
 
 			var cellScreenPosition = worldRenderer.ScreenPxPosition(location);
 			var cellScreenPixel = worldRenderer.Viewport.WorldToViewPx(cellScreenPosition);
-			var zoom = worldRenderer.Viewport.Zoom;
 
 			preview.Bounds.X = cellScreenPixel.X;
 			preview.Bounds.Y = cellScreenPixel.Y;

@@ -31,6 +31,7 @@ CRATE:
 		Units: mcv
 
 mpspawn:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	RenderEditorOnly:
@@ -38,6 +39,7 @@ mpspawn:
 	BodyOrientation:
 
 waypoint:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	RenderEditorOnly:
@@ -51,6 +53,7 @@ waypoint:
 		Palette: colorpicker
 
 CAMERA:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	Health:
@@ -60,11 +63,26 @@ CAMERA:
 	BodyOrientation:
 
 CAMERA.small:
+	AlwaysVisible:
 	Immobile:
 		OccupiesSpace: false
 	Health:
 		HP: 1000
 	RevealsShroud:
 		Range: 6c0
+	BodyOrientation:
+
+FLARE:
+	Immobile:
+		OccupiesSpace: false
+	RevealsShroud:
+		Range: 3c0
+	RenderSprites:
+		Image: smokland
+	WithSpriteBody:
+		StartSequence: open
+	HiddenUnderFog:
+	Tooltip:
+		Name: Flare
 	BodyOrientation:
 

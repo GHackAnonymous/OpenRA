@@ -37,16 +37,16 @@ Gdi12Waypoints = { waypoint0, waypoint1, waypoint3, waypoint11, waypoint12 }
 
 AllWaypoints = { Gdi1Waypoints, Gdi2Waypoints, Gdi3Waypoints, Gdi5Waypoints, Gdi11Waypoints, Gdi12Waypoints }
 
-HuntActorTriggerActivator = { Tower1, Tower2, Radar, Silo1, Silo2, Silo3, Refinery, Barracks, Plant1, Plant2, Yard, Factory }
+PrimaryTargets = { Tower1, Tower2, Radar, Silo1, Silo2, Silo3, Refinery, Barracks, Plant1, Plant2, Yard, Factory }
 
 GDIStartUnits = { }
 
 SendGDIAirstrike = function()
-	if not Radar.IsDead then
+	if not Radar.IsDead and Radar.Owner == GDI then
 		local target = getAirstrikeTarget()
 
 		if target then
-			Radar.SendAirstrike(target, false, 256 - 28)
+			Radar.SendAirstrike(target, false, Facing.NorthEast + 4)
 			Trigger.AfterDelay(AirstrikeDelay, SendGDIAirstrike)
 		else
 			Trigger.AfterDelay(AirstrikeDelay/4, SendGDIAirstrike)
@@ -188,9 +188,9 @@ WorldLoaded = function()
 		Media.PlaySpeechNotification(Nod, "Lose")
 	end)
 
-	NodObjective1 = Nod.AddPrimaryObjective("Build 3 SAMs")
-	NodObjective2 = Nod.AddPrimaryObjective("Destroy the GDI base")
-	GDIObjective = GDI.AddPrimaryObjective("Kill all enemies!")
+	NodObjective1 = Nod.AddPrimaryObjective("Build 3 SAMs.")
+	NodObjective2 = Nod.AddPrimaryObjective("Destroy the GDI base.")
+	GDIObjective = GDI.AddPrimaryObjective("Kill all enemies.")
 
 	Trigger.AfterDelay(AirstrikeDelay, SendGDIAirstrike)
 	Trigger.AfterDelay(YyyyTriggerFunctionTime, YyyyTriggerFunction)
@@ -234,7 +234,10 @@ WorldLoaded = function()
 	Trigger.OnDiscovered(Tower1, AutoTriggerFunction)
 	Trigger.OnDiscovered(Tower2, AutoTriggerFunction)
 
-	Trigger.OnAllRemovedFromWorld(HuntActorTriggerActivator, HuntTriggerFunction)
+	Trigger.OnAllKilledOrCaptured(PrimaryTargets, function()
+		Nod.MarkCompletedObjective(NodObjective2)
+		HuntTriggerFunction()
+	end)
 
 	Trigger.AfterDelay(0, getStartUnits)
 end
@@ -248,10 +251,6 @@ Tick = function()
 
 	if not Nod.IsObjectiveCompleted(NodObjective1) and CheckForSams(Nod) then
 		Nod.MarkCompletedObjective(NodObjective1)
-	end
-
-	if GDI.HasNoRequiredUnits() then
-		Nod.MarkCompletedObjective(NodObjective2)
 	end
 
 	if DateTime.GameTime % DateTime.Seconds(3) == 0 then
@@ -295,9 +294,9 @@ checkProduction = function(player)
 			end
 		end
 		if #UnitsType > 0 then
-			if (type == 'jeep' or type == 'mtnk') and not Factory.IsDead then
+			if (type == 'jeep' or type == 'mtnk') and not Factory.IsDead and Factory.Owner == gdi then
 				Factory.Build(UnitsType)
-			elseif (type == 'e1' or type == 'e2') and not Barracks.IsDead then
+			elseif (type == 'e1' or type == 'e2') and not Barracks.IsDead and Barracks.Owner == gdi then
 				Barracks.Build(UnitsType)
 			end
 		end

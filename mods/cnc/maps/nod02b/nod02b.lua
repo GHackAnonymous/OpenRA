@@ -120,9 +120,9 @@ WorldLoaded = function()
 		Media.PlaySpeechNotification(Nod, "Lose")
 	end)
 
-	GDIObjective = GDI.AddPrimaryObjective("Kill all enemies!")
-	NodObjective1 = Nod.AddPrimaryObjective("Build a base!")
-	NodObjective2 = Nod.AddPrimaryObjective("Destroy all GDI units!")
+	GDIObjective = GDI.AddPrimaryObjective("Kill all enemies.")
+	NodObjective1 = Nod.AddPrimaryObjective("Build a base.")
+	NodObjective2 = Nod.AddPrimaryObjective("Destroy all GDI units.")
 
 	OnAnyDamaged(Grd2ActorTriggerActivator, Grd2TriggerFunction)
 	Trigger.AfterDelay(Atk8TriggerFunctionTime, Atk8TriggerFunction)
@@ -152,7 +152,7 @@ Tick = function()
 		Nod.MarkCompletedObjective(NodObjective1)
 	end
 
-	if DateTime.GameTime % DateTime.Seconds(3) == 0 and Barracks.IsInWorld then
+	if DateTime.GameTime % DateTime.Seconds(3) == 0 and Barracks.IsInWorld and Barracks.Owner == gdi then
 		checkProduction(GDI)
 	end
 end
@@ -234,8 +234,8 @@ InsertNodUnits = function()
 	Reinforcements.Reinforce(Nod, { "mcv" }, { McvEntry.Location, McvRally.Location })
 end
 
-IdleHunt = function(unit) 
-	if not unit.IsDead then 
-		Trigger.OnIdle(unit, unit.Hunt) 
-	end 
+IdleHunt = function(unit)
+	if not unit.IsDead then
+		Trigger.OnIdle(unit, unit.Hunt)
+	end
 end

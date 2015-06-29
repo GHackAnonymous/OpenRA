@@ -74,7 +74,7 @@ DiscoverGdiBase = function(actor, discoverer)
 
 	baseDiscovered = true
 
-	gdiObjective3 = gdi.AddPrimaryObjective("Eliminate all Nod forces in the area")
+	gdiObjective3 = gdi.AddPrimaryObjective("Eliminate all Nod forces in the area.")
 	gdi.MarkCompletedObjective(gdiObjective1)
 end
 
@@ -101,7 +101,7 @@ Atk5TriggerFunction = function()
 end
 
 StartProduction = function(type)
-	if Hand1.IsInWorld then
+	if Hand1.IsInWorld and Hand1.Owner == nod then
 		Hand1.Build(type)
 		Trigger.AfterDelay(DateTime.Seconds(30), function() StartProduction(type) end)
 	end
@@ -150,9 +150,9 @@ WorldLoaded = function()
 		end
 	end)
 
-	gdiObjective1 = gdi.AddPrimaryObjective("Find the GDI base")
-	gdiObjective2 = gdi.AddSecondaryObjective("Destroy all SAM sites to receive air support")
-	nodObjective = nod.AddPrimaryObjective("Destroy all GDI troops")
+	gdiObjective1 = gdi.AddPrimaryObjective("Find the GDI base.")
+	gdiObjective2 = gdi.AddSecondaryObjective("Destroy all SAM sites to receive air support.")
+	nodObjective = nod.AddPrimaryObjective("Destroy all GDI troops.")
 
 	Trigger.AfterDelay(Atk1Delay, Atk1TriggerFunction)
 	Trigger.AfterDelay(Atk2Delay, Atk2TriggerFunction)

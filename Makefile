@@ -38,9 +38,17 @@
 ############################## TOOLCHAIN ###############################
 #
 CSC         = dmcs
-CSFLAGS     = -nologo -warn:4 -debug:full -optimize- -codepage:utf8 -unsafe -warnaserror
-DEFINE      = DEBUG;TRACE
+CSFLAGS     = -nologo -warn:4 -codepage:utf8 -unsafe -warnaserror
+DEFINE      = TRACE
 COMMON_LIBS = System.dll System.Core.dll System.Data.dll System.Data.DataSetExtensions.dll System.Drawing.dll System.Xml.dll thirdparty/download/ICSharpCode.SharpZipLib.dll thirdparty/download/FuzzyLogicLibrary.dll thirdparty/download/Mono.Nat.dll thirdparty/download/MaxMind.Db.dll thirdparty/download/MaxMind.GeoIP2.dll thirdparty/download/Eluant.dll
+
+DEBUG = true
+ifeq ($(DEBUG), $(filter $(DEBUG),false no n off 0))
+CSFLAGS   += -debug:pdbonly -optimize+
+else
+CSFLAGS   += -debug:full -optimize-
+DEFINE    := DEBUG;$(DEFINE)
+endif
 
 
 
@@ -71,15 +79,15 @@ INSTALL_DATA = $(INSTALL) -m644
 
 # program targets
 CORE = rsdl2 rnull game utility
-TOOLS = editor crashdialog
+TOOLS = gamemonitor
 VERSION     = $(shell git name-rev --name-only --tags --no-undefined HEAD 2>/dev/null || echo git-`git rev-parse --short HEAD`)
 
 # dependencies
 UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-os-dependencies = linux-dependencies
-else ifeq ($(UNAME_S),Darwin)
+ifeq ($(UNAME_S),Darwin)
 os-dependencies = osx-dependencies
+else
+os-dependencies = linux-dependencies
 endif
 
 
@@ -138,8 +146,8 @@ mod_ra: $(mod_ra_TARGET)
 mod_cnc_SRCS := $(shell find OpenRA.Mods.Cnc/ -iname '*.cs')
 mod_cnc_TARGET = mods/cnc/OpenRA.Mods.Cnc.dll
 mod_cnc_KIND = library
-mod_cnc_DEPS = $(STD_MOD_DEPS) $(mod_common_TARGET) $(mod_ra_TARGET)
-mod_cnc_LIBS = $(COMMON_LIBS) $(STD_MOD_LIBS) $(mod_common_TARGET) $(mod_ra_TARGET)
+mod_cnc_DEPS = $(STD_MOD_DEPS) $(mod_common_TARGET)
+mod_cnc_LIBS = $(COMMON_LIBS) $(STD_MOD_LIBS) $(mod_common_TARGET)
 PROGRAMS += mod_cnc
 mod_cnc: $(mod_cnc_TARGET)
 
@@ -147,8 +155,8 @@ mod_cnc: $(mod_cnc_TARGET)
 mod_d2k_SRCS := $(shell find OpenRA.Mods.D2k/ -iname '*.cs')
 mod_d2k_TARGET = mods/d2k/OpenRA.Mods.D2k.dll
 mod_d2k_KIND = library
-mod_d2k_DEPS = $(STD_MOD_DEPS) $(mod_common_TARGET) $(mod_ra_TARGET) $(mod_cnc_TARGET)
-mod_d2k_LIBS = $(COMMON_LIBS) $(STD_MOD_LIBS) $(mod_common_TARGET) $(mod_ra_TARGET)
+mod_d2k_DEPS = $(STD_MOD_DEPS) $(mod_common_TARGET)
+mod_d2k_LIBS = $(COMMON_LIBS) $(STD_MOD_LIBS) $(mod_common_TARGET)
 PROGRAMS += mod_d2k
 mod_d2k: $(mod_d2k_TARGET)
 
@@ -156,28 +164,10 @@ mod_d2k: $(mod_d2k_TARGET)
 mod_ts_SRCS := $(shell find OpenRA.Mods.TS/ -iname '*.cs')
 mod_ts_TARGET = mods/ts/OpenRA.Mods.TS.dll
 mod_ts_KIND = library
-mod_ts_DEPS = $(STD_MOD_DEPS) $(mod_common_TARGET) $(mod_ra_TARGET)
-mod_ts_LIBS = $(COMMON_LIBS) $(STD_MOD_LIBS) $(mod_common_TARGET) $(mod_ra_TARGET)
+mod_ts_DEPS = $(STD_MOD_DEPS) $(mod_common_TARGET)
+mod_ts_LIBS = $(COMMON_LIBS) $(STD_MOD_LIBS) $(mod_common_TARGET)
 PROGRAMS += mod_ts
 mod_ts: $(mod_ts_TARGET)
-
-##### Tools #####
-
-# Map Editor
-editor_SRCS := $(shell find OpenRA.Editor/ -iname '*.cs')
-editor_TARGET = OpenRA.Editor.exe
-editor_KIND = winexe
-editor_DEPS = $(game_TARGET) $(mod_common_TARGET)
-editor_LIBS = System.Windows.Forms.dll System.Data.dll System.Drawing.dll $(editor_DEPS) thirdparty/download/Eluant.dll
-editor_EXTRA = -resource:OpenRA.Editor.Form1.resources -resource:OpenRA.Editor.MapSelect.resources
-editor_FLAGS = -win32icon:OpenRA.Editor/OpenRA.Editor.Icon.ico
-
-PROGRAMS += editor
-OpenRA.Editor.MapSelect.resources:
-	resgen2 OpenRA.Editor/MapSelect.resx OpenRA.Editor.MapSelect.resources 1> /dev/null
-OpenRA.Editor.Form1.resources:
-	resgen2 OpenRA.Editor/Form1.resx OpenRA.Editor.Form1.resources 1> /dev/null
-editor: OpenRA.Editor.MapSelect.resources OpenRA.Editor.Form1.resources $(editor_TARGET)
 
 check: utility mods
 	@echo
@@ -204,9 +194,6 @@ check: utility mods
 	@echo
 	@echo "Checking for code style violations in OpenRA.Mods.TS..."
 	@mono --debug OpenRA.Utility.exe ra --check-code-style OpenRA.Mods.TS
-	@echo
-	@echo "Checking for code style violations in OpenRA.Editor..."
-	@mono --debug OpenRA.Utility.exe ra --check-code-style OpenRA.Editor
 	@echo
 	@echo "Checking for code style violations in OpenRA.Renderer.Sdl2..."
 	@mono --debug OpenRA.Utility.exe ra --check-code-style OpenRA.Renderer.Sdl2
@@ -283,7 +270,7 @@ default: core
 
 core: game renderers mods utility
 
-tools: editor gamemonitor
+tools: gamemonitor
 
 package: all-dependencies core tools docs version
 
@@ -292,7 +279,7 @@ mods: mod_common mod_ra mod_cnc mod_d2k mod_ts
 all: dependencies core tools
 
 clean:
-	@-$(RM_F) *.exe *.dll *.dylib *.config ./OpenRA*/*.dll ./OpenRA*/*.mdb *.mdb mods/**/*.dll mods/**/*.mdb *.resources
+	@-$(RM_F) *.exe *.dll *.dylib *.dll.config ./OpenRA*/*.dll ./OpenRA*/*.mdb *.mdb mods/**/*.dll mods/**/*.mdb *.resources
 	@-$(RM_RF) ./*/bin ./*/obj
 	@-$(RM_RF) ./thirdparty/download
 
@@ -307,7 +294,7 @@ cli-dependencies:
 linux-dependencies: cli-dependencies linux-native-dependencies
 
 linux-native-dependencies:
-	@./thirdparty/configure-linux-native-deps.sh
+	@./thirdparty/configure-native-deps.sh
 
 windows-dependencies:
 	@./thirdparty/fetch-thirdparty-deps-windows.sh
@@ -318,18 +305,19 @@ osx-dependencies: cli-dependencies
 	@ $(CP_R) thirdparty/download/osx/*.dll.config .
 
 dependencies: $(os-dependencies)
+	@./thirdparty/fetch-geoip-db.sh
+	@ $(CP) thirdparty/download/GeoLite2-Country.mmdb.gz .
 
 all-dependencies: cli-dependencies windows-dependencies osx-dependencies
 
-version: mods/ra/mod.yaml mods/cnc/mod.yaml mods/d2k/mod.yaml mods/modchooser/mod.yaml
+version: mods/ra/mod.yaml mods/cnc/mod.yaml mods/d2k/mod.yaml mods/modchooser/mod.yaml mods/all/mod.yaml
 	@for i in $? ; do \
 		awk '{sub("Version:.*$$","Version: $(VERSION)"); print $0}' $${i} > $${i}.tmp && \
 		mv -f $${i}.tmp $${i} ; \
 	done
 
-# Documentation (d2k depends on all mod libraries)
 docs: utility mods version
-	@mono --debug OpenRA.Utility.exe d2k --docs > DOCUMENTATION.md
+	@mono --debug OpenRA.Utility.exe all --docs > DOCUMENTATION.md
 	@mono --debug OpenRA.Utility.exe ra --lua-docs > Lua-API.md
 
 install: install-core
@@ -354,7 +342,7 @@ install-core: default
 	@$(CP_R) mods/modchooser "$(DATA_INSTALL_DIR)/mods/"
 
 	@$(INSTALL_DATA) "global mix database.dat" "$(DATA_INSTALL_DIR)/global mix database.dat"
-	@$(INSTALL_DATA) "GeoLite2-Country.mmdb" "$(DATA_INSTALL_DIR)/GeoLite2-Country.mmdb"
+	@$(INSTALL_DATA) "GeoLite2-Country.mmdb.gz" "$(DATA_INSTALL_DIR)/GeoLite2-Country.mmdb.gz"
 	@$(INSTALL_DATA) AUTHORS "$(DATA_INSTALL_DIR)/AUTHORS"
 	@$(INSTALL_DATA) COPYING "$(DATA_INSTALL_DIR)/COPYING"
 
@@ -372,7 +360,7 @@ install-core: default
 	@$(INSTALL_PROGRAM) Newtonsoft.Json.dll "$(DATA_INSTALL_DIR)"
 	@$(INSTALL_PROGRAM) RestSharp.dll "$(DATA_INSTALL_DIR)"
 
-ifeq ($(shell uname),Linux)
+ifneq ($(UNAME_S),Darwin)
 	@$(CP) *.sh "$(DATA_INSTALL_DIR)"
 endif
 
@@ -383,18 +371,18 @@ install-tools: tools
 
 install-linux-icons:
 	@$(INSTALL_DIR) "$(DESTDIR)$(datadir)/icons/"
-	@$(CP_R) packaging/linux/hicolor/ "$(DESTDIR)$(datadir)/icons"
+	@$(CP_R) packaging/linux/hicolor "$(DESTDIR)$(datadir)/icons/"
 
 install-linux-desktop:
 	@$(INSTALL_DIR) "$(DESTDIR)$(datadir)/applications"
 	@$(INSTALL_DATA) packaging/linux/openra.desktop "$(DESTDIR)$(datadir)/applications"
-	@$(INSTALL_DATA) packaging/linux/openra-editor.desktop "$(DESTDIR)$(datadir)/applications"
 
 install-linux-mime:
 	@$(INSTALL_DIR) "$(DESTDIR)$(datadir)/mime/packages/"
 	@$(INSTALL_DATA) packaging/linux/openra-mimeinfo.xml "$(DESTDIR)$(datadir)/mime/packages/openra.xml"
 
 	@$(INSTALL_DIR) "$(DESTDIR)$(datadir)/applications"
+	@$(INSTALL_DATA) packaging/linux/openra-join-servers.desktop "$(DESTDIR)$(datadir)/applications"
 	@$(INSTALL_DATA) packaging/linux/openra-replays.desktop "$(DESTDIR)$(datadir)/applications"
 
 install-linux-appdata:
@@ -416,24 +404,13 @@ install-linux-scripts:
 	@$(INSTALL_PROGRAM) -m +rx openra "$(BIN_INSTALL_DIR)"
 	@-$(RM) openra
 
-	@echo "#!/bin/sh" >  openra-editor
-	@echo 'cd "$(gameinstalldir)"' >> openra-editor
-	@echo 'exec mono OpenRA.Editor.exe "$$@"' >> openra-editor
-	@$(INSTALL_DIR) "$(BIN_INSTALL_DIR)"
-	@$(INSTALL_PROGRAM) -m +rx openra-editor "$(BIN_INSTALL_DIR)"
-	@-$(RM) openra-editor
-
 uninstall:
 	@-$(RM_R) "$(DATA_INSTALL_DIR)"
 	@-$(RM_F) "$(BIN_INSTALL_DIR)/openra"
-	@-$(RM_F) "$(BIN_INSTALL_DIR)/openra-editor"
 	@-$(RM_F) "$(DESTDIR)$(datadir)/applications/openra.desktop"
-	@-$(RM_F) "$(DESTDIR)$(datadir)/applications/openra-editor.desktop"
 	@-$(RM_F) "$(DESTDIR)$(datadir)/icons/hicolor/16x16/apps/openra.png"
 	@-$(RM_F) "$(DESTDIR)$(datadir)/icons/hicolor/32x32/apps/openra.png"
-	@-$(RM_F) "$(DESTDIR)$(datadir)/icons/hicolor/32x32/apps/openra-editor.png"
 	@-$(RM_F) "$(DESTDIR)$(datadir)/icons/hicolor/48x48/apps/openra.png"
-	@-$(RM_F) "$(DESTDIR)$(datadir)/icons/hicolor/48x48/apps/openra-editor.png"
 	@-$(RM_F) "$(DESTDIR)$(datadir)/icons/hicolor/64x64/apps/openra.png"
 	@-$(RM_F) "$(DESTDIR)$(datadir)/icons/hicolor/128x128/apps/openra.png"
 	@-$(RM_F) "$(DESTDIR)$(datadir)/mime/packages/openra.xml"

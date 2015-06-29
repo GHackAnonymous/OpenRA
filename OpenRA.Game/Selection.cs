@@ -57,9 +57,21 @@ namespace OpenRA
 				}
 			}
 
-			var voicedUnit = actors.FirstOrDefault(a => a.Owner == world.LocalPlayer && a.IsInWorld && a.HasVoices());
-			if (voicedUnit != null)
-				Sound.PlayVoice("Select", voicedUnit, voicedUnit.Owner.Country.Race);
+			// Play the selection voice from one of the selected actors
+			// TODO: This probably should only be considering the newly selected actors
+			// TODO: Ship this into an INotifySelection trait to remove the engine dependency on Selectable
+			foreach (var actor in actors)
+			{
+				if (actor.Owner != world.LocalPlayer || !actor.IsInWorld)
+					continue;
+
+				var selectable = actor.Info.Traits.GetOrDefault<SelectableInfo>();
+				if (selectable == null || !actor.HasVoice(selectable.Voice))
+					continue;
+
+				actor.PlayVoice(selectable.Voice);
+				break;
+			}
 
 			foreach (var a in newSelection)
 				foreach (var sel in a.TraitsImplementing<INotifySelected>())
@@ -78,7 +90,7 @@ namespace OpenRA
 			foreach (var cg in controlGroups.Values)
 			{
 				// note: NOT `!a.IsInWorld`, since that would remove things that are in transports.
-				cg.RemoveAll(a => a.Destroyed || a.Owner != world.LocalPlayer);
+				cg.RemoveAll(a => a.Disposed || a.Owner != world.LocalPlayer);
 			}
 		}
 

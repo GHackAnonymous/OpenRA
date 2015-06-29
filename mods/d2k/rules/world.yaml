@@ -1,5 +1,6 @@
 ^BaseWorld:
 	Inherits: ^Palettes
+	AlwaysVisible:
 	ScreenMap:
 	ActorMap:
 	TerrainGeometryOverlay:
@@ -35,7 +36,6 @@
 		ResourceType: 1
 		Palette: d2k
 		TerrainType: Spice
-		EditorSprite: spice0.shp
 		Variants: spice
 		MaxDensity: 20
 		ValuePerUnit: 25
@@ -143,3 +143,4 @@ EditorWorld:
 	Inherits: ^BaseWorld
 	EditorActorLayer:
 	D2kEditorResourceLayer:
+

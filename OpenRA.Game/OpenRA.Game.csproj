@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -41,6 +41,17 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -128,6 +139,7 @@
     <Compile Include="Network\Connection.cs" />
     <Compile Include="Network\FrameData.cs" />
     <Compile Include="Network\GameServer.cs" />
+    <Compile Include="Network\GeoIP.cs" />
     <Compile Include="Network\Handshake.cs" />
     <Compile Include="Network\Order.cs" />
     <Compile Include="Network\OrderIO.cs" />
@@ -144,6 +156,7 @@
     <Compile Include="Primitives\MergedStream.cs" />
     <Compile Include="Primitives\SpatiallyPartitioned.cs" />
     <Compile Include="Primitives\ConcurrentCache.cs" />
+    <Compile Include="SelectableExts.cs" />
     <Compile Include="Selection.cs" />
     <Compile Include="Server\Connection.cs" />
     <Compile Include="Server\Exts.cs" />
@@ -157,18 +170,14 @@
     <Compile Include="Sync.cs" />
     <Compile Include="TraitDictionary.cs" />
     <Compile Include="Traits\Armor.cs" />
-    <Compile Include="Traits\CreatesShroud.cs" />
     <Compile Include="Traits\DrawLineToTarget.cs" />
-    <Compile Include="Traits\EditorAppearance.cs" />
     <Compile Include="Traits\EditorTilesetFilter.cs" />
     <Compile Include="Traits\Health.cs" />
     <Compile Include="Traits\LintAttributes.cs" />
     <Compile Include="Traits\RejectsOrders.cs" />
     <Compile Include="Traits\Player\DeveloperMode.cs" />
     <Compile Include="Traits\Player\PlayerResources.cs" />
-    <Compile Include="Traits\RevealsShroud.cs" />
     <Compile Include="Traits\Selectable.cs" />
-    <Compile Include="Traits\SelectionDecorations.cs" />
     <Compile Include="Traits\Target.cs" />
     <Compile Include="Traits\TraitsInterfaces.cs" />
     <Compile Include="Traits\Util.cs" />
@@ -179,6 +188,7 @@
     <Compile Include="Traits\World\Shroud.cs" />
     <Compile Include="World.cs" />
     <Compile Include="WorldUtils.cs" />
+    <Compile Include="VoiceExts.cs" />
     <Compile Include="Network\ReplayRecorderConnection.cs" />
     <Compile Include="Traits\DebugPauseState.cs" />
     <Compile Include="Network\UPnP.cs" />
@@ -222,7 +232,6 @@
     <Compile Include="Sound\OpenAlSound.cs" />
     <Compile Include="Sound\NullSound.cs" />
     <Compile Include="Effects\SpriteEffect.cs" />
-    <Compile Include="Graphics\SelectionBoxRenderable.cs" />
     <Compile Include="Graphics\SelectionBarsRenderable.cs" />
     <Compile Include="Graphics\TargetLineRenderable.cs" />
     <Compile Include="Graphics\UISpriteRenderable.cs" />
@@ -239,6 +248,7 @@
     <Compile Include="Widgets\WidgetUtils.cs" />
     <Compile Include="Widgets\WorldInteractionControllerWidget.cs" />
     <Compile Include="Graphics\PaletteReference.cs" />
+    <Compile Include="Graphics\TerrainSpriteLayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileSystem\D2kSoundResources.cs" />

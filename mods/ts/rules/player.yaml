@@ -1,4 +1,5 @@
 Player:
+	AlwaysVisible:
 	TechTree:
 	ClassicProductionQueue@Building:
 		Type: Building
@@ -30,7 +31,7 @@ Player:
 		LowPowerSlowdown: 3
 		SpeedUp: True
 	PlaceBuilding:
-		Palette: ra
+		Palette: placebuilding
 	SupportPowerManager:
 	ScriptTriggers:
 	MissionObjectives:

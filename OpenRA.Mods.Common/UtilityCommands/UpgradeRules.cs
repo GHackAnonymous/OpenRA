@@ -11,7 +11,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 
 namespace OpenRA.Mods.Common.UtilityCommands
@@ -73,6 +72,42 @@ namespace OpenRA.Mods.Common.UtilityCommands
 			var ts = Game.ModData.Manifest.TileSize;
 			var world = new WVec(offset.X * 1024 / ts.Width, offset.Y * 1024 / ts.Height, 0);
 			input = world.ToString();
+		}
+
+		internal static void RenameDamageTypes(MiniYamlNode damageTypes)
+		{
+			var mod = Game.ModData.Manifest.Mod.Id;
+			if (mod == "cnc" || mod == "ra")
+			{
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType1", "DefaultDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType2", "BulletDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType3", "SmallExplosionDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType4", "ExplosionDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType5", "FireDeath");
+			}
+
+			if (mod == "cnc")
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType6", "TiberiumDeath");
+
+			if (mod == "ra")
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType6", "ElectricityDeath");
+
+			if (mod == "d2k")
+			{
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType1", "ExplosionDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType2", "SoundDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType3", "SmallExplosionDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType4", "BulletDeath");
+			}
+
+			if (mod == "ts")
+			{
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType1", "BulletDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType2", "SmallExplosionDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType3", "ExplosionDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType5", "FireDeath");
+				damageTypes.Value.Value = damageTypes.Value.Value.Replace("DeathType6", "EnergyDeath");
+			}
 		}
 
 		internal static void UpgradeActorRules(int engineVersion, ref List<MiniYamlNode> nodes, MiniYamlNode parent, int depth)
@@ -334,13 +369,16 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				// GiveUnitCrateAction and GiveMcvCrateAction were updated to allow multiple units
 				if (engineVersion < 20140723)
 				{
-					if (depth == 2 && parentKey.Contains("GiveMcvCrateAction"))
-						if (node.Key == "Unit")
-							node.Key = "Units";
+					if (depth == 2 && !string.IsNullOrEmpty(parentKey))
+					{
+						if (parentKey.Contains("GiveMcvCrateAction"))
+							if (node.Key == "Unit")
+								node.Key = "Units";
 
-					if (depth == 2 && parentKey.Contains("GiveUnitCrateAction"))
-						if (node.Key == "Unit")
-							node.Key = "Units";
+						if (parentKey.Contains("GiveUnitCrateAction"))
+							if (node.Key == "Unit")
+								node.Key = "Units";
+					}
 				}
 
 				// Power from Building was moved out into Power and ScalePowerWithHealth traits
@@ -832,7 +870,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 							var rearmSound = minelayerFields.FirstOrDefault(rs => rs.Key == "RearmSound");
 							var minelayerRearmSound = rearmSound != null ? FieldLoader.GetValue<string>("RearmSound", rearmSound.Value.Value) : "minelay1.aud";
 
-							limitedAmmoFields.Add(new MiniYamlNode("RearmSound", minelayerRearmSound.ToString()));
+							limitedAmmoFields.Add(new MiniYamlNode("RearmSound", minelayerRearmSound));
 							minelayerFields.Remove(rearmSound);
 						}
 					}
@@ -941,6 +979,231 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					// Rename the ProvidesCustomPrerequisite trait.
 					if (node.Key.StartsWith("ProvidesCustomPrerequisite"))
 						node.Key = node.Key.Replace("ProvidesCustomPrerequisite", "ProvidesPrerequisite");
+				}
+
+				if (engineVersion < 20150509)
+				{
+					if (depth == 0 && node.Value.Nodes.Exists(n => n.Key == "Selectable"))
+					{
+						var selectable = node.Value.Nodes.FirstOrDefault(n => n.Key == "Selectable");
+						var selectableNodes = selectable.Value.Nodes;
+						var voice = selectableNodes.FirstOrDefault(n => n.Key == "Voice");
+						var selectableVoice = voice != null ? FieldLoader.GetValue<string>("Voice", voice.Value.Value) : "";
+
+						if (voice != null)
+						{
+							node.Value.Nodes.Add(new MiniYamlNode("Voiced", "", new List<MiniYamlNode>
+							{
+								new MiniYamlNode("VoiceSet", selectableVoice),
+							}));
+						}
+					}
+
+					if (node.Key.StartsWith("Selectable"))
+						node.Value.Nodes.RemoveAll(p => p.Key == "Voice");
+				}
+
+				if (engineVersion < 20150524)
+				{
+					// Replace numbers with strings for DeathSounds.DeathType
+					if (node.Key.StartsWith("DeathSounds"))
+					{
+						var deathTypes = node.Value.Nodes.FirstOrDefault(x => x.Key == "DeathTypes");
+						if (deathTypes != null)
+						{
+							var types = FieldLoader.GetValue<string[]>("DeathTypes", deathTypes.Value.Value);
+							deathTypes.Value.Value = string.Join(", ", types.Select(type => "DeathType" + type));
+
+							RenameDamageTypes(deathTypes);
+						}
+					}
+				}
+
+				if (engineVersion < 20150528)
+				{
+					// Note (stolen from WithInfantryBody upgrade rule):
+					// These rules are set up to do approximately the right thing for maps, but
+					// mods need additional manual tweaks. This is the best we can do without having
+					// much smarter rules parsing, because we currently can't reason about inherited traits.
+					if (depth == 0)
+					{
+						var childKeys = new[] { "Sequence" };
+
+						var ru = node.Value.Nodes.FirstOrDefault(n => n.Key == "RenderUnit");
+						if (ru != null)
+						{
+							ru.Key = "WithFacingSpriteBody";
+							node.Value.Nodes.Add(new MiniYamlNode("AutoSelectionSize", ""));
+
+							var rsNodes = ru.Value.Nodes.Where(n => !childKeys.Contains(n.Key)).ToList();
+							if (rsNodes.Any())
+								node.Value.Nodes.Add(new MiniYamlNode("RenderSprites", new MiniYaml("", rsNodes)));
+							else
+								node.Value.Nodes.Add(new MiniYamlNode("RenderSprites", ""));
+
+							ru.Value.Nodes.RemoveAll(n => rsNodes.Contains(n));
+						}
+
+						var rru = node.Value.Nodes.FirstOrDefault(n => n.Key == "-RenderUnit");
+						if (rru != null)
+							rru.Key = "-WithFacingSpriteBody";
+					}
+
+					// For RenderUnitReload
+					var rur = node.Value.Nodes.Where(x => x.Key == "RenderUnitReload");
+					if (rur.Any())
+					{
+						rur.Do(x => x.Key = "RenderSprites");
+						node.Value.Nodes.Add(new MiniYamlNode("AutoSelectionSize", ""));
+						node.Value.Nodes.Add(new MiniYamlNode("WithFacingSpriteBody", "", new List<MiniYamlNode>
+						{
+							new MiniYamlNode("Sequence", "idle")
+						}));
+						node.Value.Nodes.Add(new MiniYamlNode("WithAttackAnimation", "", new List<MiniYamlNode>
+						{
+							new MiniYamlNode("AimSequence", "aim"),
+							new MiniYamlNode("ReloadPrefix", "empty-")
+						}));
+
+						var rrur = node.Value.Nodes.FirstOrDefault(n => n.Key == "-RenderUnitReload");
+						if (rrur != null)
+							rrur.Key = "-WithFacingSpriteBody";
+					}
+
+					// For RenderUnitFlying
+					var ruf = node.Value.Nodes.Where(x => x.Key == "RenderUnitFlying");
+					if (ruf.Any())
+					{
+						ruf.Do(x => x.Key = "RenderSprites");
+						node.Value.Nodes.Add(new MiniYamlNode("AutoSelectionSize", ""));
+						node.Value.Nodes.Add(new MiniYamlNode("WithFacingSpriteBody", ""));
+						node.Value.Nodes.Add(new MiniYamlNode("WithMoveAnimation", "", new List<MiniYamlNode>
+						{
+							new MiniYamlNode("MoveSequence", "move")
+						}));
+
+						var rruf = node.Value.Nodes.FirstOrDefault(n => n.Key == "-RenderUnitFlying");
+						if (rruf != null)
+							rruf.Key = "-WithFacingSpriteBody";
+					}
+				}
+
+				if (engineVersion < 20150607)
+				{
+					// Add WithRankDecoration to all actors using GainsExperience
+					var ge = node.Value.Nodes.FirstOrDefault(n => n.Key == "GainsExperience");
+					if (ge != null)
+					{
+						var nodeUpgrades = ge.Value.Nodes.FirstOrDefault(n => n.Key == "Upgrades");
+						var upgrades = nodeUpgrades != null ? nodeUpgrades.Value.Nodes.Count() : 4;
+
+						var nodeChPal = ge.Value.Nodes.FirstOrDefault(n => n.Key == "ChevronPalette");
+						var chPal = nodeChPal != null && !string.IsNullOrEmpty(nodeChPal.Value.Value) ? nodeChPal.Value.Value : "effect";
+						ge.Value.Nodes.Remove(nodeChPal);
+
+						if (upgrades != 0 && nodeUpgrades != null)
+						{
+							foreach (var nodeUpgrade in nodeUpgrades.Value.Nodes)
+								nodeUpgrade.Value.Value = "rank" + (string.IsNullOrEmpty(nodeUpgrade.Value.Value) ? null : ", ") + nodeUpgrade.Value.Value;
+
+							node.Value.Nodes.Add(new MiniYamlNode("WithRankDecoration", null, new List<MiniYamlNode>
+							{
+								new MiniYamlNode("Image", "rank"),
+								new MiniYamlNode("Sequence", "rank"),
+								new MiniYamlNode("Palette", chPal),
+								new MiniYamlNode("ReferencePoint", "Bottom, Right"),
+								new MiniYamlNode("Offset", "2, 2"),
+								new MiniYamlNode("UpgradeTypes", "rank"),
+								new MiniYamlNode("ZOffset", "256"),
+								new MiniYamlNode("UpgradeMinEnabledLevel", "1"),
+								new MiniYamlNode("UpgradeMaxAcceptedLevel", upgrades.ToString())
+							}));
+						}
+					}
+				}
+
+				// Images from WithCrateBody was moved into RenderSprites
+				if (engineVersion < 20150608)
+				{
+					if (depth == 0)
+					{
+						var actorTraits = node.Value.Nodes;
+						var withCrateBody = actorTraits.FirstOrDefault(t => t.Key == "WithCrateBody");
+						if (withCrateBody != null)
+						{
+							var withCrateBodyFields = withCrateBody.Value.Nodes;
+							var images = withCrateBodyFields.FirstOrDefault(n => n.Key == "Images");
+							if (images == null)
+								images = new MiniYamlNode("Images", "crate");
+							else
+								withCrateBodyFields.Remove(images);
+
+							images.Key = "Image";
+
+							var renderSprites = actorTraits.FirstOrDefault(t => t.Key == "RenderSprites");
+							if (renderSprites != null)
+								renderSprites.Value.Nodes.Add(images);
+							else
+							{
+								Console.WriteLine("Warning: Adding RenderSprites trait to {0} in {1}".F(node.Key, node.Location.Filename));
+								actorTraits.Add(new MiniYamlNode("RenderSprites", new MiniYaml("", new List<MiniYamlNode> { images })));
+							}
+						}
+					}
+				}
+
+				// 'Selectable' boolean was removed from selectable trait.
+				if (engineVersion < 20150619)
+				{
+					if (depth == 1 && node.Value.Nodes.Exists(n => n.Key == "Selectable"))
+					{
+						var selectable = node.Value.Nodes.FirstOrDefault(n => n.Key == "Selectable");
+						if (node.Key == "Selectable" && selectable.Value.Value == "false")
+							node.Key = "SelectableRemoveMe";
+
+						// To cover rare cases where the boolean was 'true'
+						if (node.Key == "Selectable" && selectable.Value.Value == "true")
+							node.Value.Nodes.Remove(selectable);
+					}
+
+					if (depth == 0 && node.Value.Nodes.Exists(n => n.Key == "SelectableRemoveMe"))
+					{
+						node.Value.Nodes.RemoveAll(n => n.Key == "SelectableRemoveMe");
+						Console.WriteLine("The 'Selectable' boolean has been removed from the Selectable trait.");
+						Console.WriteLine("If you just want to disable an inherited Selectable trait, use -Selectable instead.");
+						Console.WriteLine("For special cases like bridge huts, which need bounds to be targetable by C4 and engineers,");
+						Console.WriteLine("give them the CustomSelectionSize trait with CustomBounds.");
+						Console.WriteLine("See RA and C&C bridge huts or crates for reference.");
+					}
+				}
+
+				if (engineVersion < 20150620)
+				{
+					if (depth == 2)
+					{
+						if (node.Key == "DeathSound")
+							node.Key = "Voice";
+
+						if (node.Key == "KillVoice")
+							node.Key = "Voice";
+
+						if (node.Key == "BuildVoice")
+							node.Key = "Voice";
+					}
+				}
+
+				// WinForms editor was removed
+				if (engineVersion < 20150620)
+				{
+					if (depth == 0 && node.Value.Nodes.Exists(n => n.Key == "EditorAppearance"))
+						node.Value.Nodes.RemoveAll(n => n.Key == "EditorAppearance");
+
+					if (depth == 1 && node.Value.Nodes.Exists(n => n.Key == "ResourceType"))
+					{
+						var editorSprite = node.Value.Nodes.FirstOrDefault(n => n.Key == "EditorSprite");
+						if (editorSprite != null)
+							node.Value.Nodes.Remove(editorSprite);
+					}
 				}
 
 				UpgradeActorRules(engineVersion, ref node.Value.Nodes, node, depth + 1);
@@ -1359,6 +1622,43 @@ namespace OpenRA.Mods.Common.UtilityCommands
 						// Remove obsolete PreventProne and ProneModifier
 						node.Value.Nodes.RemoveAll(x => x.Key == "PreventProne");
 						node.Value.Nodes.RemoveAll(x => x.Key == "ProneModifier");
+					}
+				}
+
+				if (engineVersion < 20150524)
+				{
+					// Remove DeathType from DamageWarhead
+					if (node.Key.StartsWith("Warhead") && node.Value.Value == "SpreadDamage")
+					{
+						var deathTypeNode = node.Value.Nodes.FirstOrDefault(x => x.Key == "DeathType");
+						var deathType = deathTypeNode == null ? "1" : FieldLoader.GetValue<string>("DeathType", deathTypeNode.Value.Value);
+						var damageTypes = node.Value.Nodes.FirstOrDefault(x => x.Key == "DamageTypes");
+						if (damageTypes != null)
+							damageTypes.Value.Value += ", DeathType" + deathType;
+						else
+							node.Value.Nodes.Add(new MiniYamlNode("DamageTypes", "DeathType" + deathType));
+
+						node.Value.Nodes.RemoveAll(x => x.Key == "DeathType");
+					}
+
+					// Replace "DeathTypeX" damage types with proper words
+					if (node.Key.StartsWith("Warhead") && node.Value.Value == "SpreadDamage")
+					{
+						var damageTypes = node.Value.Nodes.FirstOrDefault(x => x.Key == "DamageTypes");
+						if (damageTypes != null)
+							RenameDamageTypes(damageTypes);
+					}
+				}
+
+				if (engineVersion < 20150526)
+				{
+					var isNukePower = node.Key == "NukePower";
+					var isIonCannonPower = node.Key == "IonCannonPower";
+
+					if ((isNukePower || isIonCannonPower) && !node.Value.Nodes.Any(n => n.Key == "Cursor"))
+					{
+						var cursor = isIonCannonPower ? "ioncannon" : "nuke";
+						node.Value.Nodes.Add(new MiniYamlNode("Cursor", cursor));
 					}
 				}
 

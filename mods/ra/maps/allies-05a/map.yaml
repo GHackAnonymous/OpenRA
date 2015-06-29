@@ -1577,6 +1577,7 @@ Rules:
 		-ConquestVictoryConditions:
 		MissionObjectives:
 			EarlyGameOver: true
+		-EnemyWatcher:
 	World:
 		-CrateSpawner:
 		-SpawnMPUnits:
@@ -1621,6 +1622,7 @@ Rules:
 		Tooltip:
 			ShowOwnerRow: false
 	Camera.Truk:
+		AlwaysVisible:
 		Mobile:
 			TerrainSpeeds:
 		RevealsShroud:
@@ -1655,10 +1657,12 @@ Rules:
 		Inherits: TRUK
 		Buildable:
 			Prerequisites: ~disabled
-		RenderUnit:
-			Image: TRUK
+		WithFacingSpriteBody:
 		-LeavesHusk:
 		-EjectOnDeath:
+		AutoSelectionSize:
+		RenderSprites:
+			Image: TRUK
 	SPY:
 		Infiltrates:
 			Types: Mission Objectives
@@ -1671,6 +1675,7 @@ Rules:
 			CloakDelay: 0
 			Palette:
 	CloakUpgrade:
+		AlwaysVisible:
 		Immobile:
 			OccupiesSpace: false
 		BodyOrientation:
@@ -1805,14 +1810,13 @@ Weapons:
 		Warhead@1Dam: SpreadDamage
 			Spread: 42
 			Damage: 50
-			DeathType: 2
 			Versus:
 				None: 0
 				Wood: 10
 				Light: 0
 				Heavy: 0
 				Concrete: 0
-			DamageTypes: Prone50Percent, TriggerProne
+			DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 		Warhead@2Eff: CreateEffect
 			Explosion: piffs
 			InvalidImpactTypes: Water

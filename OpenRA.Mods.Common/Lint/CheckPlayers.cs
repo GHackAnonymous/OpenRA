@@ -10,6 +10,7 @@
 
 using System;
 using System.Linq;
+using OpenRA.Mods.Common.Traits;
 using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.Lint
@@ -21,20 +22,47 @@ namespace OpenRA.Mods.Common.Lint
 			var players = new MapPlayers(map.PlayerDefinitions).Players;
 
 			var playerNames = players.Values.Select(p => p.Name);
-			foreach (var player in players)
-				foreach (var ally in player.Value.Allies)
+			foreach (var player in players.Values)
+			{
+				foreach (var ally in player.Allies)
 					if (!playerNames.Contains(ally))
 						emitError("Allies contains player {0} that is not in list.".F(ally));
 
-			foreach (var player in players)
-				foreach (var enemy in player.Value.Enemies)
+				foreach (var enemy in player.Enemies)
 					if (!playerNames.Contains(enemy))
 						emitError("Enemies contains player {0} that is not in list.".F(enemy));
 
-			var races = map.Rules.Actors["world"].Traits.WithInterface<CountryInfo>().Select(c => c.Race);
-			foreach (var player in players)
-				if (!string.IsNullOrWhiteSpace(player.Value.Race) && player.Value.Race != "Random" && !races.Contains(player.Value.Race))
-					emitError("Invalid race {0} chosen for player {1}.".F(player.Value.Race, player.Value.Name));
+				if (player.OwnsWorld && (player.Enemies.Any() || player.Allies.Any()))
+					emitWarning("The player {0} owning the world should not have any allies or enemies.".F(player.Name));
+			}
+
+			var worldActor = map.Rules.Actors["world"];
+
+			var races = worldActor.Traits.WithInterface<CountryInfo>().Select(c => c.Race);
+			foreach (var player in players.Values)
+				if (!string.IsNullOrWhiteSpace(player.Race) && !races.Contains(player.Race))
+					emitError("Invalid race {0} chosen for player {1}.".F(player.Race, player.Name));
+
+			if (worldActor.Traits.Contains<MPStartLocationsInfo>())
+			{
+				var multiPlayers = players.Where(p => p.Value.Playable).Count();
+				var spawns = map.ActorDefinitions.Where(a => a.Value.Value == "mpspawn");
+				var spawnCount = spawns.Count();
+
+				if (multiPlayers > spawnCount)
+					emitError("The map allows {0} possible players, but defines only {1} spawn points".F(multiPlayers, spawnCount));
+
+				if (map.SpawnPoints.Value.Distinct().Count() != spawnCount)
+					emitError("Duplicate spawn point locations detected.");
+			}
+
+			foreach (var kv in map.ActorDefinitions)
+			{
+				var actorReference = new ActorReference(kv.Value.Value, kv.Value.ToDictionary());
+				var ownerName = actorReference.InitDict.Get<OwnerInit>().PlayerName;
+				if (!playerNames.Contains(ownerName))
+					emitError("Actor {0} is owned by unknown player {1}.".F(actorReference.Type, ownerName));
+			}
 		}
 	}
 }

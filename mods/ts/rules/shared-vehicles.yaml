@@ -1,5 +1,5 @@
 MCV:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelVehicle
 	Buildable:
 		Queue: Vehicle
 		BuildPaletteOrder: 110
@@ -11,7 +11,6 @@ MCV:
 		Description: Deploys into another Construction Yard.\n  Unarmed
 	Selectable:
 		Priority: 3
-		Bounds: 42,42
 	Health:
 		HP: 600
 	Armor:
@@ -30,12 +29,12 @@ MCV:
 		Facing: 96
 		TransformSounds: facbld1.aud
 		NoTransformSounds:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
+		Voice: Move
+	SelectionDecorations:
+		VisualBounds: 42,42
 
 HARV:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 1400
 	Tooltip:
@@ -55,6 +54,8 @@ HARV:
 		UnloadTicksPerBale: 1
 		SearchFromProcRadius: 24
 		SearchFromOrderRadius: 12
+		HarvestVoice: Attack
+		DeliverVoice: Move
 	Mobile:
 		Speed: 71
 		Crushes: wall, crate
@@ -65,6 +66,7 @@ HARV:
 			Beach: 70
 			Tiberium: 80
 			BlueTiberium: 80
+			Veins: 80
 	Health:
 		HP: 1000
 	SelfHealing:
@@ -76,17 +78,18 @@ HARV:
 	RevealsShroud:
 		Range: 4c0
 	-GainsExperience:
-	RenderSprites:
-	RenderVoxels:
+	-WithVoxelBody:
 	WithVoxelUnloadBody:
 	Explodes:
 		Weapon: TiberiumExplosion
 	WithHarvestAnimation:
 		Offset: 384,0,0
 		Palette: effect
+	SelectionDecorations:
+		VisualBounds: 36,36
 
 LPST:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelVehicle
 	Valued:
 		Cost: 950
 	Tooltip:
@@ -105,14 +108,12 @@ LPST:
 		ROT: 5
 	RevealsShroud:
 		Range: 10c0
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	Transforms:
 		IntoActor: gadpsa
 		Facing: 159
 		TransformSounds:
 		NoTransformSounds:
+		Voice: Move
 
 GGHUNT:
 	Inherits: ^Vehicle
@@ -129,8 +130,11 @@ GGHUNT:
 		Type: Light
 	RevealsShroud:
 		Range: 7c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	DemoTruck:
+		Voice: Attack
 	Explodes:
 		Weapon: SuicideBomb
 		EmptyWeapon: SuicideBomb
+	AutoSelectionSize:
+

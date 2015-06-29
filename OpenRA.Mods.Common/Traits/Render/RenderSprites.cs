@@ -23,7 +23,8 @@ namespace OpenRA.Mods.Common.Traits
 		IEnumerable<IActorPreview> RenderPreviewSprites(ActorPreviewInitializer init, RenderSpritesInfo rs, string image, int facings, PaletteReference p);
 	}
 
-	public class RenderSpritesInfo : IRenderActorPreviewInfo, ITraitInfo, ILegacyEditorRenderInfo
+	[Desc("Render trait fundament that won't work without additional With* render traits.")]
+	public class RenderSpritesInfo : IRenderActorPreviewInfo, ITraitInfo
 	{
 		[Desc("The sequence name that defines the actor sprites. Defaults to the actor name.")]
 		public readonly string Image = null;
@@ -81,7 +82,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public string GetImage(ActorInfo actor, SequenceProvider sequenceProvider, string race)
 		{
-			if (RaceImages != null)
+			if (RaceImages != null && !string.IsNullOrEmpty(race))
 			{
 				string raceImage = null;
 				if (RaceImages.TryGetValue(race, out raceImage) && sequenceProvider.HasSequence(raceImage))
@@ -90,9 +91,6 @@ namespace OpenRA.Mods.Common.Traits
 
 			return (Image ?? actor.Name).ToLowerInvariant();
 		}
-
-		public string EditorPalette { get { return Palette; } }
-		public string EditorImage(ActorInfo actor, SequenceProvider sequenceProvider, string race) { return GetImage(actor, sequenceProvider, race); }
 	}
 
 	public class RenderSprites : IRender, ITick, INotifyOwnerChanged, INotifyEffectiveOwnerChanged
@@ -235,8 +233,8 @@ namespace OpenRA.Mods.Common.Traits
 			return sequence;
 		}
 
-		// Required by RenderSimple
-		protected int2 AutoSelectionSize(Actor self)
+		// Required by RenderSimple, WithSpriteBody and WithInfantryBody
+		public int2 AutoSelectionSize(Actor self)
 		{
 			return anims.Where(b => b.IsVisible
 				&& b.Animation.Animation.CurrentSequence != null)

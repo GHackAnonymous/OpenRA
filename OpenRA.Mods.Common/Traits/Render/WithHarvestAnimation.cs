@@ -18,7 +18,7 @@ namespace OpenRA.Mods.Common.Traits
 	class WithHarvestAnimationInfo : ITraitInfo, Requires<RenderSpritesInfo>, Requires<IBodyOrientationInfo>
 	{
 		[Desc("Sequence name to use")]
-		public readonly string Sequence = "harvest";
+		[SequenceReference] public readonly string Sequence = "harvest";
 
 		[Desc("Position relative to body")]
 		public readonly WVec Offset = WVec.Zero;
@@ -40,7 +40,7 @@ namespace OpenRA.Mods.Common.Traits
 			var rs = self.Trait<RenderSprites>();
 			var body = self.Trait<IBodyOrientation>();
 
-			anim = new Animation(self.World, rs.GetImage(self), RenderSimple.MakeFacingFunc(self));
+			anim = new Animation(self.World, rs.GetImage(self), RenderSprites.MakeFacingFunc(self));
 			anim.IsDecoration = true;
 			anim.Play(info.Sequence);
 			rs.Add(new AnimationWithOffset(anim,

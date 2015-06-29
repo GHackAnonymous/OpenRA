@@ -20,18 +20,17 @@ DPOD:
 		Types: Infantry
 		MaxWeight: 1
 		PipCount: 1
+		UnloadVoice: Move
 	Armament:
 		Weapon: Vulcan2
 	AttackHeli:
+		Voice: Attack
 	AmmoPool:
 		Ammo: 5
 		PipCount: 5
 		PipType: Ammo
 		PipTypeEmpty: AmmoEmpty
 	AutoTarget:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 
 DSHP:
 	Inherits: ^Helicopter
@@ -55,9 +54,7 @@ DSHP:
 		Types: Infantry
 		MaxWeight: 5
 		PipCount: 5
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
+		UnloadVoice: Move
 	Hovers:
 
 ORCA:
@@ -87,6 +84,7 @@ ORCA:
 		Weapon: Hellfire
 	AttackHeli:
 		FacingTolerance: 20
+		Voice: Attack
 	AmmoPool:
 		Ammo: 5
 		PipCount: 5
@@ -94,8 +92,6 @@ ORCA:
 		PipTypeEmpty: AmmoEmpty
 	AutoTarget:
 	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	Hovers:
 
 ORCAB:
@@ -125,6 +121,7 @@ ORCAB:
 	Armament:
 		Weapon: Bomb
 	AttackPlane:
+		Voice: Attack
 		FacingTolerance: 20
 	AmmoPool:
 		Ammo: 10
@@ -135,8 +132,6 @@ ORCAB:
 		PipTypeEmpty: AmmoEmpty
 	AutoTarget:
 	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	Hovers:
 
 ORCATRAN:
@@ -161,9 +156,7 @@ ORCATRAN:
 		Types: Infantry
 		MaxWeight: 5
 		PipCount: 5
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
+		UnloadVoice: Move
 	Hovers:
 
 TRNSPORT:
@@ -190,9 +183,9 @@ TRNSPORT:
 	RevealsShroud:
 		Range: 2c0
 	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	Hovers:
+	Selectable:
+		Bounds: 44,32,0,-8
 
 SCRIN:
 	Inherits: ^Plane
@@ -207,7 +200,8 @@ SCRIN:
 		Prerequisites: ~nahpad, natech
 	Selectable:
 		Bounds: 30,24
-		Voice: Scrin
+	Voiced:
+		VoiceSet: Scrin
 	Plane:
 		MaximumPitch: 90
 		ROT: 3
@@ -221,6 +215,7 @@ SCRIN:
 	Armament:
 		Weapon: Proton
 	AttackPlane:
+		Voice: Attack
 		FacingTolerance: 20
 	AmmoPool:
 		Ammo: 15
@@ -230,8 +225,6 @@ SCRIN:
 		PipTypeEmpty: AmmoEmpty
 	AutoTarget:
 	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 
 APACHE:
 	Inherits: ^Helicopter
@@ -260,6 +253,7 @@ APACHE:
 		Weapon: HarpyClaw
 	AttackHeli:
 		FacingTolerance: 20
+		Voice: Attack
 	AmmoPool:
 		Ammo: 12
 		PipCount: 4
@@ -269,6 +263,5 @@ APACHE:
 	WithRotor:
 		Offset: 85,0,384
 	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	Hovers:
+

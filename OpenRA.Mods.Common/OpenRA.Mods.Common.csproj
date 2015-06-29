@@ -23,6 +23,24 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="cp ${TargetFile} ../mods/common" workingdir="${ProjectDir}" />
+        <Command type="AfterBuild" command="cp ${TargetFile}.mdb ../mods/common" workingdir="${ProjectDir}" />
+      </CustomCommands>
+    </CustomCommands>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Optimize>true</Optimize>
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="cp ${TargetFile} ../mods/common" workingdir="${ProjectDir}" />
@@ -115,6 +133,7 @@
     <Compile Include="Activities\Turn.cs" />
     <Compile Include="Activities\UnloadCargo.cs" />
     <Compile Include="Activities\Wait.cs" />
+    <Compile Include="Activities\WaitForTransport.cs" />
     <Compile Include="ActorExts.cs" />
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
@@ -142,7 +161,6 @@
     <Compile Include="Effects\Parachute.cs" />
     <Compile Include="Effects\PowerdownIndicator.cs" />
     <Compile Include="Effects\RallyPointIndicator.cs" />
-    <Compile Include="Effects\Rank.cs" />
     <Compile Include="Effects\RepairIndicator.cs" />
     <Compile Include="Effects\Smoke.cs" />
     <Compile Include="Commands\ChatCommands.cs" />
@@ -153,6 +171,7 @@
     <Compile Include="Graphics\BeamRenderable.cs" />
     <Compile Include="Graphics\ContrailRenderable.cs" />
     <Compile Include="Graphics\RangeCircleRenderable.cs" />
+    <Compile Include="Graphics\SelectionBoxRenderable.cs" />
     <Compile Include="Graphics\SpriteActorPreview.cs" />
     <Compile Include="Graphics\TextRenderable.cs" />
     <Compile Include="Graphics\VoxelActorPreview.cs" />
@@ -165,7 +184,11 @@
     <Compile Include="Lint\CheckActorReferences.cs" />
     <Compile Include="Lint\CheckSyncAnnotations.cs" />
     <Compile Include="Lint\CheckTraitPrerequisites.cs" />
+    <Compile Include="Lint\CheckDeathTypes.cs" />
+    <Compile Include="Lint\CheckVoiceReferences.cs" />
+    <Compile Include="Lint\CheckUpgrades.cs" />
     <Compile Include="Lint\LintBuildablePrerequisites.cs" />
+    <Compile Include="Lint\LintExts.cs" />
     <Compile Include="LoadScreens\ModChooserLoadScreen.cs" />
     <Compile Include="Orders\BeaconOrderGenerator.cs" />
     <Compile Include="Orders\DeployOrderTargeter.cs" />
@@ -176,6 +199,10 @@
     <Compile Include="Orders\UnitOrderTargeter.cs" />
     <Compile Include="Pathfinder\CellInfo.cs" />
     <Compile Include="PlayerExtensions.cs" />
+    <Compile Include="Scripting\Global\FacingGlobal.cs" />
+    <Compile Include="Scripting\ScriptUpgradesCache.cs" />
+    <Compile Include="Scripting\Global\HSLColorGlobal.cs" />
+    <Compile Include="Scripting\Global\UserInterfaceGlobal.cs" />
     <Compile Include="ServerTraits\ColorValidator.cs" />
     <Compile Include="ServerTraits\LobbyCommands.cs" />
     <Compile Include="ServerTraits\LobbySettingsNotification.cs" />
@@ -186,6 +213,7 @@
     <Compile Include="Scripting\Media.cs" />
     <Compile Include="Scripting\ScriptTriggers.cs" />
     <Compile Include="Scripting\Global\ActorGlobal.cs" />
+    <Compile Include="Scripting\Global\BeaconGlobal.cs" />
     <Compile Include="Scripting\Global\CameraGlobal.cs" />
     <Compile Include="Scripting\Global\CoordinateGlobals.cs" />
     <Compile Include="Scripting\Global\DateTimeGlobal.cs" />
@@ -205,6 +233,7 @@
     <Compile Include="Scripting\Properties\GuardProperties.cs" />
     <Compile Include="Scripting\Properties\MissionObjectiveProperties.cs" />
     <Compile Include="Scripting\Properties\MobileProperties.cs" />
+    <Compile Include="Scripting\Properties\DemolitionProperties.cs" />
     <Compile Include="Scripting\Properties\PlaneProperties.cs" />
     <Compile Include="Scripting\Properties\PlayerProperties.cs" />
     <Compile Include="Scripting\Properties\PowerProperties.cs" />
@@ -287,6 +316,7 @@
     <Compile Include="Traits\Crushable.cs" />
     <Compile Include="Traits\CustomBuildTimeValue.cs" />
     <Compile Include="Traits\CustomSellValue.cs" />
+    <Compile Include="Traits\CustomSelectionSize.cs" />
     <Compile Include="Traits\Demolishable.cs" />
     <Compile Include="Traits\DetectCloaked.cs" />
     <Compile Include="Traits\EjectOnDeath.cs" />
@@ -359,6 +389,7 @@
     <Compile Include="Traits\ProximityCaptor.cs" />
     <Compile Include="Traits\ProximityCapturable.cs" />
     <Compile Include="Traits\RadarColorFromTerrain.cs" />
+    <Compile Include="Traits\Render\AutoSelectionSize.cs" />
     <Compile Include="Traits\Render\Hovers.cs" />
     <Compile Include="Traits\Render\LeavesTrails.cs" />
     <Compile Include="Traits\Render\RenderBuilding.cs" />
@@ -381,6 +412,8 @@
     <Compile Include="Traits\Render\WithBarrel.cs" />
     <Compile Include="Traits\Render\WithBuildingExplosion.cs" />
     <Compile Include="Traits\Render\WithActiveAnimation.cs" />
+    <Compile Include="Traits\Render\WithAttackAnimation.cs" />
+    <Compile Include="Traits\Render\WithMoveAnimation.cs" />
     <Compile Include="Traits\Render\WithBuildingPlacedAnimation.cs" />
     <Compile Include="Traits\Render\WithMakeAnimation.cs" />
     <Compile Include="Traits\Render\WithChargeOverlay.cs" />
@@ -392,6 +425,7 @@
     <Compile Include="Traits\Render\WithIdleOverlay.cs" />
     <Compile Include="Traits\Render\WithMuzzleFlash.cs" />
     <Compile Include="Traits\Render\WithRangeCircle.cs" />
+    <Compile Include="Traits\Render\WithRankDecoration.cs" />
     <Compile Include="Traits\Render\WithRepairAnimation.cs" />
     <Compile Include="Traits\Render\WithRepairOverlay.cs" />
     <Compile Include="Traits\Render\WithResources.cs" />
@@ -400,6 +434,7 @@
     <Compile Include="Traits\Render\WithSmoke.cs" />
     <Compile Include="Traits\Render\WithSpriteBody.cs" />
     <Compile Include="Traits\Render\WithTurret.cs" />
+    <Compile Include="Traits\Render\WithFacingSpriteBody.cs" />
     <Compile Include="Traits\Render\WithBuildingPlacedOverlay.cs" />
     <Compile Include="Traits\Render\WithProductionDoorOverlay.cs" />
     <Compile Include="Traits\Render\WithProductionOverlay.cs" />
@@ -411,6 +446,7 @@
     <Compile Include="Traits\RepairsBridges.cs" />
     <Compile Include="Traits\SeedsResource.cs" />
     <Compile Include="Traits\StoresResources.cs" />
+    <Compile Include="Traits\Render\SelectionDecorations.cs" />
     <Compile Include="Traits\SelfHealing.cs" />
     <Compile Include="Traits\Sellable.cs" />
     <Compile Include="Traits\ShakeOnDeath.cs" />
@@ -443,6 +479,7 @@
     <Compile Include="Traits\Upgrades\UpgradeActorsNear.cs" />
     <Compile Include="Traits\Upgrades\UpgradeManager.cs" />
     <Compile Include="Traits\Valued.cs" />
+    <Compile Include="Traits\Voiced.cs" />
     <Compile Include="Traits\Wanders.cs" />
     <Compile Include="Traits\World\BridgeLayer.cs" />
     <Compile Include="Traits\World\CrateSpawner.cs" />
@@ -643,6 +680,13 @@
     <Compile Include="Traits\World\EditorActorPreview.cs" />
     <Compile Include="Traits\World\EditorResourceLayer.cs" />
     <Compile Include="Widgets\EditorViewportControllerWidget.cs" />
+    <Compile Include="Traits\World\PaletteFromPaletteWithAlpha.cs" />
+    <Compile Include="Traits\World\PaletteFromPlayerPaletteWithAlpha.cs" />
+    <Compile Include="Traits\Modifiers\HiddenUnderShroud.cs" />
+    <Compile Include="Lint\CheckDefaultVisibility.cs" />
+    <Compile Include="Traits\Modifiers\AlwaysVisible.cs" />
+    <Compile Include="Traits\CreatesShroud.cs" />
+    <Compile Include="Traits\RevealsShroud.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -657,7 +701,4 @@ cd "$(SolutionDir)"</PostBuildEvent>
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <Folder Include="EditorBrushes\" />
-  </ItemGroup>
 </Project>

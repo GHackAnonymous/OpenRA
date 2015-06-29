@@ -94,6 +94,7 @@ namespace OpenRA.Traits
 	public interface INotifyDamageStateChanged { void DamageStateChanged(Actor self, AttackInfo e); }
 	public interface INotifyRepair { void Repairing(Actor self, Actor host); }
 	public interface INotifyKilled { void Killed(Actor self, AttackInfo e); }
+	public interface INotifyActorDisposing { void Disposing(Actor self); }
 	public interface INotifyAppliedDamage { void AppliedDamage(Actor self, Actor damaged, AttackInfo e); }
 	public interface INotifyBuildComplete { void BuildingComplete(Actor self); }
 	public interface INotifyBuildingPlaced { void BuildingPlaced(Actor self); }
@@ -108,6 +109,19 @@ namespace OpenRA.Traits
 	public interface IDisableMove { bool MoveDisabled(Actor self); }
 
 	public interface ISeedableResource { void Seed(Actor self); }
+
+	public interface ISelectionDecorationsInfo
+	{
+		int[] SelectionBoxBounds { get; }
+	}
+
+	public interface IVoiced
+	{
+		string VoiceSet { get; }
+		bool PlayVoice(Actor self, string phrase, string variant);
+		bool PlayVoiceLocal(Actor self, string phrase, string variant, float volume);
+		bool HasVoice(Actor self, string voice);
+	}
 
 	public interface IDemolishableInfo { bool IsValidTarget(ActorInfo actorInfo, Actor saboteur); }
 	public interface IDemolishable
@@ -153,6 +167,8 @@ namespace OpenRA.Traits
 		IEnumerable<Pair<CPos, Color>> RadarSignatureCells(Actor self);
 	}
 
+	public interface IDefaultVisibilityInfo { }
+	public interface IDefaultVisibility { bool IsVisible(Actor self, Player byPlayer); }
 	public interface IVisibilityModifier { bool IsVisible(Actor self, Player byPlayer); }
 	public interface IFogVisibilityModifier { bool HasFogVisibility(Player byPlayer); }
 
@@ -333,11 +349,5 @@ namespace OpenRA.Traits
 		void OnObjectiveAdded(Player player, int objectiveID);
 		void OnObjectiveCompleted(Player player, int objectiveID);
 		void OnObjectiveFailed(Player player, int objectiveID);
-	}
-
-	public interface ILegacyEditorRenderInfo
-	{
-		string EditorPalette { get; }
-		string EditorImage(ActorInfo actor, SequenceProvider sequenceProvider, string race);
 	}
 }

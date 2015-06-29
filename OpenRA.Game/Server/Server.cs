@@ -130,6 +130,9 @@ namespace OpenRA.Server
 			Port = localEndpoint.Port;
 
 			Settings = settings;
+
+			Settings.Name = OpenRA.Settings.SanitizedServerName(Settings.Name);
+
 			ModData = modData;
 
 			randomSeed = (int)DateTime.Now.ToBinary();
@@ -286,7 +289,7 @@ namespace OpenRA.Server
 
 				var client = new Session.Client()
 				{
-					Name = handshake.Client.Name,
+					Name = OpenRA.Settings.SanitizedPlayerName(handshake.Client.Name),
 					IpAddress = ((IPEndPoint)newConn.Socket.RemoteEndPoint).Address.ToString(),
 					Index = newConn.PlayerIndex,
 					Slot = LobbyInfo.FirstEmptySlot(),
@@ -447,6 +450,9 @@ namespace OpenRA.Server
 		public void SendMessage(string text)
 		{
 			DispatchOrdersToClients(null, 0, new ServerOrder("Message", text).Serialize());
+
+			if (Settings.Dedicated)
+				Console.WriteLine("[{0}] {1}".F(DateTime.Now.ToString(Settings.TimestampFormat), text));
 		}
 
 		void InterpretServerOrder(Connection conn, ServerOrder so)
@@ -486,7 +492,11 @@ namespace OpenRA.Server
 							break;
 						}
 
-						var pingFromClient = LobbyInfo.PingFromClient(GetClient(conn));
+						var client = GetClient(conn);
+						if (client == null)
+							return;
+
+						var pingFromClient = LobbyInfo.PingFromClient(client);
 						if (pingFromClient == null)
 							return;
 

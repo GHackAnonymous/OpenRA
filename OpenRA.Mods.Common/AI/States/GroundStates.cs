@@ -30,7 +30,7 @@ namespace OpenRA.Mods.Common.AI
 			if (!owner.IsValid)
 				return;
 
-			if (!owner.TargetIsValid)
+			if (!owner.IsTargetValid)
 			{
 				var t = owner.Bot.FindClosestEnemy(owner.Units.FirstOrDefault().CenterPosition);
 				if (t == null) return;
@@ -68,7 +68,7 @@ namespace OpenRA.Mods.Common.AI
 			if (!owner.IsValid)
 				return;
 
-			if (!owner.TargetIsValid)
+			if (!owner.IsTargetValid)
 			{
 				var closestEnemy = owner.Bot.FindClosestEnemy(owner.Units.Random(owner.Random).CenterPosition);
 				if (closestEnemy != null)
@@ -94,7 +94,7 @@ namespace OpenRA.Mods.Common.AI
 			else
 			{
 				var enemies = owner.World.FindActorsInCircle(leader.CenterPosition, WRange.FromCells(12))
-					.Where(a1 => !a1.Destroyed && !a1.IsDead);
+					.Where(a1 => !a1.Disposed && !a1.IsDead);
 				var enemynearby = enemies.Where(a1 => a1.HasTrait<ITargetable>() && leader.Owner.Stances[a1.Owner] == Stance.Enemy);
 				var target = enemynearby.ClosestTo(leader.CenterPosition);
 				if (target != null)
@@ -127,7 +127,7 @@ namespace OpenRA.Mods.Common.AI
 			if (!owner.IsValid)
 				return;
 
-			if (!owner.TargetIsValid)
+			if (!owner.IsTargetValid)
 			{
 				var closestEnemy = owner.Bot.FindClosestEnemy(owner.Units.Random(owner.Random).CenterPosition);
 				if (closestEnemy != null)

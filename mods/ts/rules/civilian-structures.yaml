@@ -10,7 +10,7 @@ ABAN01:
 	Health:
 		HP: 600
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN02:
 	Inherits: ^CivBuilding
@@ -24,7 +24,7 @@ ABAN02:
 	Health:
 		HP: 600
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN03:
 	Inherits: ^CivBuilding
@@ -38,7 +38,7 @@ ABAN03:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN04:
 	Inherits: ^CivBuilding
@@ -52,7 +52,7 @@ ABAN04:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN05:
 	Inherits: ^CivBuilding
@@ -66,7 +66,7 @@ ABAN05:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN06:
 	Inherits: ^CivBuilding
@@ -80,7 +80,7 @@ ABAN06:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN07:
 	Inherits: ^CivBuilding
@@ -94,7 +94,7 @@ ABAN07:
 	Health:
 		HP: 350
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN08:
 	Inherits: ^CivBuilding
@@ -108,7 +108,7 @@ ABAN08:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN09:
 	Inherits: ^CivBuilding
@@ -122,7 +122,7 @@ ABAN09:
 	Health:
 		HP: 350
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN10:
 	Inherits: ^CivBuilding
@@ -136,7 +136,7 @@ ABAN10:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN11:
 	Inherits: ^CivBuilding
@@ -150,7 +150,7 @@ ABAN11:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN12:
 	Inherits: ^CivBuilding
@@ -164,7 +164,7 @@ ABAN12:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN13:
 	Inherits: ^CivBuilding
@@ -178,7 +178,7 @@ ABAN13:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN14:
 	Inherits: ^CivBuilding
@@ -192,7 +192,7 @@ ABAN14:
 	Health:
 		HP: 300
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN15:
 	Inherits: ^CivBuilding
@@ -206,7 +206,7 @@ ABAN15:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN16:
 	Inherits: ^CivBuilding
@@ -220,7 +220,7 @@ ABAN16:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN17:
 	Inherits: ^CivBuilding
@@ -234,7 +234,7 @@ ABAN17:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 ABAN18:
 	Inherits: ^CivBuilding
@@ -248,7 +248,7 @@ ABAN18:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		ExcludeTilesets: TEMPERAT
+		ExcludeTilesets: TEMPERATE
 
 AMMOCRAT:
 	Inherits: ^CivBuilding
@@ -740,6 +740,8 @@ CAPYR01:
 		Type: concrete
 	Health:
 		HP: 400
+	EditorTilesetFilter:
+		ExcludeTilesets: SNOW
 
 CAPYR02:
 	Inherits: ^CivBuilding
@@ -752,6 +754,8 @@ CAPYR02:
 		Type: concrete
 	Health:
 		HP: 400
+	EditorTilesetFilter:
+		ExcludeTilesets: SNOW
 
 CAPYR03:
 	Inherits: ^CivBuilding
@@ -764,6 +768,8 @@ CAPYR03:
 		Type: concrete
 	Health:
 		HP: 400
+	EditorTilesetFilter:
+		ExcludeTilesets: SNOW
 
 CITY01:
 	Inherits: ^CivBuilding
@@ -777,7 +783,7 @@ CITY01:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY02:
 	Inherits: ^CivBuilding
@@ -791,7 +797,7 @@ CITY02:
 	Health:
 		HP: 700
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY03:
 	Inherits: ^CivBuilding
@@ -805,7 +811,7 @@ CITY03:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY04:
 	Inherits: ^CivBuilding
@@ -819,7 +825,7 @@ CITY04:
 	Health:
 		HP: 600
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY05:
 	Inherits: ^CivBuilding
@@ -833,7 +839,7 @@ CITY05:
 	Health:
 		HP: 600
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY06:
 	Inherits: ^CivBuilding
@@ -847,7 +853,7 @@ CITY06:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY07:
 	Inherits: ^CivBuilding
@@ -861,7 +867,7 @@ CITY07:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY08:
 	Inherits: ^CivBuilding
@@ -875,7 +881,7 @@ CITY08:
 	Health:
 		HP: 300
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY09:
 	Inherits: ^CivBuilding
@@ -889,7 +895,7 @@ CITY09:
 	Health:
 		HP: 400
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY10:
 	Inherits: ^CivBuilding
@@ -903,7 +909,7 @@ CITY10:
 	Health:
 		HP: 300
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY11:
 	Inherits: ^CivBuilding
@@ -917,7 +923,7 @@ CITY11:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY12:
 	Inherits: ^CivBuilding
@@ -931,7 +937,7 @@ CITY12:
 	Health:
 		HP: 600
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY13:
 	Inherits: ^CivBuilding
@@ -945,7 +951,7 @@ CITY13:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY14:
 	Inherits: ^CivBuilding
@@ -959,7 +965,7 @@ CITY14:
 	Health:
 		HP: 600
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY15:
 	Inherits: ^CivBuilding
@@ -973,7 +979,7 @@ CITY15:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY16:
 	Inherits: ^CivBuilding
@@ -987,7 +993,7 @@ CITY16:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY17:
 	Inherits: ^CivBuilding
@@ -1001,7 +1007,7 @@ CITY17:
 	Health:
 		HP: 300
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY18:
 	Inherits: ^CivBuilding
@@ -1015,7 +1021,7 @@ CITY18:
 	Health:
 		HP: 600
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY19:
 	Inherits: ^CivBuilding
@@ -1029,7 +1035,7 @@ CITY19:
 	Health:
 		HP: 500
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY20:
 	Inherits: ^CivBuilding
@@ -1043,7 +1049,7 @@ CITY20:
 	Health:
 		HP: 250
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY21:
 	Inherits: ^CivBuilding
@@ -1057,7 +1063,7 @@ CITY21:
 	Health:
 		HP: 100
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CITY22:
 	Inherits: ^CivBuilding
@@ -1071,7 +1077,7 @@ CITY22:
 	Health:
 		HP: 100
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
 
 CTDAM:
 	Inherits: ^CivBuilding
@@ -1089,6 +1095,8 @@ CTDAM:
 		HP: 1000
 	ProvidesPrerequisite:
 		Prerequisite: anypower
+	EditorTilesetFilter:
+		ExcludeTilesets: SNOW
 
 CTVEGA:
 	Inherits: ^CivBuilding
@@ -1101,6 +1109,8 @@ CTVEGA:
 		Type: none
 	Health:
 		HP: 100
+	EditorTilesetFilter:
+		ExcludeTilesets: SNOW
 
 GAKODK:
 	Inherits: ^CivBuilding
@@ -1240,7 +1250,7 @@ GASPOT:
 		Footprint: x
 		Dimensions: 1, 1
 	Selectable:
-		Bounds: 48, 82, 0, -25
+		Bounds: 48, 30, 0, -4
 	Power:
 		Amount: -10
 	Armor:
@@ -1251,6 +1261,8 @@ GASPOT:
 		Range: 6c0
 	WithIdleOverlay@LIGHTS:
 		Sequence: idle-lights
+	SelectionDecorations:
+		VisualBounds: 48, 82, 0, -25
 
 GALITE:
 	Inherits: ^Building
@@ -1274,10 +1286,12 @@ GALITE:
 		Sequence: lighting
 		Palette: alpha
 	Selectable:
-		Bounds: 25, 35, 0, -12
+		Bounds: 24, 24, 0, -4
 	Buildable:
 		Queue: Defense
 		Prerequisites: ~disabled
+	SelectionDecorations:
+		VisualBounds: 25, 35, 0, -12
 
 GAICBM:
 	Inherits: ^Building
@@ -1347,4 +1361,7 @@ UFO:
 	Armor:
 		Type: Heavy
 	EditorTilesetFilter:
-		RequireTilesets: TEMPERAT
+		RequireTilesets: TEMPERATE
+	SelectionDecorations:
+		VisualBounds: 144, 72, 0, 0
+

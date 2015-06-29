@@ -72,7 +72,7 @@ namespace OpenRA.Mods.Common.Server
 
 		public bool InterpretCommand(S server, Connection conn, Session.Client client, string cmd)
 		{
-			if (!ValidateCommand(server, conn, client, cmd))
+			if (server == null || conn == null || client == null || !ValidateCommand(server, conn, client, cmd))
 				return false;
 
 			var dict = new Dictionary<string, Func<string, bool>>
@@ -186,8 +186,11 @@ namespace OpenRA.Mods.Common.Server
 								server.LobbyInfo.Clients.Remove(occupant);
 								server.SyncLobbyClients();
 								var ping = server.LobbyInfo.PingFromClient(occupant);
-								server.LobbyInfo.ClientPings.Remove(ping);
-								server.SyncClientPing();
+								if (ping != null)
+								{
+									server.LobbyInfo.ClientPings.Remove(ping);
+									server.SyncClientPing();
+								}
 							}
 							else
 							{
@@ -221,7 +224,11 @@ namespace OpenRA.Mods.Common.Server
 						{
 							server.LobbyInfo.Clients.Remove(occupant);
 							var ping = server.LobbyInfo.PingFromClient(occupant);
-							server.LobbyInfo.ClientPings.Remove(ping);
+							if (ping != null)
+							{
+								server.LobbyInfo.ClientPings.Remove(ping);
+								server.SyncClientPing();
+							}
 						}
 
 						server.SyncLobbyClients();
@@ -717,9 +724,13 @@ namespace OpenRA.Mods.Common.Server
 				{ "name",
 					s =>
 					{
-						Log.Write("server", "Player@{0} is now known as {1}.", conn.Socket.RemoteEndPoint, s);
-						server.SendMessage("{0} is now known as {1}.".F(client.Name, s));
-						client.Name = s;
+						var sanitizedName = OpenRA.Settings.SanitizedPlayerName(s);
+						if (sanitizedName == client.Name)
+							return true;
+
+						Log.Write("server", "Player@{0} is now known as {1}.", conn.Socket.RemoteEndPoint, sanitizedName);
+						server.SendMessage("{0} is now known as {1}.".F(client.Name, sanitizedName));
+						client.Name = sanitizedName;
 						server.SyncLobbyClients();
 						return true;
 					}

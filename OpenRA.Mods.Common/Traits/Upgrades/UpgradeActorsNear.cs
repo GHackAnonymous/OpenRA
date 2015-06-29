@@ -18,6 +18,7 @@ namespace OpenRA.Mods.Common.Traits
 	[Desc("Applies an upgrade to actors within a specified range.")]
 	public class UpgradeActorsNearInfo : ITraitInfo
 	{
+		[UpgradeGrantedReference]
 		[Desc("The upgrades to grant.")]
 		public readonly string[] Upgrades = { };
 
@@ -87,7 +88,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void ActorEntered(Actor a)
 		{
-			if (a.Destroyed)
+			if (a.Disposed)
 				return;
 
 			if (a == self && !info.AffectsParent)
@@ -106,7 +107,7 @@ namespace OpenRA.Mods.Common.Traits
 		public void UnitProducedByOther(Actor self, Actor producer, Actor produced)
 		{
 			// Work around for actors produced within the region not triggering until the second tick
-			if ((produced.CenterPosition - self.CenterPosition).HorizontalLengthSquared <= info.Range.Range * info.Range.Range)
+			if ((produced.CenterPosition - self.CenterPosition).HorizontalLengthSquared <= info.Range.RangeSquared)
 			{
 				var stance = self.Owner.Stances[produced.Owner];
 				if (!info.ValidStances.HasFlag(stance))
@@ -122,7 +123,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		void ActorExited(Actor a)
 		{
-			if (a == self || a.Destroyed)
+			if (a == self || a.Disposed)
 				return;
 
 			var stance = self.Owner.Stances[a.Owner];

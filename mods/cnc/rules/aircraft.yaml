@@ -9,8 +9,6 @@ TRAN:
 		BuildPaletteOrder: 10
 		Prerequisites: hpad
 		Queue: Aircraft.GDI, Aircraft.Nod
-	Selectable:
-		Bounds: 41,41
 	Helicopter:
 		LandWhenIdle: true
 		ROT: 5
@@ -24,7 +22,7 @@ TRAN:
 		Type: Light
 	RevealsShroud:
 		Range: 10c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithRotor@PRIMARY:
 		Offset: -597,0,171
 		Sequence: rotor2
@@ -40,6 +38,10 @@ TRAN:
 	Explodes:
 		Weapon: HeliExplode
 		EmptyWeapon: HeliExplode
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 41,41
 
 HELI:
 	Inherits: ^Helicopter
@@ -52,8 +54,6 @@ HELI:
 		BuildPaletteOrder: 20
 		Prerequisites: hpad, anyhq, ~techlevel.medium
 		Queue: Aircraft.Nod
-	Selectable:
-		Bounds: 30,24
 	Helicopter:
 		RearmBuildings: hpad
 		ROT: 4
@@ -81,7 +81,7 @@ HELI:
 		SelfReloads: true
 		ReloadCount: 10
 		SelfReloadTicks: 200
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithRotor:
 		Offset: 0,0,85
 	WithMuzzleFlash:
@@ -91,6 +91,10 @@ HELI:
 	Explodes:
 		Weapon: HeliExplode
 		EmptyWeapon: HeliExplode
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 30,24
 
 ORCA:
 	Inherits: ^Helicopter
@@ -103,8 +107,6 @@ ORCA:
 		BuildPaletteOrder: 20
 		Prerequisites: hpad, anyhq, ~techlevel.medium
 		Queue: Aircraft.GDI
-	Selectable:
-		Bounds: 30,24
 	Helicopter:
 		RearmBuildings: hpad
 		ROT: 4
@@ -129,13 +131,19 @@ ORCA:
 		SelfReloads: true
 		ReloadCount: 2
 		SelfReloadTicks: 100
-	RenderUnitFlying:
+	RenderSprites:
+	WithFacingSpriteBody:
 	LeavesHusk:
 		HuskActor: ORCA.Husk
 	AutoTarget:
 	Explodes:
 		Weapon: HeliExplode
 		EmptyWeapon: HeliExplode
+	AutoSelectionSize:
+	WithMoveAnimation:
+		MoveSequence: move
+	SelectionDecorations:
+		VisualBounds: 30,24
 
 C17:
 	ParaDrop:
@@ -154,12 +162,15 @@ C17:
 		HP: 25
 	Armor:
 		Type: Heavy
-	RenderUnit:
+	HiddenUnderFog:
+		AlwaysVisibleStances: None
+	WithFacingSpriteBody:
 	Cargo:
 		MaxWeight: 10
 		PipCount: 10
 	Invulnerable:
 	-Selectable:
+	-Voiced:
 	-TargetableUnit:
 	-GainsExperience:
 	FlyAwayOnIdle:
@@ -176,6 +187,8 @@ C17:
 	Contrail@4:
 		Offset: -261,650,0
 		TrailLength: 15
+	AutoSelectionSize:
+	RenderSprites:
 
 A10:
 	Inherits: ^Plane
@@ -192,7 +205,7 @@ A10:
 		HP: 150
 	Armor:
 		Type: Heavy
-	RenderUnit:
+	WithFacingSpriteBody:
 	AttackBomber:
 		Armaments: gun, bombs
 		Guns: gun
@@ -207,6 +220,7 @@ A10:
 		Weapon: Napalm
 		LocalOffset: 0,-256,-43, 0,256,-43
 	-Selectable:
+	-Voiced:
 	-TargetableUnit:
 	-GainsExperience:
 	FlyAwayOnIdle:
@@ -217,6 +231,8 @@ A10:
 	Contrail@2:
 		Offset: -640,-171,0
 		TrailLength: 15
+	AutoSelectionSize:
+	RenderSprites:
 
 TRAN.Husk:
 	Inherits: ^HelicopterHusk
@@ -231,7 +247,9 @@ TRAN.Husk:
 		Offset: -597,0,171
 	WithRotor@SECONDARY:
 		Offset: 597,0,85
-	RenderUnit:
+	WithFacingSpriteBody:
+	AutoSelectionSize:
+	RenderSprites:
 		Image: tran
 
 HELI.Husk:
@@ -245,7 +263,9 @@ HELI.Husk:
 		Range: 10c0
 	WithRotor:
 		Offset: 0,0,85
-	RenderUnit:
+	WithFacingSpriteBody:
+	AutoSelectionSize:
+	RenderSprites:
 		Image: heli
 
 ORCA.Husk:
@@ -257,6 +277,8 @@ ORCA.Husk:
 		Speed: 186
 	RevealsShroud:
 		Range: 10c0
-	RenderUnit:
+	WithFacingSpriteBody:
+	AutoSelectionSize:
+	RenderSprites:
 		Image: orca
 

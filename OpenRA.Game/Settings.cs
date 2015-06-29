@@ -10,8 +10,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using OpenRA.Graphics;
+using OpenRA.Traits;
 
 namespace OpenRA
 {
@@ -37,6 +40,7 @@ namespace OpenRA
 		public bool DedicatedLoop = true;
 		public bool LockBots = false;
 		public bool AllowVersionMismatch = false;
+		public string TimestampFormat = "HH:mm";
 
 		public ServerSettings() { }
 
@@ -87,11 +91,12 @@ namespace OpenRA
 		public int MaxFramerate = 60;
 
 		public int BatchSize = 8192;
-		public int NumTempBuffers = 8;
 		public int SheetSize = 2048;
 
 		public string Language = "english";
 		public string DefaultLanguage = "english";
+
+		public ImageFormat ScreenshotFormat = ImageFormat.Png;
 	}
 
 	public class SoundSettings
@@ -176,6 +181,7 @@ namespace OpenRA
 		public Hotkey TogglePixelDoubleKey = new Hotkey(Keycode.PERIOD, Modifiers.None);
 
 		public Hotkey DevReloadChromeKey = new Hotkey(Keycode.C, Modifiers.Ctrl | Modifiers.Shift);
+		public Hotkey TakeScreenshotKey = new Hotkey(Keycode.P, Modifiers.Ctrl);
 
 		public Hotkey Production01Key = new Hotkey(Keycode.F1, Modifiers.None);
 		public Hotkey Production02Key = new Hotkey(Keycode.F2, Modifiers.None);
@@ -211,6 +217,7 @@ namespace OpenRA
 		public Hotkey ProductionTypeNavalKey = new Hotkey(Keycode.I, Modifiers.None);
 		public Hotkey ProductionTypeTankKey = new Hotkey(Keycode.I, Modifiers.None);
 		public Hotkey ProductionTypeMerchantKey = new Hotkey(Keycode.O, Modifiers.None);
+		public Hotkey ProductionTypeUpgradeKey = new Hotkey(Keycode.R, Modifiers.None);
 
 		public Hotkey SupportPower01Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
 		public Hotkey SupportPower02Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
@@ -298,6 +305,47 @@ namespace OpenRA
 				root.Add(new MiniYamlNode(kv.Key, FieldSaver.SaveDifferences(kv.Value, Activator.CreateInstance(kv.Value.GetType()))));
 
 			root.WriteToFile(settingsFile);
+		}
+
+		static string SanitizedName(string dirty)
+		{
+			if (string.IsNullOrEmpty(dirty))
+				return null;
+
+			var clean = dirty;
+
+			// reserved characters for MiniYAML and JSON
+			var disallowedChars = new char[] { '#', '@', ':', '\n', '\t', '[', ']', '{', '}', '"', '`' };
+			foreach (var disallowedChar in disallowedChars)
+				clean = clean.Replace(disallowedChar.ToString(), string.Empty);
+
+			return clean;
+		}
+
+		public static string SanitizedServerName(string dirty)
+		{
+			var clean = SanitizedName(dirty);
+			if (string.IsNullOrWhiteSpace(clean))
+				return new ServerSettings().Name;
+			else
+				return clean;
+		}
+
+		public static string SanitizedPlayerName(string dirty)
+		{
+			var forbiddenNames = new string[] { "Open", "Closed" };
+			var botNames = OpenRA.Game.ModData.DefaultRules.Actors["player"].Traits.WithInterface<IBotInfo>().Select(t => t.Name);
+
+			var clean = SanitizedName(dirty);
+
+			if (string.IsNullOrWhiteSpace(clean) || forbiddenNames.Contains(clean) || botNames.Contains(clean))
+				clean = new PlayerSettings().Name;
+
+			// avoid UI glitches
+			if (clean.Length > 16)
+				clean = clean.Substring(0, 16);
+
+			return clean;
 		}
 
 		static void LoadSectionYaml(MiniYaml yaml, object section)

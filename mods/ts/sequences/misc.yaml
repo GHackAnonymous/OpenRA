@@ -1,10 +1,8 @@
 overlay:
 	Defaults: place
 		Offset: 0, -12
-		BlendMode: Translucency
-		Alpha: 0.75
 	build-valid-snow:
-	build-valid-temperat:
+	build-valid-temperate:
 	build-invalid:
 		Start: 1
 	target-select:
@@ -96,6 +94,9 @@ pips:
 	pip-ammo: ammopips
 	pip-ammoempty: ammopips
 		Start: 1
+	pip-disguise: pip-disguise
+		Length: *
+		Tick: 300
 # TODO:
 	pip-empty-building:
 	pip-green-building:
@@ -114,10 +115,10 @@ explosion:
 		Length: *
 	building: twlt070
 	ionring: ring1
-		BlendMode: SoftAdditive
+		BlendMode: Additive
 		Tick: 120
 	pulse_explosion: pulsefx2
-		BlendMode: SoftAdditive
+		BlendMode: Additive
 		Tick: 80
 	small_watersplash: h2o_exp2
 	large_watersplash: h2o_exp1
@@ -258,8 +259,14 @@ resources:
 	tib18: tib18
 	tib19: tib19
 	tib20: tib20
+	veins: veins
+		Length: 1
+		Start: 52
+		ShadowStart: -1
 
 shroud:
+	Defaults:
+		Offset: 0, -1
 	shroud:
 		Length: *
 	fog: fog
@@ -338,48 +345,58 @@ trock01:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 trock02:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 trock03:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 trock04:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 trock05:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 srock01:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 srock02:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 srock03:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 srock04:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12
 
 srock05:
 	idle:
 		ShadowStart: 1
 		UseTilesetExtension: true
+		Offset: 0, -12

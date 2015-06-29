@@ -1,12 +1,11 @@
 WEEDGUY:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 300
 	Tooltip:
 		Name: Chem Spray Infantry
-	Selectable:
-		Bounds: 12,17,0,-6
-		Voice: Weed
+	Voiced:
+		VoiceSet: Weed
 	Mobile:
 		Speed: 42
 	Health:
@@ -17,25 +16,16 @@ WEEDGUY:
 		Weapon: FireballLauncher
 		LocalOffset: 85,0,384
 	AttackFrontal:
-	WithInfantryBody:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
+		Voice: Attack
 
 UMAGON:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 400
 	Tooltip:
 		Name: Umagon
-	Selectable:
-		Bounds: 12,17,0,-6
-		Voice: Umagon
+	Voiced:
+		VoiceSet: Umagon
 	Mobile:
 		Speed: 71
 	Health:
@@ -48,26 +38,18 @@ UMAGON:
 	Armament:
 		Weapon: Sniper
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
+		Voice: Attack
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 CHAMSPY:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 700
 	DisguiseToolTip:
 		Name: Chameleon Spy
-	Selectable:
-		Voice: Spy
-		Bounds: 12,17,0,-9
+	Voiced:
+		VoiceSet: Spy
 	Health:
 		HP: 120
 	Mobile:
@@ -75,15 +57,16 @@ CHAMSPY:
 	RevealsShroud:
 		Range: 9c0
 	Passenger:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
 	Disguise:
+	WithDecoration@disguise:
+		Image: pips
+		Sequence: pip-disguise
+		Palette: pips
+		ReferencePoint: Top, Right
+		Offset: 4, -2
+		ZOffset: 256
+		UpgradeTypes: disguise
+		UpgradeMinEnabledLevel: 1
 	Infiltrates:
 		Types: SpyInfiltrate
 	-AutoTarget:
@@ -92,14 +75,13 @@ CHAMSPY:
 		IdleSequences: idle1,idle2
 
 MUTANT:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 100
 	Tooltip:
 		Name: Mutant
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: Mutant
+	Voiced:
+		VoiceSet: Mutant
 	Health:
 		HP: 50
 	PoisonedByTiberium:
@@ -111,26 +93,18 @@ MUTANT:
 	Armament:
 		Weapon: Vulcan
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
+		Voice: Attack
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 MWMN:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 100
 	Tooltip:
 		Name: Mutant Soldier
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: CivilianFemale
+	Voiced:
+		VoiceSet: CivilianFemale
 	Health:
 		HP: 50
 	PoisonedByTiberium:
@@ -142,26 +116,18 @@ MWMN:
 	Armament:
 		Weapon: Vulcan
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
+		Voice: Attack
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 MUTANT3:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 100
 	Tooltip:
 		Name: Mutant Sergeant
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: Mutant
+	Voiced:
+		VoiceSet: Mutant
 	Health:
 		HP: 50
 	PoisonedByTiberium:
@@ -173,26 +139,18 @@ MUTANT3:
 	Armament:
 		Weapon: Vulcan
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
+		Voice: Attack
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 TRATOS:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 100
 	Tooltip:
 		Name: Tratos
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: Tratos
+	Voiced:
+		VoiceSet: Tratos
 	Health:
 		HP: 200
 	PoisonedByTiberium:
@@ -201,71 +159,45 @@ TRATOS:
 		Speed: 71
 	RevealsShroud:
 		Range: 4c0
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
 	-AutoTarget:
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 OXANNA:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 100
 	Tooltip:
 		Name: Oxanna
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: Oxanna
+	Voiced:
+		VoiceSet: Oxanna
 	Health:
 		HP: 50
 	Mobile:
 		Speed: 56
 	RevealsShroud:
 		Range: 4c0
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
 	-AutoTarget:
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 SLAV:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 100
 	Tooltip:
 		Name: Slavick
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: Slavick
+	Voiced:
+		VoiceSet: Slavick
 	Health:
 		HP: 300
 	Mobile:
 		Speed: 56
 	RevealsShroud:
 		Range: 4c0
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
 	-AutoTarget:
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 DOGGIE:
 	Inherits: ^Infantry
@@ -280,89 +212,59 @@ DOGGIE:
 		Cost: 100
 	Armor:
 		Type: Light
-	RevealsShroud:
-		Range: 4c0
+	-RevealsShroud:
 	Mobile:
 		Speed: 113
-	Selectable:
-		Voice: Fiend
+	Voiced:
+		VoiceSet: Fiend
 	TargetableUnit:
 		TargetTypes: Ground
 	Armament:
 		Weapon: FiendShard
 	AttackFrontal:
+		Voice: Attack
 	AttackWander:
 		WanderMoveRadius: 2
 		MinMoveDelayInTicks: 25
 		MaxMoveDelayInTicks: 45
 
 VISSML:
-	Inherits: ^Infantry
+	Inherits: ^Viceroid
 	Tooltip:
 		Name: Baby Visceroid
 	Health:
 		HP: 200
-	PoisonedByTiberium:
-		Weapon: TiberiumHeal
-	Valued:
-		Cost: 1
-	Armor:
-		Type: Light
-	RevealsShroud:
-		Range: 0c0
-	Mobile:
-		Speed: 113
-		ROT: 16
-	-Crushable:
-	Selectable:
-		Voice: Fiend
-	TargetableUnit:
-		TargetTypes: Ground
-	-AutoTarget:
-	-RenderSprites:
-	-WithInfantryBody:
-	-WithDeathAnimation:
-	RenderUnit:
+	AttackWander:
+		WanderMoveRadius: 2
+		MinMoveDelayInTicks: 30
+		MaxMoveDelayInTicks: 60
 
 VISLRG:
-	Inherits: ^Infantry
+	Inherits: ^Viceroid
 	Tooltip:
 		Name: Adult Visceroid
 	Health:
 		HP: 500
-	PoisonedByTiberium:
-		Weapon: TiberiumHeal
-	Valued:
-		Cost: 1
-	Armor:
-		Type: Light
-	RevealsShroud:
-		Range: 0c0
-	Mobile:
-		Speed: 113
-		ROT: 16
-	-Crushable:
-	Selectable:
-		Voice: Fiend
-	TargetableUnit:
-		TargetTypes: Ground
 	Armament:
 		Weapon: SlimeAttack
+	AutoTarget:
 	AttackFrontal:
+		Voice: Attack
 	AttackWander:
 		WanderMoveRadius: 2
 		MinMoveDelayInTicks: 25
 		MaxMoveDelayInTicks: 45
-	-RenderSprites:
-	-WithInfantryBody:
-	-WithDeathAnimation:
-	RenderUnit:
+	Mobile:
+		Crushes: crate, infantry
 
 CIV1:
 	Inherits: ^CivilianInfantry
+	WithInfantryBody:
+		AttackSequence: shoot
 	Armament:
 		Weapon: Pistola
 	AttackFrontal:
+		Voice: Attack
 
 CIV2:
 	Inherits: ^CivilianInfantry
@@ -370,7 +272,10 @@ CIV2:
 
 CIV3:
 	Inherits: ^CivilianInfantry
+	WithInfantryBody:
+		AttackSequence: shoot
 	Armament:
 		Weapon: Pistola
 	AttackFrontal:
+		Voice: Attack
 

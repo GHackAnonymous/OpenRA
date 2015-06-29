@@ -36,47 +36,8 @@ namespace OpenRA
 			{
 				// Target ranges are calculated in 2D, so ignore height differences
 				var vec = new WVec(r, r, WRange.Zero);
-				var rSq = r.Range * r.Range;
 				return world.ActorMap.ActorsInBox(origin - vec, origin + vec).Where(
-					a => (a.CenterPosition - origin).HorizontalLengthSquared <= rSq);
-			}
-		}
-
-		public static bool HasVoices(this Actor a)
-		{
-			var selectable = a.Info.Traits.GetOrDefault<SelectableInfo>();
-			return selectable != null && selectable.Voice != null;
-		}
-
-		public static bool HasVoice(this Actor a, string voice)
-		{
-			var v = GetVoices(a);
-			return v != null && v.Voices.ContainsKey(voice);
-		}
-
-		public static SoundInfo GetVoices(this Actor a)
-		{
-			var selectable = a.Info.Traits.GetOrDefault<SelectableInfo>();
-			if (selectable == null) return null;
-			var v = selectable.Voice;
-			return (v == null) ? null : a.World.Map.Rules.Voices[v.ToLowerInvariant()];
-		}
-
-		public static void PlayVoiceForOrders(this World w, Order[] orders)
-		{
-			// Find an actor with a phrase to say
-			foreach (var o in orders)
-			{
-				if (o == null)
-					continue;
-
-				if (o.Subject.Destroyed)
-					continue;
-
-				foreach (var v in o.Subject.TraitsImplementing<IOrderVoice>())
-					if (Sound.PlayVoice(v.VoicePhraseForOrder(o.Subject, o),
-						o.Subject, o.Subject.Owner.Country.Race))
-						return;
+					a => (a.CenterPosition - origin).HorizontalLengthSquared <= r.RangeSquared);
 			}
 		}
 

@@ -26,7 +26,7 @@ MCV:
 		Facing: 108
 		TransformSounds: constru2.aud, hvydoor1.aud
 		NoTransformNotification: BuildingCannotPlaceAudio
-	RenderUnit:
+	WithFacingSpriteBody:
 	MustBeDestroyed:
 		RequiredForShortGame: true
 	BaseBuilding:
@@ -37,6 +37,10 @@ MCV:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 36,36
 
 HARV:
 	Inherits: ^Tank
@@ -53,7 +57,6 @@ HARV:
 		InitialActivity: FindResources
 	Selectable:
 		Priority: 7
-		Bounds: 36,36
 	Harvester:
 		Resources: Tiberium, BlueTiberium
 		PipCount: 7
@@ -76,6 +79,8 @@ HARV:
 	RenderHarvester:
 	Explodes:
 		Weapon: TiberiumExplosion
+	SelectionDecorations:
+		VisualBounds: 36,36
 
 APC:
 	Inherits: ^Tank
@@ -114,7 +119,7 @@ APC:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	Cargo:
@@ -123,6 +128,8 @@ APC:
 		PipCount: 5
 	LeavesHusk:
 		HuskActor: APC.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 ARTY:
 	Inherits: ^Tank
@@ -150,15 +157,13 @@ ARTY:
 		MuzzleSequence: muzzle
 	AttackFrontal:
 	WithMuzzleFlash:
-	RenderUnit:
-	Explodes:
-		Weapon: UnitExplode
-		EmptyWeapon: UnitExplode
-		Chance: 75
+	WithFacingSpriteBody:
 	AutoTarget:
 		InitialStance: Defend
 	LeavesHusk:
 		HuskActor: ARTY.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 FTNK:
 	Inherits: ^Tank
@@ -186,7 +191,7 @@ FTNK:
 		MuzzleSequence: muzzle
 		MuzzleSplitFacings: 8
 	AttackFrontal:
-	RenderUnit:
+	WithFacingSpriteBody:
 	AutoTarget:
 	WithMuzzleFlash:
 		SplitFacings: true
@@ -195,6 +200,8 @@ FTNK:
 		EmptyWeapon: FlametankExplode
 	LeavesHusk:
 		HuskActor: FTNK.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 BGGY:
 	Inherits: ^Vehicle
@@ -225,16 +232,18 @@ BGGY:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	LeavesHusk:
 		HuskActor: BGGY.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 BIKE:
 	Inherits: ^Vehicle
 	Valued:
-		Cost: 600
+		Cost: 500
 	Tooltip:
 		Name: Recon Bike
 		Description: Fast scout vehicle, armed with \nrockets. \nCan attack Aircraft.\n  Strong vs Vehicles, Tanks\n  Weak vs Infantry
@@ -263,10 +272,12 @@ BIKE:
 		LocalOffset: -128, -170, 170, -128, 170, 170
 		LocalYaw: 100, -100
 	AttackFrontal:
-	RenderUnit:
+	WithFacingSpriteBody:
 	AutoTarget:
 	LeavesHusk:
 		HuskActor: BIKE.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 JEEP:
 	Inherits: ^Vehicle
@@ -297,11 +308,13 @@ JEEP:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	LeavesHusk:
 		HuskActor: JEEP.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 LTNK:
 	Inherits: ^Tank
@@ -318,7 +331,7 @@ LTNK:
 		ROT: 7
 		Speed: 113
 	Health:
-		HP: 360
+		HP: 350
 	Armor:
 		Type: Heavy
 	RevealsShroud:
@@ -333,7 +346,7 @@ LTNK:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	LeavesHusk:
@@ -341,6 +354,8 @@ LTNK:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
 
 MTNK:
 	Inherits: ^Tank
@@ -371,7 +386,7 @@ MTNK:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	LeavesHusk:
@@ -379,8 +394,10 @@ MTNK:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
-	Selectable:
-		Bounds: 28,28
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 28,28
 
 HTNK:
 	Inherits: ^Tank
@@ -420,7 +437,7 @@ HTNK:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	SelfHealing:
@@ -432,8 +449,10 @@ HTNK:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
-	Selectable:
-		Bounds: 34,34,0,-3
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 34,34,0,-3
 
 MSAM:
 	Inherits: ^Tank
@@ -465,12 +484,14 @@ MSAM:
 		Weapon: 227mm
 		LocalOffset: 213,-128,0, 213,128,0
 	AttackFrontal:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 		AimSequence: aim
 	AutoTarget:
 	LeavesHusk:
 		HuskActor: MSAM.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 MLRS:
 	Inherits: ^Tank
@@ -500,7 +521,7 @@ MLRS:
 		Weapon: Patriot
 		LocalOffset: 0,-171,0, 0,171,0
 	AttackTurreted:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 		AimSequence: aim
 	AutoTarget:
@@ -511,6 +532,8 @@ MLRS:
 	RenderRangeCircle:
 	LeavesHusk:
 		HuskActor: MLRS.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 STNK:
 	Inherits: ^Vehicle
@@ -543,13 +566,15 @@ STNK:
 		Weapon: 227mm.stnk
 		LocalOffset: 213,43,128, 213,-43,128
 	AttackFrontal:
-	RenderUnit:
+	WithFacingSpriteBody:
 	AutoTarget:
 		InitialStance: HoldFire
 	TargetableUnit:
 	LeavesHusk:
 		HuskActor: STNK.Husk
 	-MustBeDestroyed:
+	AutoSelectionSize:
+	RenderSprites:
 
 MHQ:
 	Inherits: ^Vehicle
@@ -566,11 +591,13 @@ MHQ:
 		Speed: 85
 	RevealsShroud:
 		Range: 6c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithIdleOverlay@SPINNER:
 		Sequence: spinner
 		Offset: -256,0,256
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
 

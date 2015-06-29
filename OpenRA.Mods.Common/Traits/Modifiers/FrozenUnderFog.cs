@@ -17,20 +17,23 @@ using OpenRA.Traits;
 namespace OpenRA.Mods.Common.Traits
 {
 	[Desc("This actor will remain visible (but not updated visually) under fog, once discovered.")]
-	public class FrozenUnderFogInfo : ITraitInfo, Requires<BuildingInfo>
+	public class FrozenUnderFogInfo : ITraitInfo, Requires<BuildingInfo>, IDefaultVisibilityInfo
 	{
 		public readonly bool StartsRevealed = false;
+
+		[Desc("Players with these stances can always see the actor.")]
+		public readonly Stance AlwaysVisibleStances = Stance.Ally;
 
 		public object Create(ActorInitializer init) { return new FrozenUnderFog(init, this); }
 	}
 
-	public class FrozenUnderFog : IRenderModifier, IVisibilityModifier, ITick, ISync
+	public class FrozenUnderFog : IRenderModifier, IDefaultVisibility, ITick, ISync
 	{
 		[Sync] public int VisibilityHash;
 
+		readonly FrozenUnderFogInfo info;
 		readonly bool startsRevealed;
 		readonly MPos[] footprint;
-		readonly CellRegion footprintRegion;
 
 		readonly Lazy<IToolTip> tooltip;
 		readonly Lazy<Health> health;
@@ -42,11 +45,12 @@ namespace OpenRA.Mods.Common.Traits
 
 		public FrozenUnderFog(ActorInitializer init, FrozenUnderFogInfo info)
 		{
+			this.info = info;
+
 			// Spawned actors (e.g. building husks) shouldn't be revealed
 			startsRevealed = info.StartsRevealed && !init.Contains<ParentActorInit>();
 			var footprintCells = FootprintUtils.Tiles(init.Self).ToList();
 			footprint = footprintCells.Select(cell => cell.ToMPos(init.World.Map)).ToArray();
-			footprintRegion = CellRegion.BoundingRegion(init.World.Map.TileShape, footprintCells);
 			tooltip = Exts.Lazy(() => init.Self.TraitsImplementing<IToolTip>().FirstOrDefault());
 			health = Exts.Lazy(() => init.Self.TraitOrDefault<Health>());
 
@@ -56,12 +60,16 @@ namespace OpenRA.Mods.Common.Traits
 
 		public bool IsVisible(Actor self, Player byPlayer)
 		{
-			return byPlayer == null || visible[byPlayer];
+			if (byPlayer == null)
+				return true;
+
+			var stance = self.Owner.Stances[byPlayer];
+			return info.AlwaysVisibleStances.HasFlag(stance) || visible[byPlayer];
 		}
 
 		public void Tick(Actor self)
 		{
-			if (self.Destroyed)
+			if (self.Disposed)
 				return;
 
 			VisibilityHash = 0;
@@ -71,7 +79,8 @@ namespace OpenRA.Mods.Common.Traits
 				FrozenActor frozenActor;
 				if (!initialized)
 				{
-					frozen[player] = frozenActor = new FrozenActor(self, footprint, footprintRegion, player.Shroud);
+					frozen[player] = frozenActor = new FrozenActor(self, footprint, player.Shroud);
+					frozen[player].NeedRenderables = frozenActor.NeedRenderables = startsRevealed;
 					player.PlayerActor.Trait<FrozenActorLayer>().Add(frozenActor);
 					isVisible = visible[player] |= startsRevealed;
 				}

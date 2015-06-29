@@ -1330,6 +1330,7 @@ Rules:
 		-ConquestVictoryConditions:
 		MissionObjectives:
 			EarlyGameOver: true
+		-EnemyWatcher:
 	World:
 		-CrateSpawner:
 		-SpawnMPUnits:
@@ -1404,6 +1405,7 @@ Rules:
 		RenderSprites:
 			Image: E7
 	PRISON:
+		HiddenUnderShroud:
 		Immobile:
 			OccupiesSpace: false
 		BodyOrientation:
@@ -1421,7 +1423,8 @@ Rules:
 		Tooltip:
 			Name: Crate
 		WithCrateBody:
-			Images: scrate
+		RenderSprites:
+			Image: scrate
 	E1.Autotarget:
 		Inherits: E1
 		Buildable:

@@ -75,10 +75,10 @@ namespace OpenRA.Mods.Common.Traits
 				return;
 
 			var attacker = e.Attacker;
-			if (attacker.Destroyed || Stance < UnitStance.ReturnFire)
+			if (attacker.Disposed || Stance < UnitStance.ReturnFire)
 				return;
 
-			if (!attacker.IsInWorld && !attacker.Destroyed)
+			if (!attacker.IsInWorld && !attacker.Disposed)
 			{
 				// If the aggressor is in a transport, then attack the transport instead
 				var passenger = attacker.TraitOrDefault<Passenger>();
@@ -156,7 +156,7 @@ namespace OpenRA.Mods.Common.Traits
 					a.AppearsHostileTo(self) &&
 					!a.HasTrait<AutoTargetIgnore>() &&
 					attack.HasAnyValidWeapons(Target.FromActor(a)) &&
-					self.Owner.Shroud.IsTargetable(a))
+					self.Owner.CanTargetActor(a))
 				.ClosestTo(self);
 		}
 	}

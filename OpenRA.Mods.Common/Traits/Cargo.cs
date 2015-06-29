@@ -39,6 +39,9 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Terrain types that this actor is allowed to eject actors onto. Leave empty for all terrain types.")]
 		public readonly string[] UnloadTerrainTypes = { };
 
+		[Desc("Voice to play when ordered to unload the passengers.")]
+		[VoiceReference] public readonly string UnloadVoice = "Action";
+
 		[Desc("Which direction the passenger will face (relative to the transport) when unloading.")]
 		public readonly int PassengerFacing = 128;
 
@@ -51,7 +54,8 @@ namespace OpenRA.Mods.Common.Traits
 		public object Create(ActorInitializer init) { return new Cargo(init, this); }
 	}
 
-	public class Cargo : IPips, IIssueOrder, IResolveOrder, IOrderVoice, INotifyCreated, INotifyKilled, INotifyOwnerChanged, INotifyAddedToWorld, ITick, INotifySold, IDisableMove
+	public class Cargo : IPips, IIssueOrder, IResolveOrder, IOrderVoice, INotifyCreated, INotifyKilled,
+		INotifyOwnerChanged, INotifyAddedToWorld, ITick, INotifySold, IDisableMove, INotifyActorDisposing
 	{
 		public readonly CargoInfo Info;
 		readonly Actor self;
@@ -204,10 +208,10 @@ namespace OpenRA.Mods.Common.Traits
 
 		public string VoicePhraseForOrder(Actor self, Order order)
 		{
-			if (order.OrderString != "Unload" || IsEmpty(self))
+			if (order.OrderString != "Unload" || IsEmpty(self) || !self.HasVoice(Info.UnloadVoice))
 				return null;
 
-			return self.HasVoice("Unload") ? "Unload" : "Move";
+			return Info.UnloadVoice;
 		}
 
 		public bool MoveDisabled(Actor self) { return reserves.Any(); }
@@ -298,6 +302,14 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			foreach (var c in cargo)
 				c.Kill(e.Attacker);
+
+			cargo.Clear();
+		}
+
+		public void Disposing(Actor self)
+		{
+			foreach (var c in cargo)
+				c.Dispose();
 
 			cargo.Clear();
 		}

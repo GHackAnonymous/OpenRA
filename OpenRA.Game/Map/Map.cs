@@ -239,7 +239,8 @@ namespace OpenRA
 		public SequenceProvider SequenceProvider { get { return Rules.Sequences[Tileset]; } }
 
 		public WVec[][] CellCorners { get; private set; }
-		[FieldLoader.Ignore] public CellRegion Cells;
+		[FieldLoader.Ignore] public CellRegion CellsInsideBounds;
+		[FieldLoader.Ignore] public CellRegion AllCells;
 
 		public static Map FromTileset(TileSet tileset)
 		{
@@ -392,12 +393,16 @@ namespace OpenRA
 
 			cachedTileSet = Exts.Lazy(() => Rules.TileSets[Tileset]);
 
-			var tl = new MPos(Bounds.Left, Bounds.Top).ToCPos(this);
-			var br = new MPos(Bounds.Right - 1, Bounds.Bottom - 1).ToCPos(this);
-			Cells = new CellRegion(TileShape, tl, br);
+			var tl = new MPos(0, 0).ToCPos(this);
+			var br = new MPos(MapSize.X - 1, MapSize.Y - 1).ToCPos(this);
+			AllCells = new CellRegion(TileShape, tl, br);
+
+			var btl = new MPos(Bounds.Left, Bounds.Top).ToCPos(this);
+			var bbr = new MPos(Bounds.Right - 1, Bounds.Bottom - 1).ToCPos(this);
+			CellsInsideBounds = new CellRegion(TileShape, btl, bbr);
 
 			CustomTerrain = new CellLayer<byte>(this);
-			foreach (var uv in Cells.MapCoords)
+			foreach (var uv in AllCells.MapCoords)
 				CustomTerrain[uv] = byte.MaxValue;
 
 			var leftDelta = TileShape == TileShape.Diamond ? new WVec(-512, 0, 0) : new WVec(-512, -512, 0);
@@ -479,7 +484,7 @@ namespace OpenRA
 			}
 
 			// Saving the map to a new location
-			if (toPath != Path)
+			if (toPath != Path || Container == null)
 			{
 				Path = toPath;
 
@@ -625,6 +630,12 @@ namespace OpenRA
 
 		public bool Contains(CPos cell)
 		{
+			// .ToMPos() returns the same result if the X and Y coordinates
+			// are switched. X < Y is invalid in the Diamond coordinate system,
+			// so we pre-filter these to avoid returning the wrong result
+			if (TileShape == TileShape.Diamond && cell.X < cell.Y)
+				return false;
+
 			return Contains(cell.ToMPos(this));
 		}
 
@@ -689,6 +700,10 @@ namespace OpenRA
 			MapResources = Exts.Lazy(() => CellLayer.Resize(oldMapResources, newSize, oldMapResources[MPos.Zero]));
 			MapHeight = Exts.Lazy(() => CellLayer.Resize(oldMapHeight, newSize, oldMapHeight[MPos.Zero]));
 			MapSize = new int2(newSize);
+
+			var tl = new MPos(0, 0).ToCPos(this);
+			var br = new MPos(MapSize.X - 1, MapSize.Y - 1).ToCPos(this);
+			AllCells = new CellRegion(TileShape, tl, br);
 		}
 
 		public void ResizeCordon(int left, int top, int right, int bottom)
@@ -697,7 +712,7 @@ namespace OpenRA
 
 			var tl = new MPos(Bounds.Left, Bounds.Top).ToCPos(this);
 			var br = new MPos(Bounds.Right - 1, Bounds.Bottom - 1).ToCPos(this);
-			Cells = new CellRegion(TileShape, tl, br);
+			CellsInsideBounds = new CellRegion(TileShape, tl, br);
 		}
 
 		string ComputeHash()
@@ -763,6 +778,12 @@ namespace OpenRA
 			return cell.ToMPos(this).Clamp(bounds).ToCPos(this);
 		}
 
+		public MPos Clamp(MPos uv)
+		{
+			var bounds = new Rectangle(Bounds.X, Bounds.Y, Bounds.Width - 1, Bounds.Height - 1);
+			return uv.Clamp(bounds);
+		}
+
 		public CPos ChooseRandomCell(MersenneTwister rand)
 		{
 			var x = rand.Next(Bounds.Left, Bounds.Right);
@@ -797,8 +818,8 @@ namespace OpenRA
 
 		public WRange DistanceToEdge(WPos pos, WVec dir)
 		{
-			var tl = CenterOfCell(Cells.TopLeft) - new WVec(512, 512, 0);
-			var br = CenterOfCell(Cells.BottomRight) + new WVec(511, 511, 0);
+			var tl = CenterOfCell(CellsInsideBounds.TopLeft) - new WVec(512, 512, 0);
+			var br = CenterOfCell(CellsInsideBounds.BottomRight) + new WVec(511, 511, 0);
 			var x = dir.X == 0 ? int.MaxValue : ((dir.X < 0 ? tl.X : br.X) - pos.X) / dir.X;
 			var y = dir.Y == 0 ? int.MaxValue : ((dir.Y < 0 ? tl.Y : br.Y) - pos.Y) / dir.Y;
 			return new WRange(Math.Min(x, y) * dir.Length);
@@ -849,7 +870,7 @@ namespace OpenRA
 		// it rounds the actual distance up to the next integer so that this call
 		// will return any cells that intersect with the requested range circle.
 		// The returned positions are sorted by distance from the center.
-		public IEnumerable<CPos> FindTilesInAnnulus(CPos center, int minRange, int maxRange)
+		public IEnumerable<CPos> FindTilesInAnnulus(CPos center, int minRange, int maxRange, bool allowOutsideBounds = false)
 		{
 			if (maxRange < minRange)
 				throw new ArgumentOutOfRangeException("maxRange", "Maximum range is less than the minimum range.");
@@ -857,20 +878,24 @@ namespace OpenRA
 			if (maxRange > TilesByDistance.Length)
 				throw new ArgumentOutOfRangeException("maxRange", "The requested range ({0}) exceeds the maximum allowed ({1})".F(maxRange, MaxTilesInCircleRange));
 
+			Func<CPos, bool> valid = Contains;
+			if (allowOutsideBounds)
+				valid = MapTiles.Value.Contains;
+
 			for (var i = minRange; i <= maxRange; i++)
 			{
 				foreach (var offset in TilesByDistance[i])
 				{
 					var t = offset + center;
-					if (Contains(t))
+					if (valid(t))
 						yield return t;
 				}
 			}
 		}
 
-		public IEnumerable<CPos> FindTilesInCircle(CPos center, int maxRange)
+		public IEnumerable<CPos> FindTilesInCircle(CPos center, int maxRange, bool allowOutsideBounds = false)
 		{
-			return FindTilesInAnnulus(center, 0, maxRange);
+			return FindTilesInAnnulus(center, 0, maxRange, allowOutsideBounds);
 		}
 	}
 }

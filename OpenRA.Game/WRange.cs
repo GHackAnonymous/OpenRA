@@ -23,6 +23,7 @@ namespace OpenRA
 	public struct WRange : IComparable, IComparable<WRange>, IEquatable<WRange>, IScriptBindable, ILuaAdditionBinding, ILuaSubtractionBinding, ILuaEqualityBinding, ILuaTableBinding
 	{
 		public readonly int Range;
+		public long RangeSquared { get { return (long)Range * (long)Range; } }
 
 		public WRange(int r) { Range = r; }
 		public static readonly WRange Zero = new WRange(0);
@@ -55,11 +56,15 @@ namespace OpenRA
 
 		public static bool TryParse(string s, out WRange result)
 		{
+			result = WRange.Zero;
+
+			if (string.IsNullOrEmpty(s))
+				return false;
+
 			s = s.ToLowerInvariant();
 			var components = s.Split('c');
 			var cell = 0;
 			var subcell = 0;
-			result = WRange.Zero;
 
 			switch (components.Length)
 			{

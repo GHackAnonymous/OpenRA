@@ -1,11 +1,10 @@
 spicebloom:
+	HiddenUnderShroud:
 	RenderBuilding:
 	Building:
 		Footprint: x
 		Dimensions: 1,1
 	AppearsOnRadar:
-	EditorAppearance:
-		RelativeToTopLeft: yes
 	ProximityCaptor:
 		Types: Tree
 	Tooltip:
@@ -76,5 +75,6 @@ sietch:
 	Power:
 		Amount: 0
 	ProvidesPrerequisite@buildingname:
+	-WithMakeAnimation:
 	-WithCrumbleOverlay:
 

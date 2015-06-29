@@ -10,10 +10,11 @@ BADR:
 		ROT: 5
 		Speed: 149
 		Repulsable: False
-	RenderUnit:
+	WithFacingSpriteBody:
 	Cargo:
 		MaxWeight: 10
 	-Selectable:
+	-Voiced:
 	-GainsExperience:
 	Tooltip:
 		Name: Badger
@@ -32,7 +33,8 @@ BADR:
 	-EjectOnDeath:
 	-GpsDot:
 	RejectsOrders:
-	-AnnounceOnSeen:
+	AutoSelectionSize:
+	RenderSprites:
 
 BADR.Bomber:
 	Inherits: ^Plane
@@ -49,9 +51,9 @@ BADR.Bomber:
 		Repulsable: False
 	AmmoPool:
 		Ammo: 7
-	RenderUnit:
-		Image: badr
+	WithFacingSpriteBody:
 	-Selectable:
+	-Voiced:
 	-GainsExperience:
 	Tooltip:
 		Name: Badger
@@ -70,6 +72,9 @@ BADR.Bomber:
 	-EjectOnDeath:
 	-GpsDot:
 	RejectsOrders:
+	AutoSelectionSize:
+	RenderSprites:
+		Image: badr
 
 MIG:
 	Inherits: ^Plane
@@ -82,7 +87,7 @@ MIG:
 		Cost: 2000
 	Tooltip:
 		Name: Mig Attack Plane
-		Description: Fast Ground-Attack Plane.\n  Strong vs Buildings\n  Weak vs Infantry, Light Vehicles
+		Description: Fast Ground-Attack Plane.\n  Strong vs Buildings, Tanks\n  Weak vs Infantry, Light armor, Aircraft
 	Health:
 		HP: 70
 	Armor:
@@ -105,13 +110,14 @@ MIG:
 		TargetWhenIdle: false
 		TargetWhenDamaged: false
 		EnableStances: false
-	RenderUnit:
-		CameraPitch: 99
+	WithFacingSpriteBody:
 	AmmoPool:
 		Ammo: 8
 	ReturnOnIdle:
 	Selectable:
-		Bounds: 40,29,0,1
+		Bounds: 36,28,0,2
+	SelectionDecorations:
+		VisualBounds: 40,29,0,1
 	Contrail@1:
 		Offset: -598,-683,0
 	Contrail@2:
@@ -121,6 +127,9 @@ MIG:
 	SmokeTrailWhenDamaged:
 		Offset: -853,0,171
 		Interval: 2
+	AutoSelectionSize:
+	RenderSprites:
+		CameraPitch: 99
 
 YAK:
 	Inherits: ^Plane
@@ -133,7 +142,7 @@ YAK:
 		Cost: 1350
 	Tooltip:
 		Name: Yak Attack Plane
-		Description: Anti-Tanks & Anti-Infantry Plane.\n  Strong vs Infantry, Tanks\n  Weak vs Buildings
+		Description: Anti-Tanks & Anti-Infantry Plane.\n  Strong vs Infantry, Vehicles\n  Weak vs Aircraft
 	Health:
 		HP: 60
 	Armor:
@@ -161,15 +170,14 @@ YAK:
 		TargetWhenIdle: false
 		TargetWhenDamaged: false
 		EnableStances: false
-	RenderUnit:
-		CameraPitch: 99
+	WithFacingSpriteBody:
 	AmmoPool:
 		Ammo: 18
 		PipCount: 6
 		ReloadTicks: 11
 	ReturnOnIdle:
-	Selectable:
-		Bounds: 30,28,0,2
+	SelectionDecorations:
+		VisualBounds: 30,28,0,2
 	WithMuzzleFlash:
 	Contrail:
 		Offset: -853,0,0
@@ -178,6 +186,9 @@ YAK:
 	SmokeTrailWhenDamaged:
 		Offset: -853,0,0
 		Interval: 2
+	AutoSelectionSize:
+	RenderSprites:
+		CameraPitch: 99
 
 TRAN:
 	Inherits: ^Helicopter
@@ -205,7 +216,7 @@ TRAN:
 		Speed: 112
 		LandableTerrainTypes: Clear,Rough,Road,Ore,Beach
 		AltitudeVelocity: 0c100
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithRotor@PRIMARY:
 		Offset: -597,0,341
 		Sequence: rotor2
@@ -218,6 +229,8 @@ TRAN:
 		PipCount: 8
 	LeavesHusk:
 		HuskActor: TRAN.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 HELI:
 	Inherits: ^Helicopter
@@ -230,7 +243,7 @@ HELI:
 		Cost: 2000
 	Tooltip:
 		Name: Longbow
-		Description: Helicopter Gunship with AG Missiles.\n  Strong vs Tanks\n  Weak vs Infantry
+		Description: Helicopter gunship armed\nwith multi-purpose missiles.\n  Strong vs Tanks, Aircraft\n  Weak vs Infantry
 	Health:
 		HP: 120
 	Armor:
@@ -254,17 +267,19 @@ HELI:
 		Speed: 149
 	AutoTarget:
 		InitialStance: HoldFire
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithRotor:
 		Offset: 0,0,85
 	AmmoPool:
 		Ammo: 8
-	Selectable:
-		Bounds: 36,28,0,0
+	SelectionDecorations:
+		VisualBounds: 36,28,0,0
 	LeavesHusk:
 		HuskActor: HELI.Husk
 	SmokeTrailWhenDamaged:
 		Offset: -427,0,0
+	AutoSelectionSize:
+	RenderSprites:
 
 HIND:
 	Inherits: ^Helicopter
@@ -277,7 +292,7 @@ HIND:
 		Cost: 1350
 	Tooltip:
 		Name: Hind
-		Description: Helicopter Gunship with Chainguns.\n  Strong vs Infantry, Light Vehicles.\n  Weak vs Tanks
+		Description: Helicopter gunship armed\nwith dual chainguns.\n  Strong vs Infantry, Light armor.\n  Weak vs Tanks, Aircraft
 	Health:
 		HP: 100
 	Armor:
@@ -304,19 +319,21 @@ HIND:
 		Speed: 112
 	AutoTarget:
 		InitialStance: HoldFire
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithRotor:
 	AmmoPool:
 		Ammo: 24
 		PipCount: 6
 		ReloadTicks: 8
-	Selectable:
-		Bounds: 38,32,0,0
+	SelectionDecorations:
+		VisualBounds: 38,32,0,0
 	WithMuzzleFlash:
 	LeavesHusk:
 		HuskActor: HIND.Husk
 	SmokeTrailWhenDamaged:
 		Offset: -427,0,0
+	AutoSelectionSize:
+	RenderSprites:
 
 U2:
 	Inherits: ^Plane
@@ -329,9 +346,10 @@ U2:
 		Speed: 373
 		Repulsable: False
 		MaximumPitch: 56
-	RenderUnit:
+	WithFacingSpriteBody:
 	AttackBomber:
 	-Selectable:
+	-Voiced:
 	-TargetableAircraft:
 	-GainsExperience:
 	Contrail@1:
@@ -344,5 +362,6 @@ U2:
 		Offset: -1c43,0,0
 		Interval: 2
 	RejectsOrders:
-	-AnnounceOnSeen:
+	AutoSelectionSize:
+	RenderSprites:
 

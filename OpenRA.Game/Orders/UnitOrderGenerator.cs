@@ -63,8 +63,7 @@ namespace OpenRA.Orders
 
 			if (underCursor != null && (mi.Modifiers.HasModifier(Modifiers.Shift) || !world.Selection.Actors.Any()))
 			{
-				var selectable = underCursor.TraitOrDefault<Selectable>();
-				if (selectable != null && selectable.Info.Selectable)
+				if (underCursor.HasTrait<Selectable>())
 					useSelect = true;
 			}
 
@@ -107,7 +106,7 @@ namespace OpenRA.Orders
 			if (self.Owner != self.World.LocalPlayer)
 				return null;
 
-			if (self.Destroyed || !target.IsValidFor(self))
+			if (self.Disposed || !target.IsValidFor(self))
 				return null;
 
 			if (mi.Button == Game.Settings.Game.MouseButtonPreference.Action)
@@ -140,7 +139,7 @@ namespace OpenRA.Orders
 		{
 			if (order == null && iot.OrderID != null)
 				Game.Debug("BUG: in order targeter - decided on {0} but then didn't order", iot.OrderID);
-			else if (iot.OrderID != order.OrderString)
+			else if (order != null && iot.OrderID != order.OrderString)
 				Game.Debug("BUG: in order targeter - decided on {0} but ordered {1}", iot.OrderID, order.OrderString);
 			return order;
 		}
@@ -161,25 +160,6 @@ namespace OpenRA.Orders
 				this.Cursor = cursor;
 				this.Target = target;
 			}
-		}
-	}
-
-	public static class SelectableExts
-	{
-		public static int SelectionPriority(this ActorInfo a)
-		{
-			var selectableInfo = a.Traits.GetOrDefault<SelectableInfo>();
-			return selectableInfo != null ? selectableInfo.Priority : int.MinValue;
-		}
-
-		public static Actor WithHighestSelectionPriority(this IEnumerable<Actor> actors)
-		{
-			return actors.MaxByOrDefault(a => a.Info.SelectionPriority());
-		}
-
-		public static FrozenActor WithHighestSelectionPriority(this IEnumerable<FrozenActor> actors)
-		{
-			return actors.MaxByOrDefault(a => a.Info.SelectionPriority());
 		}
 	}
 }

@@ -22,8 +22,8 @@ namespace OpenRA.Mods.Common.Server
 	public class ColorValidator : ServerTrait, IClientJoined
 	{
 		// The bigger the color threshold, the less permitive is the algorithm
-		const int ColorThreshold = 0x40;
-		const byte ColorLowerBound = 0x33;
+		const int ColorThreshold = 0x70;
+		const byte ColorLowerBound = 0x80;
 		const byte ColorHigherBound = 0xFF;
 
 		static bool ValidateColorAgainstForbidden(Color askedColor, IEnumerable<Color> forbiddenColors, out Color forbiddenColor)
@@ -134,7 +134,7 @@ namespace OpenRA.Mods.Common.Server
 					{
 						var hue = (byte)server.Random.Next(255);
 						var sat = (byte)server.Random.Next(255);
-						var lum = (byte)server.Random.Next(51, 255);
+						var lum = (byte)server.Random.Next(129, 255);
 						askColor = new HSLColor(hue, sat, lum);
 					} while (!ValidatePlayerNewColor(server, askColor.RGB, playerIndex));
 				}
@@ -160,17 +160,11 @@ namespace OpenRA.Mods.Common.Server
 			}
 
 			// Validate color against other clients
-			var playerColors = server.LobbyInfo.Clients
-				.Where(c => c.Index != playerIndex)
-				.ToDictionary(c => c.Color.RGB, c => c.Name);
-
-			if (!ValidateColorAgainstForbidden(askedColor, playerColors.Keys, out forbiddenColor))
+			var playerColors = server.LobbyInfo.Clients.Where(c => c.Index != playerIndex).Select(c => c.Color.RGB);
+			if (!ValidateColorAgainstForbidden(askedColor, playerColors, out forbiddenColor))
 			{
 				if (connectionToEcho != null)
-				{
-					var client = playerColors[forbiddenColor];
-					server.SendOrderTo(connectionToEcho, "Message", "Color was too similar to {0}, and has been adjusted.".F(client));
-				}
+					server.SendOrderTo(connectionToEcho, "Message", "Color was too similar to another player's color, and has been adjusted.");
 
 				return false;
 			}

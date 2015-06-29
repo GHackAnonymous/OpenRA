@@ -27,6 +27,7 @@ namespace OpenRA.Mods.Common.Effects
 		[Desc("Maximum offset at the maximum range.")]
 		public readonly WRange Inaccuracy = WRange.Zero;
 		public readonly string Image = null;
+		[SequenceReference("Image")] public readonly string Sequence = "idle";
 		public readonly string Palette = "effect";
 		public readonly bool Shadow = false;
 		[Desc("Trail animation.")]
@@ -96,7 +97,7 @@ namespace OpenRA.Mods.Common.Effects
 			facing = OpenRA.Traits.Util.GetFacing(target - pos, 0);
 			length = Math.Max((target - pos).Length / speed.Range, 1);
 
-			if (info.Image != null)
+			if (!string.IsNullOrEmpty(info.Image))
 			{
 				anim = new Animation(world, info.Image, GetEffectiveFacing);
 				anim.PlayRepeating("idle");
@@ -135,10 +136,10 @@ namespace OpenRA.Mods.Common.Effects
 
 			pos = WPos.LerpQuadratic(args.Source, target, angle, ticks, length);
 
-			if (info.Trail != null && --smokeTicks < 0)
+			if (!string.IsNullOrEmpty(info.Trail) && --smokeTicks < 0)
 			{
 				var delayedPos = WPos.LerpQuadratic(args.Source, target, angle, ticks - info.TrailDelay, length);
-				world.AddFrameEndTask(w => w.Add(new Smoke(w, delayedPos, info.Trail, trailPalette)));
+				world.AddFrameEndTask(w => w.Add(new Smoke(w, delayedPos, info.Trail, trailPalette, info.Sequence)));
 				smokeTicks = info.TrailInterval;
 			}
 
@@ -158,8 +159,7 @@ namespace OpenRA.Mods.Common.Effects
 			if (anim == null || ticks >= length)
 				yield break;
 
-			var cell = wr.World.Map.CellContaining(pos);
-			if (!args.SourceActor.World.FogObscures(cell))
+			if (!args.SourceActor.World.FogObscures(pos))
 			{
 				if (info.Shadow)
 				{

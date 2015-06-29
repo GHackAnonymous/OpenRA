@@ -367,58 +367,57 @@ BRIDGE4:
 		SpawnOffset: 3,2
 
 BRIDGEHUT:
+	HiddenUnderShroud:
 	Building:
 		Footprint: __ __
 		Dimensions: 2,2
-	Selectable:
-		Selectable: false
-		Bounds: 48,48
-		Priority: 2
+	CustomSelectionSize:
+		CustomBounds: 48,48
 	BridgeHut:
 	TargetableBuilding:
 		TargetTypes: BridgeHut, C4
 
 C1:
 	Inherits: ^CivInfantry
-	Selectable:
-		Voice: CivilianMaleVoice
+	Voiced:
+		VoiceSet: CivilianMaleVoice
 
 C2:
 	Inherits: ^CivInfantry
-	Selectable:
-		Voice: CivilianFemaleVoice
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C3:
 	Inherits: ^CivInfantry
 
 C4:
 	Inherits: ^CivInfantry
-	Selectable:
-		Voice: CivilianFemaleVoice
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C5:
 	Inherits: ^CivInfantry
 
 C6:
 	Inherits: ^CivInfantry
-	Selectable:
-		Voice: CivilianFemaleVoice
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C7:
 	Inherits: ^CivInfantry
 
 C8:
 	Inherits: ^CivInfantry
-	Selectable:
-		Voice: CivilianFemaleVoice
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C9:
 	Inherits: ^CivInfantry
 
 C10:
 	Inherits: ^CivInfantry
-	Selectable:
-		Voice: CivilianFemaleVoice
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 VICE:
 	AppearsOnRadar:
@@ -438,13 +437,17 @@ VICE:
 			Tiberium: 100
 			BlueTiberium: 100
 			Beach: 60
+		Voice: Move
+	SelectionDecorations:
+		VisualBounds: 24,24
 	Selectable:
-		Voice: DinoVoice
+		Bounds: 24,24
 	TargetableUnit:
 		TargetTypes: Ground
 	AutoTarget:
 		ScanRadius: 5
 	AttackMove:
+		Voice: Attack
 	HiddenUnderFog:
 	GivesExperience:
 	Valued:
@@ -457,19 +460,25 @@ VICE:
 		MuzzleSequence: muzzle
 		MuzzleSplitFacings: 8
 	AttackFrontal:
+		Voice: Attack
 	AttackWander:
 		WanderMoveRadius: 2
 		MinMoveDelayInTicks: 25
 		MaxMoveDelayInTicks: 45
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithMuzzleFlash:
 		SplitFacings: true
 	CombatDebugOverlay:
 	Guard:
+		Voice: Move
 	Guardable:
 	UpdatesPlayerStatistics:
 	BodyOrientation:
 		QuantizedFacings: 8
 	PoisonedByTiberium:
 		Weapon: Heal
+	Voiced:
+		VoiceSet: DinoVoice
+	AutoSelectionSize:
+	RenderSprites:
 

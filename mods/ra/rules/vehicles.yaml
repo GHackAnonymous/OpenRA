@@ -8,7 +8,7 @@ V2RL:
 		Cost: 900
 	Tooltip:
 		Name: V2 Rocket
-		Description: Long-range rocket artillery.\n  Strong vs Infantry, Buildings\n  Weak vs Tanks, Aircraft
+		Description: Long-range rocket artillery.\n  Strong vs Infantry, Light armor, Buildings\n  Weak vs Tanks, Aircraft
 	Health:
 		HP: 200
 	Armor:
@@ -20,11 +20,19 @@ V2RL:
 	Armament:
 		Weapon: SCUD
 	AttackFrontal:
-	RenderUnitReload:
+	SelectionDecorations:
+		VisualBounds: 28,28
+	RenderSprites:
 	AutoTarget:
 	Explodes:
 		Weapon: SCUD
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	WithFacingSpriteBody:
+		Sequence: idle
+	WithAttackAnimation:
+		AimSequence: aim
+		ReloadPrefix: empty-
 
 1TNK:
 	Inherits: ^Tank
@@ -36,7 +44,7 @@ V2RL:
 		Cost: 700
 	Tooltip:
 		Name: Light Tank
-		Description: Light Tank, good for scouting.\n  Strong vs Light Vehicles\n  Weak vs Tanks, Aircraft
+		Description: Light Tank, good for scouting.\n  Strong vs Light armor\n  Weak vs Infantry, Tanks, Aircraft
 	Health:
 		HP: 220
 	Armor:
@@ -56,7 +64,7 @@ V2RL:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	Explodes:
@@ -64,6 +72,8 @@ V2RL:
 		EmptyWeapon: UnitExplodeSmall
 	LeavesHusk:
 		HuskActor: 1TNK.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 2TNK:
 	Inherits: ^Tank
@@ -75,7 +85,7 @@ V2RL:
 		Cost: 850
 	Tooltip:
 		Name: Medium Tank
-		Description: Allied Main Battle Tank.\n  Strong vs Tanks, Light Vehicles\n  Weak vs Infantry, Aircraft
+		Description: Allied Main Battle Tank.\n  Strong vs Vehicles\n  Weak vs Infantry, Aircraft
 	Health:
 		HP: 450
 	Armor:
@@ -95,7 +105,7 @@ V2RL:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	Explodes:
@@ -103,8 +113,10 @@ V2RL:
 		EmptyWeapon: UnitExplodeSmall
 	LeavesHusk:
 		HuskActor: 2TNK.Husk
-	Selectable:
-		Bounds: 30,30
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 28,28
 
 3TNK:
 	Inherits: ^Tank
@@ -116,7 +128,7 @@ V2RL:
 		Cost: 1150
 	Tooltip:
 		Name: Heavy Tank
-		Description: Soviet Main Battle Tank, with dual cannons\n  Strong vs Tanks, Light Vehicles\n  Weak vs Infantry, Aircraft
+		Description: Soviet Main Battle Tank, with dual cannons\n  Strong vs Vehicles\n  Weak vs Infantry, Aircraft
 	Health:
 		HP: 550
 	Armor:
@@ -136,7 +148,7 @@ V2RL:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	Explodes:
@@ -144,8 +156,10 @@ V2RL:
 		EmptyWeapon: UnitExplodeSmall
 	LeavesHusk:
 		HuskActor: 3TNK.Husk
-	Selectable:
-		Bounds: 30,30
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 28,28
 
 4TNK:
 	Inherits: ^Tank
@@ -159,7 +173,7 @@ V2RL:
 		Value: 2500
 	Tooltip:
 		Name: Mammoth Tank
-		Description: Big and slow tank, with anti-air capability.\n  Strong vs Tanks, Aircraft\n  Weak vs Infantry
+		Description: Big and slow tank, with anti-air capability.\n  Strong vs Vehicles, Infantry, Aircraft\n  Weak vs Nothing
 	Health:
 		HP: 900
 	Armor:
@@ -186,7 +200,7 @@ V2RL:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	Explodes:
@@ -199,8 +213,10 @@ V2RL:
 		Ticks: 3
 		HealIfBelow: 50%
 		DamageCooldown: 150
-	Selectable:
-		Bounds: 44,38,0,-4
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 44,38,0,-4
 
 ARTY:
 	Inherits: ^Tank
@@ -212,7 +228,7 @@ ARTY:
 		Cost: 800
 	Tooltip:
 		Name: Artillery
-		Description: Long-range artillery.\n  Strong vs Infantry, Buildings\n  Weak vs Tanks, Aircraft
+		Description: Long-range artillery.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles, Aircraft
 	Health:
 		HP: 100
 	Armor:
@@ -228,11 +244,13 @@ ARTY:
 		MuzzleSequence: muzzle
 	AttackFrontal:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	Explodes:
 		Weapon: UnitExplode
 		Chance: 75
 	AutoTarget:
+	AutoSelectionSize:
+	RenderSprites:
 
 HARV:
 	Inherits: ^Vehicle
@@ -249,7 +267,8 @@ HARV:
 		Description: Collects Ore and Gems for processing.\n  Unarmed
 	Selectable:
 		Priority: 7
-		Bounds: 42,42
+	SelectionDecorations:
+		VisualBounds: 42,42
 	Harvester:
 		Capacity: 20
 		Resources: Ore,Gems
@@ -293,7 +312,8 @@ MCV:
 		Description: Deploys into another Construction Yard.\n  Unarmed
 	Selectable:
 		Priority: 4
-		Bounds: 42,42
+	SelectionDecorations:
+		VisualBounds: 42,42
 	Health:
 		HP: 600
 	Armor:
@@ -309,7 +329,7 @@ MCV:
 		Facing: 96
 		TransformSounds: placbldg.aud, build5.aud
 		NoTransformNotification: BuildingCannotPlaceAudio
-	RenderUnit:
+	WithFacingSpriteBody:
 	MustBeDestroyed:
 		RequiredForShortGame: true
 	BaseBuilding:
@@ -318,6 +338,8 @@ MCV:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
 
 JEEP:
 	Inherits: ^Vehicle
@@ -329,7 +351,7 @@ JEEP:
 		Cost: 500
 	Tooltip:
 		Name: Ranger
-		Description: Fast scout & anti-infantry vehicle.\n  Strong vs Infantry\n  Weak vs Tanks, Aircraft
+		Description: Fast scout & anti-infantry vehicle.\n  Strong vs Infantry\n  Weak vs Vehicles, Aircraft
 	Health:
 		HP: 150
 	Armor:
@@ -347,7 +369,7 @@ JEEP:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	Cargo:
@@ -357,6 +379,8 @@ JEEP:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
 
 APC:
 	Inherits: ^Tank
@@ -368,7 +392,7 @@ APC:
 		Cost: 850
 	Tooltip:
 		Name: Armored Personnel Carrier
-		Description: Tough infantry transport.\n  Strong vs Infantry, Light Vehicles\n  Weak vs Tanks, Aircraft
+		Description: Tough infantry transport.\n  Strong vs Infantry, Light armor\n  Weak vs Tanks, Aircraft
 	Health:
 		HP: 300
 	Armor:
@@ -383,7 +407,7 @@ APC:
 		LocalOffset: 0,0,171
 		MuzzleSequence: muzzle
 	AttackFrontal:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithMuzzleFlash:
 	AutoTarget:
 	Cargo:
@@ -393,6 +417,8 @@ APC:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
 
 MNLY.AP:
 	Inherits: ^Tank
@@ -404,7 +430,7 @@ MNLY.AP:
 		Cost: 800
 	Tooltip:
 		Name: Minelayer
-		Description: Lays mines to destroy unwary enemy units.\nCan detect mines.\n  Unarmed
+		Description: Lays mines to destroy\nunwary enemy units.\nCan detect mines.\n  Unarmed
 	Health:
 		HP: 100
 	Armor:
@@ -414,8 +440,7 @@ MNLY.AP:
 		Crushes: wall, mine, crate, infantry
 	RevealsShroud:
 		Range: 5c0
-	RenderUnit:
-		Image: MNLY
+	WithFacingSpriteBody:
 	Minelayer:
 		Mine: MINP
 	MineImmune:
@@ -428,6 +453,9 @@ MNLY.AP:
 	RenderDetectionCircle:
 	Explodes:
 		Weapon: APMine
+	AutoSelectionSize:
+	RenderSprites:
+		Image: MNLY
 
 MNLY.AT:
 	Inherits: ^Tank
@@ -439,7 +467,7 @@ MNLY.AT:
 		Cost: 800
 	Tooltip:
 		Name: Minelayer
-		Description: Lays mines to destroy unwary enemy units.\nCan detect mines.\n  Unarmed
+		Description: Lays mines to destroy\nunwary enemy units.\nCan detect mines.\n  Unarmed
 	Health:
 		HP: 100
 	Armor:
@@ -449,8 +477,7 @@ MNLY.AT:
 		Crushes: wall, mine, crate, infantry
 	RevealsShroud:
 		Range: 5c0
-	RenderUnit:
-		Image: MNLY
+	WithFacingSpriteBody:
 	Minelayer:
 		Mine: MINV
 	MineImmune:
@@ -463,6 +490,9 @@ MNLY.AT:
 	RenderDetectionCircle:
 	Explodes:
 		Weapon: ATMine
+	AutoSelectionSize:
+	RenderSprites:
+		Image: MNLY
 
 TRUK:
 	Inherits: ^Vehicle
@@ -483,7 +513,7 @@ TRUK:
 		Speed: 128
 	RevealsShroud:
 		Range: 3c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	SupplyTruck:
 		Payload: 500
 	Explodes:
@@ -491,6 +521,8 @@ TRUK:
 		EmptyWeapon: UnitExplodeSmall
 	LeavesHusk:
 		HuskActor: moneycrate
+	AutoSelectionSize:
+	RenderSprites:
 
 MGG:
 	Inherits: ^Vehicle
@@ -509,7 +541,7 @@ MGG:
 		Type: Heavy
 	Mobile:
 		Speed: 85
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithIdleOverlay@SPINNER:
 		Offset: -299,0,171
 		Sequence: spinner
@@ -523,6 +555,8 @@ MGG:
 		EmptyWeapon: UnitExplodeSmall
 	LeavesHusk:
 		HuskActor: MGG.Husk
+	AutoSelectionSize:
+	RenderSprites:
 
 MRJ:
 	Inherits: ^Vehicle
@@ -543,7 +577,7 @@ MRJ:
 		Speed: 85
 	RevealsShroud:
 		Range: 6c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithIdleOverlay@SPINNER:
 		Sequence: spinner
 		Offset: -256,0,256
@@ -558,6 +592,8 @@ MRJ:
 	RenderJammerCircle:
 	DetectCloaked:
 		Range: 6
+	AutoSelectionSize:
+	RenderSprites:
 
 TTNK:
 	Inherits: ^Tank
@@ -569,7 +605,7 @@ TTNK:
 		Cost: 1350
 	Tooltip:
 		Name: Tesla Tank
-		Description: Tank with mounted tesla coil.\n  Strong vs Infantry, Vehicles\n  and Buildings  \n  Weak vs Aircraft
+		Description: Tank with mounted tesla coil.\n  Strong vs Infantry, Vehicles, Buildings\n  Weak vs Aircraft
 	Health:
 		HP: 400
 	Armor:
@@ -583,15 +619,17 @@ TTNK:
 		Weapon: TTankZap
 		LocalOffset: 0,0,213
 	AttackFrontal:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithIdleOverlay@SPINNER:
 		Sequence: spinner
-	Selectable:
-		Bounds: 28,28,0,0
+	SelectionDecorations:
+		VisualBounds: 30,30
 	AutoTarget:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
 
 FTRK:
 	Inherits: ^Vehicle
@@ -603,7 +641,7 @@ FTRK:
 		Cost: 600
 	Tooltip:
 		Name: Mobile Flak
-		Description: Mobile unit with mounted Flak Cannon.\n  Strong vs Light Vehicles, Aircraft  \n  Weak vs Tanks
+		Description: Mobile unit with mounted Flak Cannon.\n  Strong vs Infantry, Light armor, Aircraft\n  Weak vs Tanks
 	Health:
 		HP: 150
 	Armor:
@@ -623,14 +661,16 @@ FTRK:
 		MuzzleSequence: muzzle
 	AttackTurreted:
 	WithMuzzleFlash:
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithTurret:
 	AutoTarget:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
-	Selectable:
-		Bounds: 28,28,0,0
+	AutoSelectionSize:
+	RenderSprites:
+	SelectionDecorations:
+		VisualBounds: 28,28
 
 DTRK:
 	Inherits: ^Vehicle
@@ -642,7 +682,7 @@ DTRK:
 		Cost: 2500
 	Tooltip:
 		Name: Demolition Truck
-		Description: Demolition Truck, actively armed with explosives.\n  Strong vs Everything\n  Weak vs Everything
+		Description: Demolition Truck, actively armed with\nnuclear explosives. Has very weak armor.
 	Health:
 		HP: 50
 	Armor:
@@ -651,7 +691,7 @@ DTRK:
 		Speed: 85
 	RevealsShroud:
 		Range: 3c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	Explodes:
 		Weapon: MiniNuke
 		EmptyWeapon: MiniNuke
@@ -662,6 +702,8 @@ DTRK:
 		UpgradeMinEnabledLevel: 1
 	Chronoshiftable:
 		ExplodeInstead: yes
+	AutoSelectionSize:
+	RenderSprites:
 
 CTNK:
 	Inherits: ^Vehicle
@@ -673,9 +715,9 @@ CTNK:
 		Cost: 1350
 	Tooltip:
 		Name: Chrono Tank
-		Description: Chrono Tank, teleports to areas within range.\n  Strong vs Vehicles, Buildings\n  Weak vs Aircraft
-	Selectable:
-		Bounds: 28,28
+		Description: Chrono Tank, teleports to areas within range.\n  Strong vs Vehicles, Buildings\n  Weak vs Infantry, Aircraft\n  Special ability: Can teleport
+	SelectionDecorations:
+		VisualBounds: 30,30
 	Health:
 		HP: 400
 	Armor:
@@ -685,7 +727,7 @@ CTNK:
 		Crushes: wall, mine, crate, infantry
 	RevealsShroud:
 		Range: 6c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	AutoTarget:
 	Armament@PRIMARY:
 		Weapon: APTusk
@@ -700,6 +742,8 @@ CTNK:
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	AutoSelectionSize:
+	RenderSprites:
 
 QTNK:
 	Inherits: ^Tank
@@ -711,7 +755,7 @@ QTNK:
 		Cost: 2000
 	Tooltip:
 		Name: MAD Tank
-		Description: Deals seismic damage to nearby vehicles\nand structures.\n  Strong vs Vehicles, Buildings\n  Weak vs Infantry
+		Description: Deals seismic damage to nearby vehicles\nand structures.\n  Strong vs Vehicles, Buildings\n  Weak vs Infantry, Aircraft
 	Health:
 		HP: 900
 	Armor:
@@ -721,15 +765,17 @@ QTNK:
 		Crushes: wall, mine, crate, infantry
 	RevealsShroud:
 		Range: 6c0
-	Selectable:
-		Bounds: 44,38,0,-4
-	RenderUnit:
+	WithFacingSpriteBody:
+	SelectionDecorations:
+		VisualBounds: 44,38,0,-4
 	Explodes:
 		Weapon: UnitExplodeSmall
 	MadTank:
 	-EjectOnDeath:
 	TargetableUnit:
 		TargetTypes: Ground, MADTank, Repair
+	AutoSelectionSize:
+	RenderSprites:
 
 STNK:
 	Inherits: ^Vehicle
@@ -741,9 +787,9 @@ STNK:
 		Cost: 1350
 	Tooltip:
 		Name: Phase Transport
-		Description: Lightly armored infantry transport\nwhich can cloak. Can detect cloaked units.\n  Strong vs Light Vehicles\n  Weak vs Aircraft
-	Selectable:
-		Bounds: 28,28
+		Description: Lightly armored infantry transport\nwhich can cloak. Can detect cloaked units.\n  Strong vs Light armor\n  Weak vs Infantry, Tanks, Aircraft
+	SelectionDecorations:
+		VisualBounds: 26,26
 	Health:
 		HP: 300
 	Armor:
@@ -753,7 +799,7 @@ STNK:
 		Crushes: wall, mine, crate, infantry
 	RevealsShroud:
 		Range: 6c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	AutoTarget:
 		InitialStance: ReturnFire
 	Armament:
@@ -778,4 +824,6 @@ STNK:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
 	-MustBeDestroyed:
+	AutoSelectionSize:
+	RenderSprites:
 

@@ -23,6 +23,7 @@ namespace OpenRA.Mods.Common.Effects
 	class MissileInfo : IProjectileInfo
 	{
 		public readonly string Image = null;
+		[SequenceReference("Image")] public readonly string Sequence = "idle";
 		public readonly string Palette = "effect";
 		public readonly bool Shadow = false;
 		[Desc("Projectile speed in WRange / tick")]
@@ -106,7 +107,7 @@ namespace OpenRA.Mods.Common.Effects
 				offset = WVec.FromPDF(world.SharedRandom, 2) * inaccuracy / 1024;
 			}
 
-			if (info.Image != null)
+			if (!string.IsNullOrEmpty(info.Image))
 			{
 				anim = new Animation(world, info.Image, () => facing);
 				anim.PlayRepeating("idle");
@@ -169,9 +170,9 @@ namespace OpenRA.Mods.Common.Effects
 
 			pos += move;
 
-			if (info.Trail != null && --ticksToNextSmoke < 0)
+			if (!string.IsNullOrEmpty(info.Trail) && --ticksToNextSmoke < 0)
 			{
-				world.AddFrameEndTask(w => w.Add(new Smoke(w, pos - 3 * move / 2, info.Trail, trailPalette)));
+				world.AddFrameEndTask(w => w.Add(new Smoke(w, pos - 3 * move / 2, info.Trail, trailPalette, info.Sequence)));
 				ticksToNextSmoke = info.TrailInterval;
 			}
 
@@ -181,7 +182,7 @@ namespace OpenRA.Mods.Common.Effects
 			var cell = world.Map.CellContaining(pos);
 
 			var shouldExplode = (pos.Z < 0) // Hit the ground
-				|| (dist.LengthSquared < info.CloseEnough.Range * info.CloseEnough.Range) // Within range
+				|| (dist.LengthSquared < info.CloseEnough.RangeSquared) // Within range
 				|| (info.RangeLimit != 0 && ticks > info.RangeLimit) // Ran out of fuel
 				|| (info.Blockable && world.ActorMap.GetUnitsAt(cell).Any(a => a.HasTrait<IBlocksProjectiles>())) // Hit a wall or other blocking obstacle
 				|| !world.Map.Contains(cell) // This also avoids an IndexOutOfRangeException in GetTerrainInfo below.
@@ -210,7 +211,7 @@ namespace OpenRA.Mods.Common.Effects
 			if (info.ContrailLength > 0)
 				yield return contrail;
 
-			if (!args.SourceActor.World.FogObscures(wr.World.Map.CellContaining(pos)))
+			if (!args.SourceActor.World.FogObscures(pos))
 			{
 				if (info.Shadow)
 				{

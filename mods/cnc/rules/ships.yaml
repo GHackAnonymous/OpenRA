@@ -29,6 +29,8 @@ BOAT:
 		AllowMovement: false
 	WithSmoke:
 	RejectsOrders:
+	SelectionDecorations:
+		VisualBounds: 42,24
 
 LST:
 	Inherits: ^Ship
@@ -60,7 +62,7 @@ LST:
 		Type: Heavy
 	RevealsShroud:
 		Range: 7c0
-	RenderUnit:
+	WithFacingSpriteBody:
 	WithRoof:
 	WithCargo:
 		DisplayTypes: Infantry, Vehicle
@@ -70,4 +72,6 @@ LST:
 		MaxWeight: 5
 		PipCount: 5
 		PassengerFacing: 0
+	AutoSelectionSize:
+	RenderSprites:
 

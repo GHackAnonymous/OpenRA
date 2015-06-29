@@ -44,11 +44,13 @@ namespace OpenRA.Mods.Common.Traits
 		public int GetInitialFacing() { return InitialFacing; }
 		public WRange GetCruiseAltitude() { return CruiseAltitude; }
 
+		[VoiceReference] public readonly string Voice = "Action";
+
 		public IReadOnlyDictionary<CPos, SubCell> OccupiedCells(ActorInfo info, CPos location, SubCell subCell = SubCell.Any) { return new ReadOnlyDictionary<CPos, SubCell>(); }
 		bool IOccupySpaceInfo.SharesCell { get { return false; } }
 	}
 
-	public class Aircraft : IFacing, IPositionable, ISync, INotifyKilled, IIssueOrder, IOrderVoice, INotifyAddedToWorld, INotifyRemovedFromWorld
+	public class Aircraft : IFacing, IPositionable, ISync, IIssueOrder, IOrderVoice, INotifyAddedToWorld, INotifyRemovedFromWorld, INotifyActorDisposing
 	{
 		static readonly Pair<CPos, SubCell>[] NoCells = { };
 
@@ -110,7 +112,7 @@ namespace OpenRA.Mods.Common.Traits
 
 			var d = self.CenterPosition - other.CenterPosition;
 			var distSq = d.HorizontalLengthSquared;
-			if (distSq > info.IdealSeparation.Range * info.IdealSeparation.Range)
+			if (distSq > info.IdealSeparation.RangeSquared)
 				return WVec.Zero;
 
 			if (distSq < 1)
@@ -157,7 +159,7 @@ namespace OpenRA.Mods.Common.Traits
 			}
 		}
 
-		public void Killed(Actor self, AttackInfo e)
+		public void Disposing(Actor self)
 		{
 			UnReserve();
 		}
@@ -300,7 +302,7 @@ namespace OpenRA.Mods.Common.Traits
 				case "Enter":
 				case "ReturnToBase":
 				case "Stop":
-					return "Move";
+					return info.Voice;
 				default: return null;
 			}
 		}

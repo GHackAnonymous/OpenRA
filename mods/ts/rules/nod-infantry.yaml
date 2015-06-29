@@ -1,5 +1,5 @@
 E3:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Buildable:
 		Queue: Infantry
 		BuildPaletteOrder: 20
@@ -9,9 +9,8 @@ E3:
 	Tooltip:
 		Name: Rocket Infantry
 		Description: Anti-tank infantry.\n  Strong vs Vehicles, Aircraft, Buildings\n  Weak vs Infantry
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: Rocket
+	Voiced:
+		VoiceSet: Rocket
 	Health:
 		HP: 100
 	Mobile:
@@ -20,19 +19,12 @@ E3:
 		Weapon: Bazooka
 		LocalOffset: 128,0,640
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
+		Voice: Attack
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 CYBORG:
-	Inherits: ^Infantry
+	Inherits: ^Cyborg
 	Armor:
 		Type: Light
 	Valued:
@@ -42,37 +34,28 @@ CYBORG:
 		Description: Cybernetic infantry unit.\n  Strong vs Infantry, Light armor\n  Weak vs Vehicles, Aircraft
 	Buildable:
 		Queue: Infantry
-		BuildPaletteOrder: 50
+		BuildPaletteOrder: 40
 		Prerequisites: ~nahand
-	-Crushable:
 	Selectable:
-		Bounds: 14,30,0,-7
-		Voice: Cyborg
+		Bounds: 16,31,0,-10
+	Voiced:
+		VoiceSet: Cyborg
 	Mobile:
 		Speed: 56
 	Health:
 		HP: 300
-	PoisonedByTiberium:
-		Weapon: TiberiumHeal
 	Passenger:
 	RevealsShroud:
 		Range: 5c0
 	Armament:
 		Weapon: Vulcan3
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
-	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		Voice: Attack
+	SelectionDecorations:
+		VisualBounds: 16,31,0,-10
 
 CYC2:
-	Inherits: ^Infantry
+	Inherits: ^Cyborg
 	Armor:
 		Type: Heavy
 	Valued:
@@ -85,16 +68,14 @@ CYC2:
 		BuildPaletteOrder: 50
 		Prerequisites: ~nahand, natech
 		BuildLimit: 1
-	-Crushable:
 	Selectable:
-		Bounds: 14,30,0,-7
-		Voice: CyborgCommando
+		Bounds: 16,32,-1,-12
+	Voiced:
+		VoiceSet: CyborgCommando
 	Mobile:
 		Speed: 56
 	Health:
-		HP: 500
-	PoisonedByTiberium:
-		Weapon: TiberiumHeal
+		HP: 500	
 	Passenger:
 	RevealsShroud:
 		Range: 7c0
@@ -102,31 +83,23 @@ CYC2:
 		Weapon: CyCannon
 		LocalOffset: 170,85,683
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
-	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		Voice: Attack
+	SelectionDecorations:
+		VisualBounds: 16,32,-1,-12
 
 MHIJACK:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Buildable:
 		Queue: Infantry
-		BuildPaletteOrder: 10
+		BuildPaletteOrder: 60
 		Prerequisites: ~nahand, natech # natech must be natmpl
 	Valued:
-		Cost: 100
+		Cost: 1850
 	Tooltip:
 		Name: Mutant Hijacker
 		Description: Hijacks enemy vehicles.\n  Unarmed
-	Selectable:
-		Bounds: 12,17,0,-9
-		Voice: Hijacker
+	Voiced:
+		VoiceSet: Hijacker
 	Health:
 		HP: 300
 	PoisonedByTiberium:
@@ -138,14 +111,6 @@ MHIJACK:
 	RevealsShroud:
 		Range: 6c0
 	-AutoTarget:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 

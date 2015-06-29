@@ -32,7 +32,9 @@ namespace OpenRA.Mods.Common.Traits
 		[Desc("Does not care about shroud or fog. Enables the actor to launch an attack against a target even if he has no visibility of it.")]
 		public readonly bool IgnoresVisibility = false;
 
-		public abstract object Create(ActorInitializer init);
+		[VoiceReference] public readonly string Voice = "Action";
+
+		public override abstract object Create(ActorInitializer init);
 	}
 
 	public abstract class AttackBase : UpgradableTrait<AttackBaseInfo>, IIssueOrder, IResolveOrder, IOrderVoice, ISync
@@ -141,7 +143,7 @@ namespace OpenRA.Mods.Common.Traits
 
 		public string VoicePhraseForOrder(Actor self, Order order)
 		{
-			return order.OrderString == "Attack" ? "Attack" : null;
+			return order.OrderString == "Attack" ? Info.Voice : null;
 		}
 
 		public abstract Activity GetAttackActivity(Actor self, Target newTarget, bool allowMove);
@@ -262,9 +264,8 @@ namespace OpenRA.Mods.Common.Traits
 
 				if (modifiers.HasModifier(TargetModifiers.ForceAttack))
 				{
-					var maxRange = ab.GetMaximumRange().Range;
 					var targetRange = (self.World.Map.CenterOfCell(location) - self.CenterPosition).HorizontalLengthSquared;
-					if (targetRange > maxRange * maxRange)
+					if (targetRange > ab.GetMaximumRange().RangeSquared)
 						cursor = ab.Info.OutsideRangeCursor;
 
 					return true;

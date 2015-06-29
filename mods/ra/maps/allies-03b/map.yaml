@@ -1225,6 +1225,7 @@ Rules:
 		-ConquestVictoryConditions:
 		MissionObjectives:
 			EarlyGameOver: true
+		-EnemyWatcher:
 	World:
 		-CrateSpawner:
 		-SpawnMPUnits:
@@ -1300,6 +1301,7 @@ Rules:
 		RenderSprites:
 			Image: E7
 	PRISON:
+		HiddenUnderShroud:
 		Immobile:
 			OccupiesSpace: false
 		BodyOrientation:
@@ -1320,6 +1322,7 @@ Rules:
 		RevealsShroud:
 			Range: 40c0
 	CAMERA.Jeep:
+		AlwaysVisible:
 		Mobile:
 			TerrainSpeeds:
 		RevealsShroud:
@@ -1330,7 +1333,8 @@ Rules:
 		Tooltip:
 			Name: Crate
 		WithCrateBody:
-			Images: scrate
+		RenderSprites:
+			Image: scrate
 	E1.Autotarget:
 		Inherits: E1
 		Buildable:
@@ -1376,8 +1380,7 @@ Rules:
 			ShowOwnerRow: false
 	JEEP.mission:
 		Inherits: JEEP
-		RenderUnit:
-			Image: JEEP
+		WithFacingSpriteBody:
 		-Selectable:
 		-Demolishable:
 		-Huntable:
@@ -1388,6 +1391,9 @@ Rules:
 			Types: ~disabled
 		RevealsShroud:
 			Range: 0c0
+		AutoSelectionSize:
+		RenderSprites:
+			Image: JEEP
 	E3:
 		Buildable:
 			Prerequisites: ~disabled

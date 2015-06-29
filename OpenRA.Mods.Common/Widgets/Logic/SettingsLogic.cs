@@ -204,14 +204,20 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var ps = Game.Settings.Player;
 
 			var nameTextfield = panel.Get<TextFieldWidget>("PLAYERNAME");
-			nameTextfield.Text = ps.Name;
+			nameTextfield.IsDisabled = () => worldRenderer.World.Type != WorldType.Shellmap;
+			nameTextfield.Text = Settings.SanitizedPlayerName(ps.Name);
 			nameTextfield.OnEnterKey = () => { nameTextfield.YieldKeyboardFocus(); return true; };
-			nameTextfield.OnLoseFocus = () => { ps.Name = nameTextfield.Text; };
+			nameTextfield.OnLoseFocus = () =>
+			{
+				nameTextfield.Text = Settings.SanitizedPlayerName(nameTextfield.Text);
+				ps.Name = nameTextfield.Text;
+			};
 
 			var colorPreview = panel.Get<ColorPreviewManagerWidget>("COLOR_MANAGER");
 			colorPreview.Color = ps.Color;
 
 			var colorDropdown = panel.Get<DropDownButtonWidget>("PLAYERCOLOR");
+			colorDropdown.IsDisabled = () => worldRenderer.World.Type != WorldType.Shellmap;
 			colorDropdown.OnMouseDown = _ => ColorPickerLogic.ShowColorDropDown(colorDropdown, colorPreview, worldRenderer.World);
 			colorDropdown.Get<ColorBlockWidget>("COLORBLOCK").GetColor = () => ps.Color.RGB;
 
@@ -425,7 +431,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 					{ "ProductionTypeAircraftKey", "Aircraft Tab" },
 					{ "ProductionTypeNavalKey", "Naval Tab" },
 					{ "ProductionTypeTankKey", "Tank Tab" },
-					{ "ProductionTypeMerchantKey", "Starport Tab" }
+					{ "ProductionTypeMerchantKey", "Starport Tab" },
+					{ "ProductionTypeUpgradeKey", "Upgrade Tab" }
 				};
 
 				for (var i = 1; i <= 24; i++)
@@ -457,7 +464,8 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			{
 				var hotkeys = new Dictionary<string, string>()
 				{
-					{ "DevReloadChromeKey", "Reload Chrome" }
+					{ "DevReloadChromeKey", "Reload Chrome" },
+					{ "TakeScreenshotKey", "Take screenshot" }
 				};
 
 				var header = ScrollItemWidget.Setup(hotkeyHeader, returnTrue, doNothing);

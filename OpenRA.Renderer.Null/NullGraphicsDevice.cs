@@ -43,13 +43,14 @@ namespace OpenRA.Renderer.Null
 		public void EnableDepthBuffer() { }
 		public void DisableDepthBuffer() { }
 
-		public void SetBlendMode(BlendMode mode, float alpha = 1f) { }
+		public void SetBlendMode(BlendMode mode) { }
 
 		public void GrabWindowMouseFocus() { }
 		public void ReleaseWindowMouseFocus() { }
 
 		public void Clear() { }
 		public void Present() { }
+		public Bitmap TakeScreenshot() { return new Bitmap(1, 1); }
 
 		public string GetClipboardText() { return ""; }
 		public void PumpInput(IInputHandler ih)
@@ -105,6 +106,7 @@ namespace OpenRA.Renderer.Null
 		public void Bind() { }
 		public void SetData(T[] vertices, int length) { }
 		public void SetData(T[] vertices, int start, int length) { }
+		public void SetData(IntPtr data, int start, int length) { }
 		public void Dispose() { }
 	}
 }

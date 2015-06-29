@@ -49,6 +49,9 @@ namespace OpenRA.Mods.Common.Traits
 		void UpgradeLevelChanged(Actor self, string type, int oldLevel, int newLevel);
 	}
 
+	// Implement to construct before UpgradeManager
+	public interface IUpgradableInfo : ITraitInfo { }
+
 	public interface INotifyHarvesterAction
 	{
 		void MovingToResources(Actor self, CPos targetCell, Activity next);
@@ -84,5 +87,13 @@ namespace OpenRA.Mods.Common.Traits
 	public interface IProvidesAssetBrowserPalettes
 	{
 		IEnumerable<string> PaletteNames { get; }
+	}
+
+	public interface ICallForTransport
+	{
+		WRange MinimumDistance { get; }
+		bool WantsTransport { get; set; }
+		void MovementCancelled(Actor self);
+		void RequestTransport(CPos destination, Activity afterLandActivity);
 	}
 }

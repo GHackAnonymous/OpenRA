@@ -33,8 +33,8 @@ namespace OpenRA.Mods.Common.Traits
 
 		public void Render(WorldRenderer wr)
 		{
-			var shroudObscured = world.ShroudObscuresTest(wr.Viewport.VisibleCells);
-			foreach (var uv in wr.Viewport.VisibleCells.MapCoords)
+			var shroudObscured = world.ShroudObscuresTest;
+			foreach (var uv in wr.Viewport.VisibleCellsInsideBounds.MapCoords)
 			{
 				if (shroudObscured(uv))
 					continue;
@@ -50,9 +50,14 @@ namespace OpenRA.Mods.Common.Traits
 		{
 			var sum = 0;
 			for (var u = -1; u < 2; u++)
+			{
 				for (var v = -1; v < 2; v++)
-					if (content[cell + new CVec(u, v)].Type == t)
+				{
+					var c = cell + new CVec(u, v);
+					if (content.Contains(c) && content[c].Type == t)
 						++sum;
+				}
+			}
 
 			return sum;
 		}
@@ -70,7 +75,7 @@ namespace OpenRA.Mods.Common.Traits
 			var resources = w.WorldActor.TraitsImplementing<ResourceType>()
 				.ToDictionary(r => r.Info.ResourceType, r => r);
 
-			foreach (var cell in w.Map.Cells)
+			foreach (var cell in w.Map.AllCells)
 			{
 				ResourceType t;
 				if (!resources.TryGetValue(w.Map.MapResources.Value[cell].Type, out t))
@@ -83,7 +88,7 @@ namespace OpenRA.Mods.Common.Traits
 			}
 
 			// Set initial density based on the number of neighboring resources
-			foreach (var cell in w.Map.Cells)
+			foreach (var cell in w.Map.AllCells)
 			{
 				var type = content[cell].Type;
 				if (type != null)

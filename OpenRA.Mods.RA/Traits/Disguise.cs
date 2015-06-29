@@ -8,6 +8,7 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -57,7 +58,16 @@ namespace OpenRA.Mods.RA.Traits
 	}
 
 	[Desc("Provides access to the disguise command, which makes the actor appear to be another player's actor.")]
-	class DisguiseInfo : TraitInfo<Disguise> { }
+	class DisguiseInfo : ITraitInfo
+	{
+		[VoiceReference] public readonly string Voice = "Action";
+
+		[UpgradeGrantedReference]
+		[Desc("Upgrades to grant when disguised.")]
+		public readonly string[] Upgrades = { "disguise" };
+
+		public object Create(ActorInitializer init) { return new Disguise(init.Self, this); }
+	}
 
 	class Disguise : IEffectiveOwner, IIssueOrder, IResolveOrder, IOrderVoice, IRadarColorModifier, INotifyAttack
 	{
@@ -67,6 +77,18 @@ namespace OpenRA.Mods.RA.Traits
 
 		public bool Disguised { get { return AsPlayer != null; } }
 		public Player Owner { get { return AsPlayer; } }
+
+		readonly Actor self;
+		readonly DisguiseInfo info;
+		readonly Lazy<UpgradeManager> um;
+
+		public Disguise(Actor self, DisguiseInfo info)
+		{
+			this.self = self;
+			this.info = info;
+
+			um = Exts.Lazy(() => self.TraitOrDefault<UpgradeManager>());
+		}
 
 		public IEnumerable<IOrderTargeter> Orders
 		{
@@ -89,13 +111,13 @@ namespace OpenRA.Mods.RA.Traits
 			if (order.OrderString == "Disguise")
 			{
 				var target = order.TargetActor != self && order.TargetActor.IsInWorld ? order.TargetActor : null;
-				DisguiseAs(self, target);
+				DisguiseAs(target);
 			}
 		}
 
 		public string VoicePhraseForOrder(Actor self, Order order)
 		{
-			return order.OrderString == "Disguise" ? "Attack" : null;
+			return order.OrderString == "Disguise" ? info.Voice : null;
 		}
 
 		public Color RadarColorOverride(Actor self)
@@ -106,16 +128,29 @@ namespace OpenRA.Mods.RA.Traits
 			return AsPlayer.Color.RGB;
 		}
 
-		void DisguiseAs(Actor self, Actor target)
+		void DisguiseAs(Actor target)
 		{
+			var oldDisguiseSetting = Disguised;
 			var oldEffectiveOwner = AsPlayer;
 
 			if (target != null)
 			{
-				var tooltip = target.TraitsImplementing<IToolTip>().FirstOrDefault();
-				AsTooltipInfo = tooltip.TooltipInfo;
-				AsPlayer = tooltip.Owner;
-				AsSprite = target.Trait<RenderSprites>().GetImage(target);
+				// Take the image of the target's disguise, if it exist.
+				// E.g., SpyA is disguised as a dog. SpyB then targets SpyA. We should use the dog image.
+				var targetDisguise = target.TraitOrDefault<Disguise>();
+				if (targetDisguise != null && targetDisguise.Disguised)
+				{
+					AsSprite = targetDisguise.AsSprite;
+					AsPlayer = targetDisguise.AsPlayer;
+					AsTooltipInfo = targetDisguise.AsTooltipInfo;
+				}
+				else
+				{
+					AsSprite = target.Trait<RenderSprites>().GetImage(target);
+					var tooltip = target.TraitsImplementing<IToolTip>().FirstOrDefault();
+					AsPlayer = tooltip.Owner;
+					AsTooltipInfo = tooltip.TooltipInfo;
+				}
 			}
 			else
 			{
@@ -126,8 +161,22 @@ namespace OpenRA.Mods.RA.Traits
 
 			foreach (var t in self.TraitsImplementing<INotifyEffectiveOwnerChanged>())
 				t.OnEffectiveOwnerChanged(self, oldEffectiveOwner, AsPlayer);
+
+			if (Disguised != oldDisguiseSetting && um.Value != null)
+			{
+				foreach (var u in info.Upgrades)
+				{
+					if (!um.Value.AcknowledgesUpgrade(self, u))
+						continue;
+
+					if (Disguised)
+						um.Value.GrantUpgrade(self, u, this);
+					else
+						um.Value.RevokeUpgrade(self, u, this);
+				}
+			}
 		}
 
-		public void Attacking(Actor self, Target target, Armament a, Barrel barrel) { DisguiseAs(self, null); }
+		public void Attacking(Actor self, Target target, Armament a, Barrel barrel) { DisguiseAs(null); }
 	}
 }

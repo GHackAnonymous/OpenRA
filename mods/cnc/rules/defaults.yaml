@@ -1,4 +1,26 @@
+^GainsExperience:
+	GainsExperience:
+	GainsStatUpgrades:
+	SelfHealing@ELITE:
+		Step: 2
+		Ticks: 100
+		HealIfBelow: 1
+		DamageCooldown: 125
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
+	WithRankDecoration:
+		Image: rank
+		Sequence: rank
+		Palette: effect
+		ReferencePoint: Bottom, Right
+		Offset: 2, 2
+		UpgradeTypes: rank
+		ZOffset: 256
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 4
+
 ^Vehicle:
+	Inherits: ^GainsExperience
 	AppearsOnRadar:
 	Mobile:
 		Crushes: crate
@@ -12,14 +34,13 @@
 		ROT: 5
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
+		Bounds: 24,24
 	TargetableUnit:
 		TargetTypes: Ground, Vehicle
 	Repairable:
 	Passenger:
 		CargoType: Vehicle
 	HiddenUnderFog:
-	GainsExperience:
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -41,18 +62,13 @@
 		UncloakSound: trans1.aud
 	Huntable:
 	ScriptTriggers:
-	GainsStatUpgrades:
-	SelfHealing@ELITE:
-		Step: 2
-		Ticks: 100
-		HealIfBelow: 1
-		DamageCooldown: 125
-		UpgradeTypes: selfheal
-		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
 	MustBeDestroyed:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Tank:
+	Inherits: ^GainsExperience
 	AppearsOnRadar:
 	Mobile:
 		Crushes: wall, crate, infantry
@@ -66,14 +82,13 @@
 		ROT: 5
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
+		Bounds: 24,24
 	TargetableUnit:
 		TargetTypes: Ground, Vehicle
 	Repairable:
 	Passenger:
 		CargoType: Vehicle
 	HiddenUnderFog:
-	GainsExperience:
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -98,18 +113,13 @@
 		UncloakSound: trans1.aud
 	Huntable:
 	ScriptTriggers:
-	GainsStatUpgrades:
-	SelfHealing@ELITE:
-		Step: 2
-		Ticks: 100
-		HealIfBelow: 1
-		DamageCooldown: 125
-		UpgradeTypes: selfheal
-		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
 	MustBeDestroyed:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Helicopter:
+	Inherits: ^GainsExperience
 	AppearsOnRadar:
 		UseLocation: yes
 	TargetableAircraft:
@@ -117,13 +127,12 @@
 		GroundedTargetTypes: Ground
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
+		Bounds: 24,24
 	Helicopter:
 		RepairBuildings: hpad
 		RearmBuildings:
 		LandWhenIdle: false
 	HiddenUnderFog:
-	GainsExperience:
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -140,20 +149,15 @@
 	ScriptTriggers:
 	Tooltip:
 		GenericName: Helicopter
-	GainsStatUpgrades:
-	SelfHealing@ELITE:
-		Step: 2
-		Ticks: 100
-		HealIfBelow: 1
-		DamageCooldown: 125
-		UpgradeTypes: selfheal
-		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
 	WithShadow:
 	Hovers:
 	MustBeDestroyed:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Infantry:
+	Inherits: ^GainsExperience
 	AppearsOnRadar:
 	Health:
 		Radius: 128
@@ -177,7 +181,7 @@
 			Beach: 80
 	SelectionDecorations:
 	Selectable:
-		Voice: GenericVoice
+		Bounds: 12,17,0,-6
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
 	TakeCover:
@@ -188,12 +192,19 @@
 	RenderSprites:
 	WithInfantryBody:
 	WithDeathAnimation:
+		DeathTypes:
+			DefaultDeath: 1
+			BulletDeath: 2
+			SmallExplosionDeath: 3
+			ExplosionDeath: 4
+			FireDeath: 5
+			TiberiumDeath: 6
+		CrushedSequence: die-crushed
 	AttackMove:
 	Passenger:
 		CargoType: Infantry
 	HiddenUnderFog:
 	PoisonedByTiberium:
-	GainsExperience:
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -224,33 +235,23 @@
 		Range: 1
 	ScriptTriggers:
 	DeathSounds@NORMAL:
-		DeathTypes: 1, 2, 3, 4
+		DeathTypes: DefaultDeath, BulletDeath, SmallExplosionDeath, ExplosionDeath
 	DeathSounds@BURNED:
-		DeathSound: Burned
-		DeathTypes: 5
+		Voice: Burned
+		DeathTypes: FireDeath
 	DeathSounds@POISONED:
-		DeathSound: Poisoned
-		DeathTypes: 6
-	GainsStatUpgrades:
-	SelfHealing@ELITE:
-		Step: 2
-		Ticks: 100
-		HealIfBelow: 1
-		DamageCooldown: 125
-		UpgradeTypes: selfheal
-		UpgradeMinEnabledLevel: 1
+		Voice: Poisoned
+		DeathTypes: TiberiumDeath
 	UpgradeManager:
 	MustBeDestroyed:
+	Voiced:
+		VoiceSet: GenericVoice
 
 ^CivInfantry:
 	Inherits: ^Infantry
 	-AutoTarget:
 	-TakeCover:
 	AppearsOnRadar:
-	SelectionDecorations:
-	Selectable:
-		Voice: CivilianMaleVoice
-		Bounds: 12,17,0,-9
 	Valued:
 		Cost: 70
 	Tooltip:
@@ -271,6 +272,10 @@
 	ScaredyCat:
 	Crushable:
 		CrushSound: squish2.aud
+	Voiced:
+		VoiceSet: CivilianMaleVoice
+	WithInfantryBody:
+		AttackSequence: shoot
 
 ^DINO:
 	AppearsOnRadar:
@@ -298,40 +303,45 @@
 			Tiberium: 70
 			BlueTiberium: 70
 			Beach: 80
+		Voice: Move
+	SelectionDecorations:
 	Selectable:
-		Voice: DinoVoice
+		Bounds: 24,24
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
 	HiddenUnderFog:
 	GivesExperience:
 	WithInfantryBody:
+		AttackSequence: attack
 	WithDeathAnimation:
 		UseDeathTypeSuffix: false
-	EditorAppearance:
-		UseTerrainPalette: true
 	BodyOrientation:
 	DrawLineToTarget:
 	AutoTarget:
 		ScanRadius: 4
 	AttackMove:
+		Voice: Attack
 	AttackFrontal:
+		Voice: Attack
 	UpdatesPlayerStatistics:
 	Huntable:
 	ScriptTriggers:
 	DeathSounds:
 	RenderSprites:
 		Palette: terrain
+	Voiced:
+		VoiceSet: DinoVoice
 
 ^Plane:
+	Inherits: ^GainsExperience
 	AppearsOnRadar:
 		UseLocation: yes
 	SelectionDecorations:
 	Selectable:
-		Voice: GenericVoice
+		Bounds: 24,24
 	TargetableUnit:
 		TargetTypes: Air
 	HiddenUnderFog:
-	GainsExperience:
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -340,18 +350,13 @@
 	Huntable:
 	AttackMove:
 	ScriptTriggers:
-	GainsStatUpgrades:
-	SelfHealing@ELITE:
-		Step: 2
-		Ticks: 100
-		HealIfBelow: 1
-		DamageCooldown: 125
-		UpgradeTypes: selfheal
-		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
 	WithShadow:
+	Voiced:
+		VoiceSet: GenericVoice
 
 ^Ship:
+	Inherits: ^GainsExperience
 	AppearsOnRadar:
 	Mobile:
 		Crushes: crate
@@ -359,11 +364,9 @@
 			Water: 100
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
 	TargetableUnit:
 		TargetTypes: Ground, Water
 	HiddenUnderFog:
-	GainsExperience:
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -375,15 +378,9 @@
 	UpdatesPlayerStatistics:
 	Huntable:
 	ScriptTriggers:
-	GainsStatUpgrades:
-	SelfHealing@ELITE:
-		Step: 2
-		Ticks: 100
-		HealIfBelow: 1
-		DamageCooldown: 125
-		UpgradeTypes: selfheal
-		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Building:
 	AppearsOnRadar:
@@ -415,8 +412,6 @@
 		NewOwnerVoice: no
 	ActorLostNotification:
 		Notification: BuildingLost
-	EditorAppearance:
-		RelativeToTopLeft: yes
 	ShakeOnDeath:
 	CombatDebugOverlay:
 	Guardable:
@@ -459,6 +454,7 @@
 		GenericVisibility: None
 	FrozenUnderFog:
 		StartsRevealed: true
+	-WithMakeAnimation:
 
 ^CivBuildingHusk:
 	AppearsOnRadar:
@@ -466,8 +462,6 @@
 		Dimensions: 1,1
 		Footprint: x
 	RenderBuilding:
-	EditorAppearance:
-		RelativeToTopLeft: yes
 	Tooltip:
 		Name: Civilian Building (Destroyed)
 		GenericVisibility: None
@@ -475,7 +469,6 @@
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
 
 ^TechBuilding:
 	Inherits: ^CivBuilding
@@ -499,17 +492,12 @@
 	-Demolishable:
 	RenderBuilding:
 		Palette: terrain
-	EditorAppearance:
-		UseTerrainPalette: true
-	WithMakeAnimation:
 
 ^CivFieldHusk:
 	AppearsOnRadar:
 	Building:
 		Dimensions: 1,1
 		Footprint: _
-	EditorAppearance:
-		RelativeToTopLeft: yes
 	Tooltip:
 		Name: Field (Destroyed)
 		GenericVisibility: None
@@ -519,7 +507,6 @@
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
 
 ^Wall:
 	AppearsOnRadar:
@@ -543,8 +530,6 @@
 	RenderBuildingWall:
 		Palette: staticterrain
 	GivesExperience:
-	EditorAppearance:
-		RelativeToTopLeft: yes
 	AutoTargetIgnore:
 	Sellable:
 		SellSounds: cashturn.aud
@@ -564,8 +549,6 @@
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Tree
-	EditorAppearance:
-		RelativeToTopLeft: yes
 	Health:
 		HP: 500
 	Armor:
@@ -575,7 +558,6 @@
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
 
 ^TibTree:
 	Tooltip:
@@ -588,7 +570,6 @@
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Tiberium
-	EditorAppearance:
 	BodyOrientation:
 	FrozenUnderFog:
 		StartsRevealed: true
@@ -605,13 +586,12 @@
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Tree
-	EditorAppearance:
-		RelativeToTopLeft: yes
 	BodyOrientation:
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
+	EditorTilesetFilter:
+		RequireTilesets: DESERT
 
 ^Husk:
 	Health:
@@ -652,6 +632,7 @@
 	-TargetableUnit:
 
 ^Bridge:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Bridge
 	TargetableBuilding:
@@ -666,6 +647,7 @@
 	ScriptTriggers:
 
 ^Crate:
+	HiddenUnderShroud:
 	Tooltip:
 		Name: Crate
 		GenericName: Crate
@@ -673,10 +655,9 @@
 		TerrainTypes: Clear, Rough, Road, Tiberium, BlueTiberium, Beach
 	RenderSprites:
 		Palette: effect
+		Image: crate
 	WithCrateBody:
 		XmasImages: xcratea, xcrateb, xcratec, xcrated
-	Selectable:
-		Selectable: false
-		Bounds: 15,15,-1,-1
-	BodyOrientation:
+	CustomSelectionSize:
+		CustomBounds: 16,16
 

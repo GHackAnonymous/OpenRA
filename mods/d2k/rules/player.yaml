@@ -1,10 +1,17 @@
 Player:
+	AlwaysVisible:
 	TechTree:
 	ClassicProductionQueue@Building:
 		Type: Building
 		LowPowerSlowdown: 3
 		QueuedAudio: Building
 		ReadyAudio: BuildingReady
+		BlockedAudio: NoRoom
+	ClassicProductionQueue@Upgrade:
+		Type: Upgrade
+		LowPowerSlowdown: 3
+		QueuedAudio: Upgrading
+		ReadyAudio: NewOptions
 		BlockedAudio: NoRoom
 	ClassicProductionQueue@Infantry:
 		Type: Infantry

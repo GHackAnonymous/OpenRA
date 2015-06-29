@@ -8,6 +8,7 @@
  */
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Graphics;
@@ -27,7 +28,7 @@ namespace OpenRA.Mods.D2k.Traits
 		public object Create(ActorInitializer init) { return new Carryall(init.Self, this); }
 	}
 
-	public class Carryall : INotifyBecomingIdle, INotifyKilled, ISync, IRender
+	public class Carryall : INotifyBecomingIdle, INotifyKilled, ISync, IRender, INotifyActorDisposing
 	{
 		readonly Actor self;
 		readonly WRange carryHeight;
@@ -103,6 +104,9 @@ namespace OpenRA.Mods.D2k.Traits
 					if (!trait.WantsTransport)
 						return false;
 
+					if (actor.IsIdle)
+						return false;
+
 					return true;
 				})
 				.OrderBy(p => (self.Location - p.Actor.Location).LengthSquared);
@@ -161,6 +165,15 @@ namespace OpenRA.Mods.D2k.Traits
 			}
 
 			UnreserveCarryable();
+		}
+
+		public void Disposing(Actor self)
+		{
+			if (Carrying != null && IsCarrying)
+			{
+				Carrying.Dispose();
+				Carrying = null;
+			}
 		}
 
 		// Called when carryable is inside.

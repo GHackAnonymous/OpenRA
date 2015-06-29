@@ -703,6 +703,7 @@ Rules:
 		-ConquestVictoryConditions:
 		MissionObjectives:
 			EarlyGameOver: true
+		-EnemyWatcher:
 	World:
 		-CrateSpawner:
 		-SpawnMPUnits:
@@ -840,7 +841,7 @@ Weapons:
 		Burst: 1
 		Warhead: SpreadDamage
 			Damage: 20
-			DamageTypes: Prone50Percent, TriggerProne
+			DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 
 Voices:
 

@@ -99,6 +99,9 @@ namespace OpenRA.FileFormats
 
 							case "IEND":
 								{
+									if (bitmap == null)
+										throw new InvalidDataException("Image header not found.");
+
 									var bits = bitmap.LockBits(bitmap.Bounds(),
 										ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
 
@@ -129,6 +132,9 @@ namespace OpenRA.FileFormats
 									}
 
 									bitmap.UnlockBits(bits);
+
+									if (palette == null)
+										throw new InvalidDataException("Non-Palette indexed PNG are not supported.");
 
 									using (var temp = new Bitmap(1, 1, PixelFormat.Format8bppIndexed))
 									{

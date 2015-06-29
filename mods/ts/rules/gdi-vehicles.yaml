@@ -1,5 +1,5 @@
 APC:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelVehicle
 	Valued:
 		Cost: 600
 	Tooltip:
@@ -26,8 +26,8 @@ APC:
 		Types: Infantry
 		MaxWeight: 5
 		PipCount: 5
-	RenderSprites:
-	RenderVoxels:
+		UnloadVoice: Unload
+	-WithVoxelBody:
 	WithVoxelWaterBody:
 	LeavesTrails:
 		Image: wake
@@ -35,7 +35,7 @@ APC:
 		TerrainTypes: Water
 
 HVR:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelVehicle
 	Valued:
 		Cost: 900
 	Tooltip:
@@ -56,6 +56,7 @@ HVR:
 			Water: 100
 			Tiberium: 100
 			BlueTiberium: 100
+			Veins: 100
 	Health:
 		HP: 230
 	Armor:
@@ -69,10 +70,8 @@ HVR:
 		ROT: 7
 		Offset: -128,0,85
 	AttackTurreted:
+		Voice: Attack
 	AutoTarget:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	WithVoxelTurret:
 	Hovers:
 	LeavesTrails:
@@ -101,13 +100,19 @@ SMECH:
 	RevealsShroud:
 		Range: 6c0
 	AttackFrontal:
+		Voice: Attack
 	AutoTarget:
 	Armament:
 		Weapon: AssaultCannon
-	RenderSprites:
-	WithInfantryBody:
+	Voiced:
+		VoiceSet: Mech
+	WithFacingSpriteBody:
+		Sequence: stand
+	WithAttackAnimation:
+		AttackSequence: shoot
+	WithMoveAnimation:
+		MoveSequence: run
 	Selectable:
-		Voices: Mech
 		Bounds: 20, 32, 0, -8
 
 MMCH:
@@ -131,11 +136,11 @@ MMCH:
 		Type: Heavy
 	RevealsShroud:
 		Range: 8c0
-	RenderSprites:
 	WithInfantryBody:
 	Turreted:
 		ROT: 5
 	AttackTurreted:
+		Voice: Attack
 	WithTurret:
 		Recoils: no
 	Armament:
@@ -150,7 +155,7 @@ MMCH:
 		Bounds: 30, 42, 0, -8
 
 HMEC:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 3000
 	Tooltip:
@@ -172,8 +177,8 @@ HMEC:
 		Type: Heavy
 	RevealsShroud:
 		Range: 8c0
-	RenderSprites:
 	AttackFrontal:
+		Voice: Attack
 	AutoTarget:
 	Armament@MISSILES:
 		Weapon: MammothTusk
@@ -181,12 +186,14 @@ HMEC:
 	Armament@RAILGUN:
 		Weapon: MechRailgun
 		LocalOffset: 640,-384,980, 640,384,980
-	RenderVoxels:
+	-WithVoxelBody:
 	WithVoxelWalkerBody:
 		TickRate: 1
+	Selectable:
+		Bounds: 40, 40, 0, -8
 
 SONIC:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 1300
 	Tooltip:
@@ -210,11 +217,10 @@ SONIC:
 		Weapon: SonicZap
 		LocalOffset: -50,0,410
 	AttackTurreted:
+		Voice: Attack
 	Turreted:
 		ROT: 5
 		Offset: -170,0,0
 	AutoTarget:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	WithVoxelTurret:
+

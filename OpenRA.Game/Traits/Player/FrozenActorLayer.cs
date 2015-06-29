@@ -28,7 +28,7 @@ namespace OpenRA.Traits
 		public readonly WPos CenterPosition;
 		public readonly Rectangle Bounds;
 		readonly Actor actor;
-		readonly Func<MPos, bool> isVisibleTest;
+		readonly Shroud shroud;
 
 		public Player Owner;
 
@@ -38,16 +38,20 @@ namespace OpenRA.Traits
 		public int HP;
 		public DamageState DamageState;
 
-		public bool Visible;
-
+		public bool Visible = true;
+		public bool NeedRenderables;
 		public bool IsRendering { get; private set; }
 
-		public FrozenActor(Actor self, MPos[] footprint, CellRegion footprintRegion, Shroud shroud)
+		public FrozenActor(Actor self, MPos[] footprint, Shroud shroud)
 		{
 			actor = self;
-			isVisibleTest = shroud.IsVisibleTest(footprintRegion);
+			this.shroud = shroud;
 
-			Footprint = footprint;
+			// Consider all cells inside the map area (ignoring the current map bounds)
+			Footprint = footprint
+				.Where(m => shroud.Contains(m))
+				.ToArray();
+
 			CenterPosition = self.CenterPosition;
 			Bounds = self.Bounds;
 
@@ -63,7 +67,6 @@ namespace OpenRA.Traits
 
 		int flashTicks;
 		IRenderable[] renderables = NoRenderables;
-		bool needRenderables;
 
 		public void Tick()
 		{
@@ -76,19 +79,22 @@ namespace OpenRA.Traits
 		void UpdateVisibility()
 		{
 			var wasVisible = Visible;
+			var isVisibleTest = shroud.IsVisibleTest;
 
 			// We are doing the following LINQ manually for performance since this is a hot path.
 			// Visible = !Footprint.Any(isVisibleTest);
 			Visible = true;
 			foreach (var uv in Footprint)
+			{
 				if (isVisibleTest(uv))
 				{
 					Visible = false;
 					break;
 				}
+			}
 
 			if (Visible && !wasVisible)
-				needRenderables = true;
+				NeedRenderables = true;
 		}
 
 		public void Flash()
@@ -98,10 +104,10 @@ namespace OpenRA.Traits
 
 		public IEnumerable<IRenderable> Render(WorldRenderer wr)
 		{
-			if (needRenderables)
+			if (NeedRenderables)
 			{
-				needRenderables = false;
-				if (!actor.Destroyed)
+				NeedRenderables = false;
+				if (!actor.Disposed)
 				{
 					IsRendering = true;
 					renderables = actor.Render(wr).ToArray();

@@ -1,5 +1,5 @@
 BGGY:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelVehicle
 	Valued:
 		Cost: 500
 	Tooltip:
@@ -24,14 +24,12 @@ BGGY:
 		MuzzleSequence: muzzle
 		MuzzleSplitFacings: 8
 	AttackFrontal:
+		Voice: Attack
 	AutoTarget:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	WithMuzzleFlash:
 
 BIKE:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelVehicle
 	Valued:
 		Cost: 600
 	Tooltip:
@@ -62,13 +60,11 @@ BIKE:
 		UpgradeMinEnabledLevel: 1
 		LocalOffset: -128,-170,213, -128,170,213
 	AttackFrontal:
+		Voice: Attack
 	AutoTarget:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 
 TTNK:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 800
 	Tooltip:
@@ -87,6 +83,7 @@ TTNK:
 	Armor:
 		Type: Light
 	AttackFrontal:
+		Voice: Attack
 	Armament@PRIMARY:
 		Weapon: 90mm
 		LocalOffset: 256,0,256
@@ -103,17 +100,15 @@ TTNK:
 	WithMuzzleFlash:
 	RevealsShroud:
 		Range: 5c0
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	Transforms:
 		IntoActor: gatick
 		Facing: 159
 		TransformSounds: place2.aud
 		NoTransformSounds:
+		Voice: Move
 
 ART2:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 975
 	Tooltip:
@@ -132,18 +127,17 @@ ART2:
 		ROT: 2
 	RevealsShroud:
 		Range: 9c0
-	RenderSprites:
 	RenderVoxels:
 		LightAmbientColor: 0.4, 0.4, 0.4
-	WithVoxelBody:
 	Transforms:
 		IntoActor: gaarty
 		Facing: 96
 		TransformSounds:
 		NoTransformSounds:
+		Voice: Move
 
 REPAIR:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Buildable:
 		Queue: Vehicle
 		BuildPaletteOrder: 70
@@ -165,12 +159,10 @@ REPAIR:
 	AttackMedic:
 		Cursor: repair
 		OutsideRangeCursor: repair
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
+		Voice: Attack
 
 WEED:
-	Inherits: ^Vehicle
+	Inherits: ^VoxelVehicle
 	Valued:
 		Cost: 1400
 	Tooltip:
@@ -190,12 +182,9 @@ WEED:
 	RevealsShroud:
 		Range: 4c0
 	-GainsExperience:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 
 SAPC:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 800
 	Tooltip:
@@ -218,12 +207,10 @@ SAPC:
 		Types: Infantry
 		MaxWeight: 5
 		PipCount: 5
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
+		UnloadVoice: Unload
 
 SUBTANK:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 750
 	Tooltip:
@@ -246,13 +233,11 @@ SUBTANK:
 	Armament:
 		Weapon: FireballLauncher
 	AttackFrontal:
+		Voice: Attack
 	AutoTarget:
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 
 STNK:
-	Inherits: ^Tank
+	Inherits: ^VoxelTank
 	Valued:
 		Cost: 1100
 	Tooltip:
@@ -281,9 +266,8 @@ STNK:
 		Weapon: Dragon
 		LocalOffset: 213,43,128, 213,-43,128
 	AttackFrontal:
+		Voice: Attack
 	AutoTarget:
 		InitialStance: HoldFire
-	RenderSprites:
-	RenderVoxels:
-	WithVoxelBody:
 	-MustBeDestroyed:
+

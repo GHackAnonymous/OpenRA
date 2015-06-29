@@ -1,5 +1,5 @@
 E1:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Buildable:
 		Queue: Infantry
 		BuildPaletteOrder: 10
@@ -9,8 +9,6 @@ E1:
 	Tooltip:
 		Name: Light Infantry
 		Description: General-purpose infantry.\n  Strong vs Infantry\n  Weak vs Vehicles, Aircraft
-	Selectable:
-		Bounds: 12,17,0,-9
 	Health:
 		HP: 125
 	Mobile:
@@ -25,19 +23,12 @@ E1:
 		UpgradeTypes: eliteweapon
 		UpgradeMinEnabledLevel: 1
 	AttackFrontal:
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
+		Voice: Attack
 	WithInfantryBody:
-		IdleSequences: idle1,idle2
+		AttackSequence: shoot
 
 ENGINEER:
-	Inherits: ^Infantry
+	Inherits: ^Soldier
 	Valued:
 		Cost: 500
 	Tooltip:
@@ -47,9 +38,8 @@ ENGINEER:
 		Queue: Infantry
 		BuildPaletteOrder: 30
 		Prerequisites: ~barracks
-	Selectable:
-		Bounds: 12,17,0,-6
-		Voice: Engineer
+	Voiced:
+		VoiceSet: Engineer
 	Mobile:
 		Speed: 56
 	Health:
@@ -61,15 +51,5 @@ ENGINEER:
 	Captures:
 		CaptureTypes: building
 	-AutoTarget:
-	WithInfantryBody:
-		IdleSequences: idle1,idle2
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-			Prone60Percent: 60
-			Prone70Percent: 70
-			Prone100Percent: 100
-			Prone350Percent: 350
-		DamageTriggers: TriggerProne
 	-GainsExperience:
 

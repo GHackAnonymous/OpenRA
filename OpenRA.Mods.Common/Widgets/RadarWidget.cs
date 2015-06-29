@@ -82,7 +82,7 @@ namespace OpenRA.Mods.Common.Widgets
 			actorSprite = new Sprite(radarSheet, new Rectangle(0, height, width, height), TextureChannel.Alpha);
 
 			// Set initial terrain data
-			foreach (var cell in world.Map.Cells)
+			foreach (var cell in world.Map.CellsInsideBounds)
 				UpdateTerrainCell(cell);
 
 			world.Map.MapTiles.Value.CellEntryChanged += UpdateTerrainCell;
@@ -91,6 +91,9 @@ namespace OpenRA.Mods.Common.Widgets
 
 		void UpdateTerrainCell(CPos cell)
 		{
+			if (!world.Map.Contains(cell))
+				return;
+
 			var stride = radarSheet.Size.Width;
 			var uv = cell.ToMPos(world.Map);
 
@@ -119,6 +122,9 @@ namespace OpenRA.Mods.Common.Widgets
 
 		void UpdateShroudCell(CPos cell)
 		{
+			if (!world.Map.Contains(cell))
+				return;
+
 			var stride = radarSheet.Size.Width;
 			var uv = cell.ToMPos(world.Map);
 			var dx = shroudSprite.Bounds.Left - world.Map.Bounds.Left;
@@ -216,7 +222,7 @@ namespace OpenRA.Mods.Common.Widgets
 				dirtyShroudCells.Clear();
 			}
 
-			radarSheet.CommitData();
+			radarSheet.CommitBufferedData();
 
 			var o = new float2(mapRect.Location.X, mapRect.Location.Y + world.Map.Bounds.Height * previewScale * (1 - radarMinimapHeight) / 2);
 			var s = new float2(mapRect.Size.Width, mapRect.Size.Height * radarMinimapHeight);
@@ -256,9 +262,9 @@ namespace OpenRA.Mods.Common.Widgets
 				var pingCell = world.Map.CellContaining(radarPing.Position);
 				var points = radarPing.Points(CellToMinimapPixel(pingCell)).ToArray();
 
-				lr.DrawLine(points[0], points[1], c, c);
-				lr.DrawLine(points[1], points[2], c, c);
-				lr.DrawLine(points[2], points[0], c, c);
+				lr.DrawLine(points[0], points[1], c);
+				lr.DrawLine(points[1], points[2], c);
+				lr.DrawLine(points[2], points[0], c);
 			}
 
 			lr.LineWidth = oldWidth;

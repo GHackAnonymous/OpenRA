@@ -41,11 +41,9 @@ namespace OpenRA.Traits
 		public Health(ActorInitializer init, HealthInfo info)
 		{
 			Info = info;
-			MaxHP = info.HP;
+			MaxHP = info.HP > 0 ? info.HP : 1;
 
 			hp = init.Contains<HealthInit>() ? init.Get<HealthInit, int>() * MaxHP / 100 : MaxHP;
-			if (hp <= 0)
-				hp = Math.Max(MaxHP / 100, 1);
 
 			DisplayHp = hp;
 		}
@@ -157,9 +155,12 @@ namespace OpenRA.Traits
 					nd.Killed(self, ai);
 
 				if (RemoveOnDeath)
-					self.Destroy();
+					self.Dispose();
 
-				Log.Write("debug", "{0} #{1} killed by {2} #{3}", self.Info.Name, self.ActorID, attacker.Info.Name, attacker.ActorID);
+				if (attacker == null)
+					Log.Write("debug", "{0} #{1} was killed.", self.Info.Name, self.ActorID);
+				else
+					Log.Write("debug", "{0} #{1} killed by {2} #{3}", self.Info.Name, self.ActorID, attacker.Info.Name, attacker.ActorID);
 			}
 		}
 
@@ -176,16 +177,28 @@ namespace OpenRA.Traits
 	public class HealthInit : IActorInit<int>
 	{
 		[FieldFromYamlKey] readonly int value = 100;
+		readonly bool allowZero = false;
 		public HealthInit() { }
-		public HealthInit(int init) { value = init; }
-		public int Value(World world) { return value; }
+		public HealthInit(int init, bool allowZero = false)
+		{
+			this.allowZero = allowZero;
+			value = init;
+		}
+
+		public int Value(World world)
+		{
+			if (value < 0 || (value == 0 && !allowZero))
+				return 1;
+
+			return value;
+		}
 	}
 
 	public static class HealthExts
 	{
 		public static DamageState GetDamageState(this Actor self)
 		{
-			if (self.Destroyed)
+			if (self.Disposed)
 				return DamageState.Dead;
 
 			var health = self.TraitOrDefault<Health>();
@@ -194,7 +207,7 @@ namespace OpenRA.Traits
 
 		public static void InflictDamage(this Actor self, Actor attacker, int damage, DamageWarhead warhead)
 		{
-			if (self.Destroyed) return;
+			if (self.Disposed) return;
 			var health = self.TraitOrDefault<Health>();
 			if (health == null) return;
 			health.InflictDamage(self, attacker, damage, warhead, false);

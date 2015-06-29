@@ -11,11 +11,11 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using MaxMind.GeoIP2;
 using OpenRA.FileSystem;
 using OpenRA.Graphics;
 using OpenRA.Network;
@@ -44,20 +44,18 @@ namespace OpenRA
 		public static Renderer Renderer;
 		public static bool HasInputFocus = false;
 
-		public static DatabaseReader GeoIpDatabase;
-
 		public static OrderManager JoinServer(string host, int port, string password, bool recordReplay = true)
 		{
 			IConnection connection = new NetworkConnection(host, port);
 			if (recordReplay)
-				connection = new ReplayRecorderConnection(connection, ChooseReplayFilename);
+				connection = new ReplayRecorderConnection(connection, TimestampedFilename);
 
 			var om = new OrderManager(host, port, password, connection);
 			JoinInner(om);
 			return om;
 		}
 
-		static string ChooseReplayFilename()
+		static string TimestampedFilename()
 		{
 			return DateTime.UtcNow.ToString("OpenRA-yyyy-MM-ddTHHmmssZ");
 		}
@@ -216,14 +214,7 @@ namespace OpenRA
 				Settings.Server.AllowPortForward = false;
 			}
 
-			try
-			{
-				GeoIpDatabase = new DatabaseReader("GeoLite2-Country.mmdb");
-			}
-			catch (Exception e)
-			{
-				Log.Write("geoip", "DatabaseReader failed: {0}", e);
-			}
+			GeoIP.Initialize();
 
 			GlobalFileSystem.Mount(Platform.GameDir); // Needed to access shaders
 			var renderers = new[] { Settings.Graphics.Renderer, "Sdl2", null };
@@ -409,6 +400,35 @@ namespace OpenRA
 		public static void RunAfterTick(Action a) { delayedActions.Add(a); }
 		public static void RunAfterDelay(int delay, Action a) { delayedActions.Add(a, delay); }
 
+		static void TakeScreenshotInner()
+		{
+			Log.Write("debug", "Taking screenshot");
+
+			Bitmap bitmap;
+			using (new PerfTimer("Renderer.TakeScreenshot"))
+				bitmap = Renderer.TakeScreenshot();
+
+			ThreadPool.QueueUserWorkItem(_ =>
+			{
+				var mod = ModData.Manifest.Mod;
+				var directory = Platform.ResolvePath("^", "Screenshots", mod.Id, mod.Version);
+				Directory.CreateDirectory(directory);
+
+				var filename = TimestampedFilename();
+				var format = Settings.Graphics.ScreenshotFormat;
+				var extension = ImageCodecInfo.GetImageEncoders().FirstOrDefault(x => x.FormatID == format.Guid)
+					.FilenameExtension.Split(';').First().ToLowerInvariant().Substring(1);
+				var destination = Path.Combine(directory, string.Concat(filename, extension));
+
+				using (new PerfTimer("Save Screenshot ({0})".F(format)))
+					bitmap.Save(destination, format);
+
+				bitmap.Dispose();
+
+				Game.RunAfterTick(() => Debug("Saved screenshot " + filename));
+			});
+		}
+
 		static void InnerLogicTick(OrderManager orderManager)
 		{
 			var tick = RunTime;
@@ -492,6 +512,8 @@ namespace OpenRA
 				InnerLogicTick(worldRenderer.World.OrderManager);
 		}
 
+		public static bool TakeScreenshot = false;
+
 		static void RenderTick()
 		{
 			using (new PerfSample("render"))
@@ -525,6 +547,12 @@ namespace OpenRA
 
 				using (new PerfSample("render_flip"))
 					Renderer.EndFrame(new DefaultInputHandler(OrderManager.World));
+
+				if (TakeScreenshot)
+				{
+					TakeScreenshot = false;
+					TakeScreenshotInner();
+				}
 			}
 
 			PerfHistory.Items["render"].Tick();

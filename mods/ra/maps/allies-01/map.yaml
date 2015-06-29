@@ -45,7 +45,6 @@ Players:
 		OwnsWorld: True
 		NonCombatant: True
 		Race: allies
-		Enemies: USSR, Greece, England
 	PlayerReference@Greece:
 		Name: Greece
 		Playable: True
@@ -58,7 +57,7 @@ Players:
 		LockSpawn: True
 		LockTeam: True
 		Allies: England
-		Enemies: Neutral, USSR
+		Enemies: USSR
 	PlayerReference@England:
 		Name: England
 		Race: allies
@@ -470,6 +469,7 @@ Rules:
 		-ConquestVictoryConditions:
 		MissionObjectives:
 			EarlyGameOver: true
+		-EnemyWatcher:
 	World:
 		-CrateSpawner:
 		-SpawnMPUnits:
@@ -480,8 +480,7 @@ Rules:
 			PanelName: MISSION_OBJECTIVES
 	TRAN.Extraction:
 		Inherits: TRAN
-		RenderUnit:
-			Image: tran
+		WithFacingSpriteBody:
 		RevealsShroud:
 			Range: 0c0
 		RejectsOrders:
@@ -489,12 +488,17 @@ Rules:
 		Cargo:
 			Types: Einstein
 			MaxWeight: 1
+		AutoSelectionSize:
+		RenderSprites:
+			Image: tran
 	TRAN.Insertion:
 		Inherits: TRAN.Extraction
-		RenderUnit:
-			Image: tran
+		WithFacingSpriteBody:
 		Cargo:
 			MaxWeight: 0
+		AutoSelectionSize:
+		RenderSprites:
+			Image: tran
 	EINSTEIN:
 		Passenger:
 			CargoType: Einstein
@@ -562,7 +566,7 @@ Weapons:
 		Burst: 1
 		Warhead: SpreadDamage
 			Damage: 20
-			DamageTypes: Prone50Percent, TriggerProne
+			DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 
 Voices:
 

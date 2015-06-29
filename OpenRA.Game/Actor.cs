@@ -22,7 +22,7 @@ using OpenRA.Traits;
 
 namespace OpenRA
 {
-	public class Actor : IScriptBindable, IScriptNotifyBind, ILuaTableBinding, ILuaEqualityBinding, ILuaToStringBinding, IEquatable<Actor>
+	public sealed class Actor : IScriptBindable, IScriptNotifyBind, ILuaTableBinding, ILuaEqualityBinding, ILuaToStringBinding, IEquatable<Actor>, IDisposable
 	{
 		public readonly ActorInfo Info;
 
@@ -33,7 +33,7 @@ namespace OpenRA
 		[Sync] public Player Owner { get; set; }
 
 		public bool IsInWorld { get; internal set; }
-		public bool Destroyed { get; private set; }
+		public bool Disposed { get; private set; }
 
 		Activity currentActivity;
 
@@ -41,17 +41,19 @@ namespace OpenRA
 		public int Generation;
 
 		Lazy<Rectangle> bounds;
+		Lazy<Rectangle> visualBounds;
 		Lazy<IFacing> facing;
 		Lazy<Health> health;
 		Lazy<IOccupySpace> occupySpace;
 		Lazy<IEffectiveOwner> effectiveOwner;
 
 		public Rectangle Bounds { get { return bounds.Value; } }
+		public Rectangle VisualBounds { get { return visualBounds.Value; } }
 		public IOccupySpace OccupiesSpace { get { return occupySpace.Value; } }
 		public IEffectiveOwner EffectiveOwner { get { return effectiveOwner.Value; } }
 
 		public bool IsIdle { get { return currentActivity == null; } }
-		public bool IsDead { get { return Destroyed || (health.Value == null ? false : health.Value.IsDead); } }
+		public bool IsDead { get { return Disposed || (health.Value == null ? false : health.Value.IsDead); } }
 
 		public CPos Location { get { return occupySpace.Value.TopLeft; } }
 		public WPos CenterPosition { get { return occupySpace.Value.CenterPosition; } }
@@ -106,6 +108,21 @@ namespace OpenRA
 				var offset = -size / 2;
 				if (si != null && si.Bounds != null && si.Bounds.Length > 2)
 					offset += new int2(si.Bounds[2], si.Bounds[3]);
+
+				return new Rectangle(offset.X, offset.Y, size.X, size.Y);
+			});
+
+			visualBounds = Exts.Lazy(() =>
+			{
+				var sd = Info.Traits.GetOrDefault<ISelectionDecorationsInfo>();
+				if (sd == null || sd.SelectionBoxBounds == null)
+					return bounds.Value;
+
+				var size = new int2(sd.SelectionBoxBounds[0], sd.SelectionBoxBounds[1]);
+
+				var offset = -size / 2;
+				if (sd.SelectionBoxBounds.Length > 2)
+					offset += new int2(sd.SelectionBoxBounds[2], sd.SelectionBoxBounds[3]);
 
 				return new Rectangle(offset.X, offset.Y, size.X, size.Y);
 			});
@@ -215,18 +232,21 @@ namespace OpenRA
 			World.TraitDict.AddTrait(this, trait);
 		}
 
-		public void Destroy()
+		public void Dispose()
 		{
 			World.AddFrameEndTask(w =>
 			{
-				if (Destroyed)
+				if (Disposed)
 					return;
 
 				if (IsInWorld)
 					World.Remove(this);
 
+				foreach (var t in TraitsImplementing<INotifyActorDisposing>())
+					t.Disposing(this);
+
 				World.TraitDict.RemoveActor(this);
-				Destroyed = true;
+				Disposed = true;
 
 				if (luaInterface != null)
 					luaInterface.Value.OnActorDestroyed();
@@ -238,16 +258,21 @@ namespace OpenRA
 		{
 			World.AddFrameEndTask(w =>
 			{
-				if (Destroyed)
+				if (Disposed)
 					return;
 
 				var oldOwner = Owner;
+				var wasInWorld = IsInWorld;
 
 				// momentarily remove from world so the ownership queries don't get confused
-				w.Remove(this);
+				if (wasInWorld)
+					w.Remove(this);
+
 				Owner = newOwner;
 				Generation++;
-				w.Add(this);
+
+				if (wasInWorld)
+					w.Add(this);
 
 				foreach (var t in this.TraitsImplementing<INotifyOwnerChanged>())
 					t.OnOwnerChanged(this, oldOwner, newOwner);

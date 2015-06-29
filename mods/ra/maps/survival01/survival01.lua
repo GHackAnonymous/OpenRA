@@ -109,6 +109,7 @@ IdleTrigger = function(units, dest)
 	end)
 end
 
+ticked = TimerTicks
 Tick = function()
 	if KillObj and soviets.HasNoRequiredUnits() then
 		allies.MarkCompletedObjective(KillObj)
@@ -122,14 +123,63 @@ Tick = function()
 		soviets.Resources = soviets.ResourceCapacity / 2
 	end
 
-	if DateTime.Minutes(20) == TimerTicks - DateTime.GameTime then
-		Media.PlaySpeechNotification(allies, "TwentyMinutesRemaining")
-	elseif DateTime.Minutes(10) == TimerTicks - DateTime.GameTime then
-		Media.PlaySpeechNotification(allies, "TenMinutesRemaining")
-	elseif DateTime.Minutes(5) == TimerTicks - DateTime.GameTime then
-		Media.PlaySpeechNotification(allies, "WarningFiveMinutesRemaining")
-		InitTimer()
+	if ticked > 0 then
+		if DateTime.Minutes(20) == ticked then
+			Media.PlaySpeechNotification(allies, "TwentyMinutesRemaining")
+
+		elseif DateTime.Minutes(10) == ticked then
+			Media.PlaySpeechNotification(allies, "TenMinutesRemaining")
+
+		elseif DateTime.Minutes(5) == ticked then
+			Media.PlaySpeechNotification(allies, "WarningFiveMinutesRemaining")
+
+		elseif DateTime.Minutes(4) == ticked then
+			Media.PlaySpeechNotification(allies, "WarningFourMinutesRemaining")
+
+			Trigger.AfterDelay(ParadropTicks, function()
+				SendSovietParadrops(ParadropWaypoints[3])
+				SendSovietParadrops(ParadropWaypoints[2])
+			end)
+			Trigger.AfterDelay(ParadropTicks * 2, function()
+				SendSovietParadrops(ParadropWaypoints[4])
+				SendSovietParadrops(ParadropWaypoints[1])
+			end)
+
+		elseif DateTime.Minutes(3) == ticked then
+			Media.PlaySpeechNotification(allies, "WarningThreeMinutesRemaining")
+
+		elseif DateTime.Minutes(2) == ticked then
+			Media.PlaySpeechNotification(allies, "WarningTwoMinutesRemaining")
+
+			AttackAtFrameIncrement = DateTime.Seconds(4)
+			AttackAtFrameIncrementInf = DateTime.Seconds(4)
+
+		elseif DateTime.Minutes(1) == ticked then
+			Media.PlaySpeechNotification(allies, "WarningOneMinuteRemaining")
+
+		elseif DateTime.Seconds(45) == ticked then
+			Media.PlaySpeechNotification(allies, "AlliedForcesApproaching")
+		end
+
+		UserInterface.SetMissionText("French reinforcements arrive in " .. Utils.FormatTime(ticked), TimerColor)
+		ticked = ticked - 1
+	elseif ticked == 0 then
+		FinishTimer()
+		TimerExpired()
+		ticked = ticked - 1
 	end
+end
+
+FinishTimer = function()
+	for i = 0, 9, 1 do
+		local c = TimerColor
+		if i % 2 == 0 then
+			c = HSLColor.White
+		end
+
+		Trigger.AfterDelay(DateTime.Seconds(i), function() UserInterface.SetMissionText("Our french allies have arrived!", c) end)
+	end
+	Trigger.AfterDelay(DateTime.Seconds(10), function() UserInterface.SetMissionText("") end)
 end
 
 SendSovietParadrops = function(table)
@@ -208,43 +258,17 @@ SendVehicleWave = function()
 	end
 end
 
-InitTimer = function()
-	Trigger.AfterDelay(DateTime.Minutes(1), function()
-		Media.PlaySpeechNotification(allies, "WarningFourMinutesRemaining")
-
-		Trigger.AfterDelay(ParadropTicks, function()
-			SendSovietParadrops(ParadropWaypoints[3])
-			SendSovietParadrops(ParadropWaypoints[2])
-		end)
-		Trigger.AfterDelay(ParadropTicks * 2, function()
-			SendSovietParadrops(ParadropWaypoints[4])
-			SendSovietParadrops(ParadropWaypoints[1])
-		end)
-	end)
-
-	Trigger.AfterDelay(DateTime.Minutes(2), function() Media.PlaySpeechNotification(allies, "WarningThreeMinutesRemaining") end)
-	Trigger.AfterDelay(DateTime.Minutes(3), function()
-		Media.PlaySpeechNotification(allies, "WarningTwoMinutesRemaining")
-
-		AttackAtFrameIncrement = DateTime.Seconds(4)
-		AttackAtFrameIncrementInf = DateTime.Seconds(4)
-	end)
-
-	Trigger.AfterDelay(DateTime.Minutes(4), function() Media.PlaySpeechNotification(allies, "WarningOneMinuteRemaining") end)
-	Trigger.AfterDelay(DateTime.Minutes(4) + DateTime.Seconds(45), function() Media.PlaySpeechNotification(allies, "AlliedForcesApproaching") end)
-	Trigger.AfterDelay(DateTime.Minutes(5), TimerExpired)
-end
-
 TimerExpired = function()
 	SpawningSovietUnits = false
 	SpawningInfantry = false
 	SpawnNavalUnits = false
 
+	Beacon.New(allies, SovietEntryPoint7.CenterPosition - WVec.New(3 * 1024, 0, 0))
 	Media.PlaySpeechNotification(allies, "AlliedReinforcementsArrived")
 	Reinforcements.Reinforce(allies, FrenchReinforcements, { SovietEntryPoint7.Location, Alliesbase.Location })
 
 	if DestroyObj then
-		KillObj = allies.AddPrimaryObjective("Take control of French reinforcements and\nkill all remaining soviet forces.")
+		KillObj = allies.AddPrimaryObjective("Take control of French reinforcements and\nkill all remaining Soviet forces.")
 	else
 		DestroyObj = allies.AddPrimaryObjective("Take control of French reinforcements and\ndismantle the nearby Soviet base.")
 	end
@@ -279,9 +303,9 @@ InitObjectives = function()
 	end)
 
 	SurviveObj = allies.AddPrimaryObjective("Enforce your position and hold-out the onslaught\nuntil reinforcements arrive.")
-	KillSams = allies.AddSecondaryObjective("Destroy the two SAM Sites before reinforcements\narrive.")
-	Media.DisplayMessage("The soviets are blocking our GPS. We need to investigate their new technology.")
-	CaptureAirfields = allies.AddSecondaryObjective("Capture and hold the soviet airbase\nin the north east.")
+	KillSams = allies.AddSecondaryObjective("Destroy the two SAM sites before reinforcements\narrive.")
+	Media.DisplayMessage("The Soviets are blocking our GPS. We need to investigate their new technology.")
+	CaptureAirfields = allies.AddSecondaryObjective("Capture and hold the Soviet airbase\nin the northeast.")
 	SovietObj = soviets.AddPrimaryObjective("Eliminate all Allied forces.")
 
 	Trigger.OnObjectiveCompleted(allies, function(p, id)
@@ -296,7 +320,7 @@ InitObjectives = function()
 	end)
 	Trigger.OnPlayerWon(allies, function()
 		Media.PlaySpeechNotification(allies, "MissionAccomplished")
-		Media.DisplayMessage("The French forces have survived and dismantled the soviet presence in the area!")
+		Media.DisplayMessage("The French forces have survived and dismantled the Soviet presence in the area!")
 	end)
 end
 
@@ -335,7 +359,7 @@ InitMission = function()
 	Trigger.OnAllKilledOrCaptured(SovietBuildings, function()
 		if DestroyObj then
 			if not soviets.HasNoRequiredUnits() then
-				KillObj = allies.AddPrimaryObjective("Kill all remaining soviet forces.")
+				KillObj = allies.AddPrimaryObjective("Kill all remaining Soviet forces.")
 			end
 			allies.MarkCompletedObjective(DestroyObj)
 		else
@@ -345,6 +369,7 @@ InitMission = function()
 	end)
 
 	Trigger.AfterDelay(DateTime.Seconds(1), function() Media.PlaySpeechNotification(allies, "MissionTimerInitialised") end)
+	TimerColor = allies.Color
 end
 
 SetupSoviets = function()

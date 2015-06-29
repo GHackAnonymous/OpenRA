@@ -9,26 +9,40 @@ DOG:
 		Cost: 200
 	Tooltip:
 		Name: Attack Dog
-		Description: Anti-infantry unit.\nCan detect cloaked units and spies.\n  Strong vs Infantry\n  Weak vs Vehicles
+		Description: Anti-infantry unit.\nCan detect cloaked units and spies.\n  Strong vs Infantry\n  Weak vs Vehicles, Aircraft
+		GenericName: Dog
 	Selectable:
-		Voice: DogVoice
 		Bounds: 12,17,-1,-4
+	SelectionDecorations:
+		VisualBounds: 12,17,-1,-4
 	Health:
 		HP: 12
 	Mobile:
 		Speed: 99
+		Voice: Move
+	Guard:
+		Voice: Move
+	Passenger:
+		Voice: Move
 	RevealsShroud:
 		Range: 5c0
 	Armament:
 		Weapon: DogJaw
 	AttackLeap:
+		Voice: Attack
+	AttackMove:
+		Voice: Move
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
 	WithInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 	IgnoresDisguise:
 	DetectCloaked:
 		Range: 5
+	Voiced:
+		VoiceSet: DogVoice
+	-TakeCover:
 
 E1:
 	Inherits: ^Infantry
@@ -41,9 +55,7 @@ E1:
 		Cost: 100
 	Tooltip:
 		Name: Rifle Infantry
-		Description: General-purpose infantry.\n  Strong vs Infantry\n  Weak vs Vehicles
-	Selectable:
-		Bounds: 12,17,0,-9
+		Description: General-purpose infantry.\n  Strong vs Infantry\n  Weak vs Vehicles, Aircraft
 	Health:
 		HP: 50
 	Mobile:
@@ -56,10 +68,8 @@ E1:
 		MuzzleSequence: garrison-muzzle
 	AttackFrontal:
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
 
@@ -74,9 +84,7 @@ E2:
 		Cost: 160
 	Tooltip:
 		Name: Grenadier
-		Description: Infantry armed with grenades. \n  Strong vs Buildings, Infantry\n  Weak vs Vehicles
-	Selectable:
-		Bounds: 12,17,0,-9
+		Description: Infantry armed with grenades.\n  Strong vs Buildings, Infantry\n  Weak vs Vehicles, Aircraft
 	Health:
 		HP: 50
 	Mobile:
@@ -91,10 +99,8 @@ E2:
 		FireDelay: 15
 	AttackFrontal:
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
+		AttackSequence: throw
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
 	Explodes:
@@ -112,9 +118,7 @@ E3:
 		Cost: 300
 	Tooltip:
 		Name: Rocket Soldier
-		Description: Anti-tank/Anti-aircraft infantry.\n  Strong vs Tanks, Aircraft\n  Weak vs Infantry
-	Selectable:
-		Bounds: 12,17,0,-9
+		Description: Anti-tank/Anti-aircraft infantry.\n  Strong vs Vehicles, Aircraft\n  Weak vs Infantry
 	Health:
 		HP: 45
 	Mobile:
@@ -130,10 +134,8 @@ E3:
 		Weapon: Dragon
 	AttackFrontal:
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
 
@@ -148,9 +150,7 @@ E4:
 		Cost: 300
 	Tooltip:
 		Name: Flamethrower
-		Description: Advanced anti-structure unit.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles
-	Selectable:
-		Bounds: 12,17,0,-9
+		Description: Advanced anti-structure unit.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles, Aircraft
 	Health:
 		HP: 40
 	Mobile:
@@ -164,10 +164,8 @@ E4:
 		Weapon: Flamer
 	AttackFrontal:
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
 
@@ -182,10 +180,7 @@ E6:
 		Cost: 500
 	Tooltip:
 		Name: Engineer
-		Description: Infiltrates and captures enemy structures.\n  Strong vs Nothing\n  Weak vs Everything
-	Selectable:
-		Voice: EngineerVoice
-		Bounds: 12,17,0,-9
+		Description: Infiltrates and captures\nenemy structures.\n  Unarmed
 	Health:
 		HP: 25
 	Mobile:
@@ -196,14 +191,13 @@ E6:
 	RepairsBridges:
 	ExternalCaptures:
 		Type: building
-	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	-AutoTarget:
+	TakeCover:
 	WithInfantryBody:
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
+	Voiced:
+		VoiceSet: EngineerVoice
 
 SPY:
 	Inherits: ^Infantry
@@ -218,36 +212,49 @@ SPY:
 	DisguiseToolTip:
 		Name: Spy
 		GenericName: Soldier
-		Description: Infiltrates enemy structures for intel or\nsabotage. Exact effect depends on the\nbuilding infiltrated.\n  Strong vs Nothing\n  Weak vs Everything\n  Special Ability: Disguised
-	Selectable:
-		Voice: SpyVoice
-		Bounds: 12,17,0,-9
+		Description: Infiltrates enemy structures for intel or\nsabotage. Exact effect depends on the\nbuilding infiltrated.\nLoses disguise when attacking.\n  Strong vs Infantry\n  Weak vs Vehicles, Aircraft\n  Special Ability: Disguised
 	Health:
 		HP: 25
 	Mobile:
 		Speed: 56
+		Voice: Move
+	-Guard:
 	RevealsShroud:
 		Range: 5c0
 	Passenger:
 		PipType: Yellow
+		Voice: Move
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	Disguise:
+		Voice: Move
 	Infiltrates:
 		Types: SpyInfiltrate
 	-AutoTarget:
 	-WithInfantryBody:
 	WithDisguisingInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
+	WithDecoration@disguise:
+		Image: pips
+		Sequence: pip-disguise
+		Palette: effect
+		ReferencePoint: Top, Right
+		Offset: 4, -2
+		ZOffset: 256
+		UpgradeTypes: disguise
+		UpgradeMinEnabledLevel: 1
 	Armament:
 		Weapon: SilencedPPK
 	AttackFrontal:
+	AttackMove:
+		Voice: Move
+	Voiced:
+		VoiceSet: SpyVoice
 
 SPY.England:
 	Inherits: SPY
+	TakeCover:
 	WithDisguisingInfantryBody:
 	Buildable:
 		Prerequisites: ~infantry.england, dome, ~tent, ~techlevel.medium
@@ -270,14 +277,14 @@ E7:
 		Cost: 1200
 	Tooltip:
 		Name: Tanya
-		Description: Elite commando infantry. Armed with\ndual pistols and C4.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles\n  Special Ability: Destroy Building with C4\n\nMaximum 1 can be trained
-	Selectable:
-		Voice: TanyaVoice
-		Bounds: 12,17,0,-9
+		Description: Elite commando infantry. Armed with\ndual pistols and C4.\n  Strong vs Infantry, Buildings\n  Weak vs Vehicles, Aircraft\n  Special Ability: Destroy Building with C4\nMaximum 1 can be trained.
 	Health:
 		HP: 100
 	Mobile:
 		Speed: 71
+		Voice: Move
+	Guard:
+		Voice: Move
 	RevealsShroud:
 		Range: 6c0
 	C4Demolition:
@@ -285,6 +292,7 @@ E7:
 		Voice: Demolish
 	Passenger:
 		PipType: Red
+		Voice: Move
 	Armament@PRIMARY:
 		Weapon: Colt45
 	Armament@SECONDARY:
@@ -295,13 +303,13 @@ E7:
 		MuzzleSequence: garrison-muzzle
 	AttackFrontal:
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 	AnnounceOnBuild:
 	AnnounceOnKill:
+	Voiced:
+		VoiceSet: TanyaVoice
 
 MEDI:
 	Inherits: ^Infantry
@@ -314,10 +322,7 @@ MEDI:
 		Cost: 200
 	Tooltip:
 		Name: Medic
-		Description: Heals nearby infantry.\n  Strong vs Nothing\n  Weak vs Everything
-	Selectable:
-		Voice: MedicVoice
-		Bounds: 12,17,0,-9
+		Description: Heals nearby infantry.\n  Unarmed
 	Health:
 		HP: 80
 	Mobile:
@@ -333,13 +338,12 @@ MEDI:
 		Cursor: heal
 		OutsideRangeCursor: heal
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	-AutoTarget:
 	WithInfantryBody:
 		IdleSequences: idle1,idle2
 		AttackSequence: heal
+	Voiced:
+		VoiceSet: MedicVoice
 
 MECH:
 	Inherits: ^Infantry
@@ -352,40 +356,36 @@ MECH:
 		Cost: 500
 	Tooltip:
 		Name: Mechanic
-		Description: Repairs nearby vehicles and restores\nhusks to working condition.\n  Strong vs Nothing\n  Weak vs Everything
-	Selectable:
-		Voice: MechanicVoice
-		Bounds: 12,17,0,-9
+		Description: Repairs nearby vehicles and restores\nhusks to working condition by capturing them.\n  Unarmed
 	Health:
 		HP: 80
 	Mobile:
 		Speed: 56
+		Voice: Move
 	RevealsShroud:
 		Range: 3c0
 	Passenger:
 		PipType: Yellow
+		Voice: Move
 	AutoHeal:
 	Armament:
 		Weapon: Repair
 	AttackMedic:
 		Cursor: repair
 		OutsideRangeCursor: repair
+		Voice: Move
 	Captures:
 		CaptureTypes: husk
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	-AutoTarget:
 	WithInfantryBody:
 		IdleSequences: idle1,idle2
-		AttackSequence: heal
+		AttackSequence: repair
+	Voiced:
+		VoiceSet: MechanicVoice
 
 EINSTEIN:
 	Inherits: ^Infantry
-	Selectable:
-		Voice: EinsteinVoice
-		Bounds: 12,17,0,-9
 	Valued:
 		Cost: 10
 	Tooltip:
@@ -397,16 +397,16 @@ EINSTEIN:
 	RevealsShroud:
 		Range: 2c0
 	-AutoTarget:
+	-TakeCover:
 	ProximityCaptor:
 		Types: CivilianInfantry
 	WithInfantryBody:
 	ScaredyCat:
+	Voiced:
+		VoiceSet: EinsteinVoice
 
 DELPHI:
 	Inherits: ^Infantry
-	Selectable:
-		Voice: CivilianMaleVoice
-		Bounds: 12,17,0,-9
 	Valued:
 		Cost: 10
 	Tooltip:
@@ -418,13 +418,18 @@ DELPHI:
 	RevealsShroud:
 		Range: 2c0
 	-AutoTarget:
+	-TakeCover:
 	ProximityCaptor:
 		Types: CivilianInfantry
 	WithInfantryBody:
 	ScaredyCat:
+	Voiced:
+		VoiceSet: CivilianMaleVoice
 
 CHAN:
 	Inherits: ^CivInfantry
+	Selectable:
+		Class: CHAN
 	Tooltip:
 		Name: Agent Chan
 
@@ -433,7 +438,20 @@ GNRL:
 	Tooltip:
 		Name: General
 	Selectable:
-		Voice: StavrosVoice
+		Class: GNRL
+	Mobile:
+		Voice: Move
+	AttackFrontal:
+		Voice: Attack
+	AttackMove:
+		Voice: Move
+	Passenger:
+		Voice: Move
+	Guard:
+		Voice: Move
+	Voiced:
+		VoiceSet: StavrosVoice
+	-ScaredyCat:
 
 THF:
 	Inherits: ^Infantry
@@ -441,10 +459,7 @@ THF:
 		Cost: 400
 	Tooltip:
 		Name: Thief
-		Description: Steals enemy credits.\n  Strong vs Nothing\n  Weak vs Everything\n
-	Selectable:
-		Voice: ThiefVoice
-		Bounds: 12,17,0,-9
+		Description: Steals enemy credits.\n  Unarmed
 	Health:
 		HP: 25
 	Mobile:
@@ -456,10 +471,9 @@ THF:
 	Infiltrates:
 		InfiltrateTypes: Cash
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	-AutoTarget:
+	Voiced:
+		VoiceSet: ThiefVoice
 
 HIJACKER:
 	Inherits: ^Infantry
@@ -472,10 +486,7 @@ HIJACKER:
 		Cost: 500
 	Tooltip:
 		Name: Hijacker
-		Description: Hijacks enemy vehicles. Unarmed\n  Strong vs Tanks\n  Weak vs Infantry, Aircraft
-	Selectable:
-		Voice: ThiefVoice
-		Bounds: 12,17,0,-9
+		Description: Hijacks enemy vehicles.\n  Unarmed
 	Health:
 		HP: 50
 	Mobile:
@@ -487,6 +498,9 @@ HIJACKER:
 	Captures:
 		CaptureTypes: vehicle
 	-AutoTarget:
+	Voiced:
+		VoiceSet: ThiefVoice
+	-TakeCover:
 
 SHOK:
 	Inherits: ^Infantry
@@ -499,14 +513,12 @@ SHOK:
 		Cost: 400
 	Tooltip:
 		Name: Shock Trooper
-		Description: Elite infantry with portable tesla coils.\n Strong vs Infantry\n Weak vs Aircraft
-	Selectable:
-		Voice: ShokVoice
-		Bounds: 12,17,0,-9
+		Description: Elite infantry with portable tesla coils.\n  Strong vs Infantry, Vehicles\n  Weak vs Aircraft
 	Health:
 		HP: 100
 	Mobile:
 		Speed: 56
+		Voice: Move
 	RevealsShroud:
 		Range: 5c0
 	Armament@PRIMARY:
@@ -516,13 +528,20 @@ SHOK:
 		Name: garrisoned
 		Weapon: PortaTesla
 	AttackFrontal:
+		Voice: Attack
+	AttackMove:
+		Voice: Move
+	Passenger:
+		Voice: Move
+	Guard:
+		Voice: Move
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
+	Voiced:
+		VoiceSet: ShokVoice
 
 SNIPER:
 	Inherits: ^Infantry
@@ -530,14 +549,12 @@ SNIPER:
 		Cost: 700
 	Tooltip:
 		Name: Sniper
-		Description: Elite sniper infantry unit.\nCan detect cloaked units.\n  Strong vs Infantry\n  Weak vs Vehicles
+		Description: Elite sniper infantry unit.\nCan detect cloaked units.\n  Strong vs Infantry\n  Weak vs Vehicles, Aircraft
 	Buildable:
 		Queue: Infantry
 		BuildAtProductionType: Soldier
 		BuildPaletteOrder: 80
 		Prerequisites: ~disabled
-	Selectable:
-		Bounds: 12,17,0,-6
 	Mobile:
 		Speed: 56
 	Health:
@@ -556,10 +573,8 @@ SNIPER:
 		MuzzleSequence: garrison-muzzle
 	AttackFrontal:
 	TakeCover:
-		DamageModifiers:
-			Prone50Percent: 50
-		DamageTriggers: TriggerProne
 	WithInfantryBody:
+		AttackSequence: shoot
 		IdleSequences: idle1,idle2
 		StandSequences: stand,stand2
 	Cloak:
@@ -583,9 +598,6 @@ Zombie:
 		Queue: Infantry
 		BuildPaletteOrder: 200
 		Prerequisites: ~bio
-	Selectable:
-		Voice: AntVoice
-		Bounds: 12,17,0,-9
 	Health:
 		HP: 250
 	Mobile:
@@ -593,8 +605,13 @@ Zombie:
 	AutoTarget:
 		ScanRadius: 5
 	AttackFrontal:
+	WithInfantryBody:
+		AttackSequence: bite
 	Armament:
 		Weapon: claw
+	Voiced:
+		VoiceSet: AntVoice
+	-TakeCover:
 
 Ant:
 	Inherits: ^Infantry
@@ -608,8 +625,9 @@ Ant:
 		BuildPaletteOrder: 1954
 		Prerequisites: ~bio
 	Selectable:
-		Voice: AntVoice
-		Bounds: 30,30,0,-2
+		Bounds: 24,24,0,-5
+	SelectionDecorations:
+		VisualBounds: 30,30,0,-2
 	Health:
 		HP: 750
 		Radius: 469
@@ -620,10 +638,15 @@ Ant:
 	AutoTarget:
 		ScanRadius: 5
 	AttackFrontal:
+	WithInfantryBody:
+		AttackSequence: bite
 	Armament:
 		Weapon: mandible
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
 	WithDeathAnimation:
 		UseDeathTypeSuffix: false
+	Voiced:
+		VoiceSet: AntVoice
+	-TakeCover:
 

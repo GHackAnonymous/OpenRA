@@ -19,6 +19,7 @@ namespace OpenRA
 	public class CellLayer<T> : IEnumerable<T>
 	{
 		public readonly Size Size;
+		readonly Rectangle bounds;
 		public readonly TileShape Shape;
 		public event Action<CPos> CellEntryChanged = null;
 
@@ -30,6 +31,7 @@ namespace OpenRA
 		public CellLayer(TileShape shape, Size size)
 		{
 			Size = size;
+			bounds = new Rectangle(0, 0, Size.Width, Size.Height);
 			Shape = shape;
 			entries = new T[size.Width * size.Height];
 		}
@@ -121,6 +123,32 @@ namespace OpenRA
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();
+		}
+
+		public bool Contains(CPos cell)
+		{
+			// .ToMPos() returns the same result if the X and Y coordinates
+			// are switched. X < Y is invalid in the Diamond coordinate system,
+			// so we pre-filter these to avoid returning the wrong result
+			if (Shape == TileShape.Diamond && cell.X < cell.Y)
+				return false;
+
+			return Contains(cell.ToMPos(Shape));
+		}
+
+		public bool Contains(MPos uv)
+		{
+			return bounds.Contains(uv.U, uv.V);
+		}
+
+		public CPos Clamp(CPos uv)
+		{
+			return Clamp(uv.ToMPos(Shape)).ToCPos(Shape);
+		}
+
+		public MPos Clamp(MPos uv)
+		{
+			return uv.Clamp(new Rectangle(0, 0, Size.Width - 1, Size.Height - 1));
 		}
 	}
 

@@ -14,7 +14,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
@@ -28,7 +27,6 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly ScrollPanelWidget newsPanel;
 		readonly Widget newsTemplate;
 		readonly LabelWidget newsStatus;
-		bool newsHighlighted = false;
 
 		[ObjectCreator.UseCtor]
 		public MainMenuLogic(Widget widget, World world)
@@ -56,8 +54,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			mainMenu.Get<ButtonWidget>("MODS_BUTTON").OnClick = () =>
 			{
-				Game.Settings.Game.PreviousMod = Game.ModData.Manifest.Mod.Id;
-				Game.InitializeMod("modchooser", null);
+				// Switching mods changes the world state (by disposing it),
+				// so we can't do this inside the input handler.
+				Game.RunAfterTick(() =>
+				{
+					Game.Settings.Game.PreviousMod = Game.ModData.Manifest.Mod.Id;
+					Game.InitializeMod("modchooser", null);
+				});
 			};
 
 			mainMenu.Get<ButtonWidget>("SETTINGS_BUTTON").OnClick = () =>
@@ -170,11 +173,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var loadMapButton = widget.Get<ButtonWidget>("LOAD_MAP_BUTTON");
 			loadMapButton.OnClick = () =>
 			{
-				var initialMap = Game.ModData.MapCache.FirstOrDefault();
 				menuType = MenuType.None;
 				Game.OpenWindow("MAPCHOOSER_PANEL", new WidgetArgs()
 				{
-					{ "initialMap", initialMap != null ? initialMap.Uid : null },
+					{ "initialMap", null },
+					{ "initialTab", MapClassification.User },
 					{ "onExit", () => menuType = MenuType.MapEditor },
 					{ "onSelect", onSelect },
 					{ "filter", MapVisibility.Lobby | MapVisibility.Shellmap | MapVisibility.MissionSelector },
@@ -200,19 +203,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				if (currentNews != null)
 					DisplayNews(currentNews);
 
-				// Only query for new stories once per day
-				var cacheValid = currentNews != null && DateTime.Today.ToUniversalTime() <= Game.Settings.Game.NewsFetchedDate;
-				if (!cacheValid)
-					new Download(Game.Settings.Game.NewsUrl, cacheFile, e => { }, (e, c) => NewsDownloadComplete(e, c, cacheFile, currentNews));
-
 				var newsButton = newsBG.GetOrNull<DropDownButtonWidget>("NEWS_BUTTON");
-				newsButton.OnClick = () =>
-				{
-					newsButton.AttachPanel(newsPanel);
-					newsHighlighted = false;
-				};
 
-				newsButton.IsHighlighted = () => newsHighlighted && Game.LocalTick % 50 < 25;
+				if (newsButton != null)
+				{
+					// Only query for news once per day.
+					var cacheValid = currentNews != null && DateTime.Today.ToUniversalTime() <= Game.Settings.Game.NewsFetchedDate;
+					if (!cacheValid)
+						new Download(Game.Settings.Game.NewsUrl, cacheFile, e => { },
+							(e, c) => NewsDownloadComplete(e, cacheFile, currentNews, () => newsButton.AttachPanel(newsPanel)));
+
+					newsButton.OnClick = () => newsButton.AttachPanel(newsPanel);
+				}
 			}
 
 			Game.OnRemoteDirectConnect += (host, port) =>
@@ -278,7 +280,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			return null;
 		}
 
-		void NewsDownloadComplete(AsyncCompletedEventArgs e, bool cancelled, string cacheFile, NewsItem[] oldNews)
+		void NewsDownloadComplete(AsyncCompletedEventArgs e, string cacheFile, NewsItem[] oldNews, Action onNewsDownloaded)
 		{
 			Game.RunAfterTick(() => // run on the main thread
 			{
@@ -295,7 +297,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				DisplayNews(newNews);
 
 				if (oldNews == null || newNews.Any(n => !oldNews.Select(c => c.DateTime).Contains(n.DateTime)))
-					newsHighlighted = true;
+					onNewsDownloaded();
 
 				Game.Settings.Game.NewsFetchedDate = DateTime.Today.ToUniversalTime();
 				Game.Settings.Save();

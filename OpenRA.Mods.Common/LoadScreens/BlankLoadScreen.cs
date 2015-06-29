@@ -48,7 +48,8 @@ namespace OpenRA.Mods.Common.LoadScreens
 			{
 				var widgetArgs = new WidgetArgs()
 				{
-					{ "continueLoading", () => Game.InitializeMod(Game.Settings.Game.Mod, args) },
+					{ "continueLoading", () => Game.RunAfterTick(() =>
+						Game.InitializeMod(Game.Settings.Game.Mod, args)) },
 				};
 
 				if (installData.BackgroundWidget != null)
@@ -61,7 +62,23 @@ namespace OpenRA.Mods.Common.LoadScreens
 			}
 
 			// Join a server directly
-			var connect = args != null ? args.GetValue("Launch.Connect", null) : null;
+			var connect = string.Empty;
+			if (args != null)
+			{
+				if (args.Contains("Launch.Connect"))
+					connect = args.GetValue("Launch.Connect", null);
+
+				if (args.Contains("Launch.URI"))
+				{
+					connect = args.GetValue("Launch.URI", null);
+					if (connect != null)
+					{
+						connect = connect.Replace("openra://", "");
+						connect = connect.TrimEnd('/');
+					}
+				}
+			}
+
 			if (!string.IsNullOrEmpty(connect))
 			{
 				var parts = connect.Split(':');
