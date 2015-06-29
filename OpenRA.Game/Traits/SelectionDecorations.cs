@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -18,17 +18,17 @@ namespace OpenRA.Traits
 	{
 		public readonly string Palette = "chrome";
 
-		public object Create(ActorInitializer init) { return new SelectionDecorations(init.self, this); }
+		public object Create(ActorInitializer init) { return new SelectionDecorations(init.Self, this); }
 	}
 
 	public class SelectionDecorations : IPostRenderSelection
 	{
 		// depends on the order of pips in TraitsInterfaces.cs!
-		static readonly string[] pipStrings = { "pip-empty", "pip-green", "pip-yellow", "pip-red", "pip-gray", "pip-blue", "pip-ammo", "pip-ammoempty" };
-		static readonly string[] tagStrings = { "", "tag-fake", "tag-primary" };
+		static readonly string[] PipStrings = { "pip-empty", "pip-green", "pip-yellow", "pip-red", "pip-gray", "pip-blue", "pip-ammo", "pip-ammoempty" };
+		static readonly string[] TagStrings = { "", "tag-fake", "tag-primary" };
 
 		public SelectionDecorationsInfo Info;
-		Actor self;
+		readonly Actor self;
 
 		public SelectionDecorations(Actor self, SelectionDecorationsInfo info)
 		{
@@ -38,10 +38,10 @@ namespace OpenRA.Traits
 
 		public IEnumerable<IRenderable> RenderAfterWorld(WorldRenderer wr)
 		{
-			if (!self.Owner.IsAlliedWith(self.World.RenderPlayer) && self.World.FogObscures(self))
+			if (!self.Owner.IsAlliedWith(self.World.RenderPlayer) || self.World.FogObscures(self))
 				yield break;
 
-			var b = self.Bounds.Value;
+			var b = self.Bounds;
 			var pos = wr.ScreenPxPosition(self.CenterPosition);
 			var tl = wr.Viewport.WorldToViewPx(pos + new int2(b.Left, b.Top));
 			var bl = wr.Viewport.WorldToViewPx(pos + new int2(b.Left, b.Bottom));
@@ -68,7 +68,7 @@ namespace OpenRA.Traits
 			pipImages.PlayFetchIndex("groups", () => (int)group);
 			pipImages.Tick();
 
-			var pos = basePosition - (0.5f * pipImages.Image.size).ToInt2() + new int2(9, 5);
+			var pos = basePosition - (0.5f * pipImages.Image.Size).ToInt2() + new int2(9, 5);
 			yield return new UISpriteRenderable(pipImages.Image, pos, 0, pal, 1f);
 		}
 
@@ -79,13 +79,13 @@ namespace OpenRA.Traits
 				yield break;
 
 			var pipImages = new Animation(self.World, "pips");
-			pipImages.PlayRepeating(pipStrings[0]);
+			pipImages.PlayRepeating(PipStrings[0]);
 
-			var pipSize = pipImages.Image.size.ToInt2();
-			var pipxyBase = basePosition + new int2(1 - pipSize.X / 2, - (3 + pipSize.Y / 2));
+			var pipSize = pipImages.Image.Size.ToInt2();
+			var pipxyBase = basePosition + new int2(1 - pipSize.X / 2, -(3 + pipSize.Y / 2));
 			var pipxyOffset = new int2(0, 0);
 			var pal = wr.Palette(Info.Palette);
-			var width = self.Bounds.Value.Width;
+			var width = self.Bounds.Width;
 
 			foreach (var pips in pipSources)
 			{
@@ -96,20 +96,16 @@ namespace OpenRA.Traits
 				foreach (var pip in thisRow)
 				{
 					if (pipxyOffset.X + pipSize.X >= width)
-					{
-						pipxyOffset.X = 0;
-						pipxyOffset.Y -= pipSize.Y;
-					}
+						pipxyOffset = new int2(0, pipxyOffset.Y - pipSize.Y);
 
-					pipImages.PlayRepeating(pipStrings[(int)pip]);
+					pipImages.PlayRepeating(PipStrings[(int)pip]);
 					pipxyOffset += new int2(pipSize.X, 0);
 
 					yield return new UISpriteRenderable(pipImages.Image, pipxyBase + pipxyOffset, 0, pal, 1f);
 				}
 
 				// Increment row
-				pipxyOffset.X = 0;
-				pipxyOffset.Y -= pipSize.Y + 1;
+				pipxyOffset = new int2(0, pipxyOffset.Y - (pipSize.Y + 1));
 			}
 		}
 
@@ -126,16 +122,14 @@ namespace OpenRA.Traits
 					if (tag == TagType.None)
 						continue;
 
-					tagImages.PlayRepeating(tagStrings[(int)tag]);
-					var pos = basePosition + tagxyOffset - (0.5f * tagImages.Image.size).ToInt2();
+					tagImages.PlayRepeating(TagStrings[(int)tag]);
+					var pos = basePosition + tagxyOffset - (0.5f * tagImages.Image.Size).ToInt2();
 					yield return new UISpriteRenderable(tagImages.Image, pos, 0, pal, 1f);
 
 					// Increment row
-					tagxyOffset.Y += 8;
+					tagxyOffset = tagxyOffset.WithY(tagxyOffset.Y + 8);
 				}
 			}
 		}
-
 	}
 }
-

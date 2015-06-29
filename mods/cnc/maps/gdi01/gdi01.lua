@@ -48,26 +48,21 @@ Reinforce = function(units)
 	ReinforceWithLandingCraft(units, lstStart.Location, lstEnd.Location, reinforcementsTarget.Location)
 end
 
-triggerAdded = false
 CheckForBase = function()
 	baseBuildings = Map.ActorsInBox(Map.TopLeft, Map.BottomRight, function(actor)
 		return actor.Type == "fact" or actor.Type == "pyle" or actor.Type == "nuke"
 	end)
 
-	Utils.Do(baseBuildings, function(building)
-		if not triggerAdded and building.Type == "fact" then
-			Trigger.OnRemovedFromWorld(building, function()
-				player.MarkFailedObjective(gdiObjective2)
-			end)
-			triggerAdded = true
-		end
-	end)
-
 	return #baseBuildings >= 3
 end
 
-WorldLoaded = function()
+initialSong = "aoi"
+PlayMusic = function()
+	Media.PlayMusic(initialSong, PlayMusic)
+	initialSong = nil
+end
 
+WorldLoaded = function()
 	player = Player.GetPlayer("GDI")
 	enemy = Player.GetPlayer("Nod")
 
@@ -83,26 +78,22 @@ WorldLoaded = function()
 
 	Trigger.OnPlayerWon(player, function()
 		Media.PlaySpeechNotification(player, "Win")
-		Trigger.AfterDelay(25, function()
-			Media.PlayMovieFullscreen("consyard.vqa")
+		Trigger.AfterDelay(DateTime.Seconds(1), function()
+			Media.PlayMusic("win1")
 		end)
 	end)
 
 	Trigger.OnPlayerLost(player, function()
 		Media.PlaySpeechNotification(player, "Lose")
-		Trigger.AfterDelay(25, function()
-			Media.PlayMovieFullscreen("gameover.vqa")
-		end)
 	end)
 
-	Media.PlayMovieFullscreen("landing.vqa", function()
-		nodObjective = enemy.AddPrimaryObjective("Destroy all GDI troops")
-		gdiObjective1 = player.AddPrimaryObjective("Eliminate all Nod forces in the area")
-		gdiObjective2 = player.AddSecondaryObjective("Establish a beachhead")
-		
-		ReinforceWithLandingCraft(MCVReinforcements, lstStart.Location + CVec.New(2, 0), lstEnd.Location + CVec.New(2, 0), mcvTarget.Location)
-		Reinforce(InfantryReinforcements)
-	end)
+	secureAreaObjective = player.AddPrimaryObjective("Eliminate all Nod forces in the area")
+	beachheadObjective = player.AddSecondaryObjective("Establish a beachhead")
+
+	ReinforceWithLandingCraft(MCVReinforcements, lstStart.Location + CVec.New(2, 0), lstEnd.Location + CVec.New(2, 0), mcvTarget.Location)
+	Reinforce(InfantryReinforcements)
+
+	PlayMusic()
 
 	Trigger.OnIdle(Gunboat, function() SetGunboatPath(Gunboat) end)
 
@@ -112,20 +103,17 @@ WorldLoaded = function()
 	Trigger.AfterDelay(DateTime.Seconds(60), function() Reinforce(VehicleReinforcements) end)
 end
 
-tick = 0
-baseEstablished = false
 Tick = function()
-	tick = tick + 1
 	if enemy.HasNoRequiredUnits() then
-		player.MarkCompletedObjective(gdiObjective1)
+		player.MarkCompletedObjective(secureAreaObjective)
 	end
 
-	if tick > DateTime.Seconds(5) and player.HasNoRequiredUnits() then
-		enemy.MarkCompletedObjective(nodObjective)
+	if DateTime.GameTime > DateTime.Seconds(5) and player.HasNoRequiredUnits() then
+		player.MarkFailedObjective(beachheadObjective)
+		player.MarkFailedObjective(secureAreaObjective)
 	end
 
-	if not baseEstablished and tick % DateTime.Seconds(1) == 0 and CheckForBase() then
-		baseEstablished = true
-		player.MarkCompletedObjective(gdiObjective2)
+	if DateTime.GameTime % DateTime.Seconds(1) == 0 and not player.IsObjectiveCompleted(beachheadObjective) and CheckForBase() then
+		player.MarkCompletedObjective(beachheadObjective)
 	end
 end

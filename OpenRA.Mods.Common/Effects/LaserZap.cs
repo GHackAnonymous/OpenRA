@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -16,7 +16,6 @@ using OpenRA.Graphics;
 using OpenRA.Mods.Common.Graphics;
 using OpenRA.Traits;
 
-
 namespace OpenRA.Mods.Common.Effects
 {
 	[Desc("Not a sprite, but an engine effect.")]
@@ -27,8 +26,10 @@ namespace OpenRA.Mods.Common.Effects
 		public readonly bool UsePlayerColor = false;
 		[Desc("Laser color in (A,)R,G,B.")]
 		public readonly Color Color = Color.Red;
-		[Desc("Impact animation. Requires a regular animation with idle: sequence instead of explosion special case.")]
+		[Desc("Impact animation.")]
 		public readonly string HitAnim = null;
+		[Desc("Sequence of impact animation to use.")]
+		public readonly string HitAnimSequence = "idle";
 		public readonly string HitAnimPalette = "effect";
 
 		public IEffect Create(ProjectileArgs args)
@@ -40,13 +41,13 @@ namespace OpenRA.Mods.Common.Effects
 
 	class LaserZap : IEffect
 	{
-		ProjectileArgs args;
-		LaserZapInfo info;
+		readonly ProjectileArgs args;
+		readonly LaserZapInfo info;
+		readonly Animation hitanim;
 		int ticks = 0;
 		Color color;
 		bool doneDamage;
 		bool animationComplete;
-		Animation hitanim;
 		WPos target;
 
 		public LaserZap(ProjectileArgs args, LaserZapInfo info, Color color)
@@ -56,7 +57,7 @@ namespace OpenRA.Mods.Common.Effects
 			this.color = color;
 			this.target = args.PassiveTarget;
 
-			if (info.HitAnim != null)
+			if (!string.IsNullOrEmpty(info.HitAnim))
 				this.hitanim = new Animation(args.SourceActor.World, info.HitAnim);
 		}
 
@@ -69,7 +70,7 @@ namespace OpenRA.Mods.Common.Effects
 			if (!doneDamage)
 			{
 				if (hitanim != null)
-					hitanim.PlayThen("idle", () => animationComplete = true);
+					hitanim.PlayThen(info.HitAnimSequence, () => animationComplete = true);
 
 				args.Weapon.Impact(Target.FromPos(target), args.SourceActor, args.DamageModifiers);
 				doneDamage = true;
@@ -84,8 +85,8 @@ namespace OpenRA.Mods.Common.Effects
 
 		public IEnumerable<IRenderable> Render(WorldRenderer wr)
 		{
-			if (wr.world.FogObscures(wr.world.Map.CellContaining(target)) &&
-				wr.world.FogObscures(wr.world.Map.CellContaining(args.Source)))
+			if (wr.World.FogObscures(wr.World.Map.CellContaining(target)) &&
+				wr.World.FogObscures(wr.World.Map.CellContaining(args.Source)))
 				yield break;
 
 			if (ticks < info.BeamDuration)

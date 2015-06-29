@@ -1,6 +1,6 @@
-﻿#region Copyright & License Information
+#region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -9,9 +9,7 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 
 namespace OpenRA.Mods.Common.UtilityCommands
 {
@@ -23,11 +21,13 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		public void Run(ModData modData, string[] args)
 		{
 			// HACK: The engine code assumes that Game.modData is set.
-			Game.modData = modData;
+			Game.ModData = modData;
 
-			var rules = Game.modData.RulesetCache.LoadDefaultRules();
-			var map = LegacyMapImporter.Import(args[1], modData.Manifest.Mod.Id, rules, e => Console.WriteLine(e));
-			var dest = map.Title + ".oramap";
+			var rules = Game.ModData.RulesetCache.LoadDefaultRules();
+			var map = LegacyMapImporter.Import(args[1], modData.Manifest.Mod.Id, rules, Console.WriteLine);
+
+			var fileName = Path.GetFileNameWithoutExtension(args[1]);
+			var dest = fileName + ".oramap";
 			map.Save(dest);
 			Console.WriteLine(dest + " saved.");
 		}

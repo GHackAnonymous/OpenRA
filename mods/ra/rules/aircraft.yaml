@@ -11,7 +11,6 @@ BADR:
 		Speed: 149
 		Repulsable: False
 	RenderUnit:
-	WithShadow:
 	Cargo:
 		MaxWeight: 10
 	-Selectable:
@@ -33,6 +32,7 @@ BADR:
 	-EjectOnDeath:
 	-GpsDot:
 	RejectsOrders:
+	-AnnounceOnSeen:
 
 BADR.Bomber:
 	Inherits: ^Plane
@@ -47,11 +47,10 @@ BADR.Bomber:
 		ROT: 5
 		Speed: 149
 		Repulsable: False
-	LimitedAmmo:
+	AmmoPool:
 		Ammo: 7
 	RenderUnit:
 		Image: badr
-	WithShadow:
 	-Selectable:
 	-GainsExperience:
 	Tooltip:
@@ -108,8 +107,7 @@ MIG:
 		EnableStances: false
 	RenderUnit:
 		CameraPitch: 99
-	WithShadow:
-	LimitedAmmo:
+	AmmoPool:
 		Ammo: 8
 	ReturnOnIdle:
 	Selectable:
@@ -165,8 +163,7 @@ YAK:
 		EnableStances: false
 	RenderUnit:
 		CameraPitch: 99
-	WithShadow:
-	LimitedAmmo:
+	AmmoPool:
 		Ammo: 18
 		PipCount: 6
 		ReloadTicks: 11
@@ -201,6 +198,7 @@ TRAN:
 	RevealsShroud:
 		Range: 12c0
 	Helicopter:
+		CruiseAltitude: 1024
 		RearmBuildings: hpad
 		InitialFacing: 0
 		ROT: 5
@@ -213,9 +211,7 @@ TRAN:
 		Sequence: rotor2
 		GroundSequence: slow-rotor2
 	WithRotor@SECONDARY:
-		Id: rotor_2
 		Offset: 597,0,213
-	WithShadow:
 	Cargo:
 		Types: Infantry
 		MaxWeight: 8
@@ -250,20 +246,18 @@ HELI:
 	AttackHeli:
 		FacingTolerance: 20
 	Helicopter:
+		CruiseAltitude: 1024
 		RearmBuildings: hpad
 		LandWhenIdle: false
 		InitialFacing: 20
 		ROT: 4
 		Speed: 149
 	AutoTarget:
-		TargetWhenIdle: false
-		TargetWhenDamaged: false
-		EnableStances: false
+		InitialStance: HoldFire
 	RenderUnit:
 	WithRotor:
 		Offset: 0,0,85
-	WithShadow:
-	LimitedAmmo:
+	AmmoPool:
 		Ammo: 8
 	Selectable:
 		Bounds: 36,28,0,0
@@ -302,19 +296,17 @@ HIND:
 	AttackHeli:
 		FacingTolerance: 20
 	Helicopter:
+		CruiseAltitude: 1024
 		RearmBuildings: hpad
 		LandWhenIdle: false
 		InitialFacing: 20
 		ROT: 4
 		Speed: 112
 	AutoTarget:
-		TargetWhenIdle: false
-		TargetWhenDamaged: false
-		EnableStances: false
+		InitialStance: HoldFire
 	RenderUnit:
 	WithRotor:
-	WithShadow:
-	LimitedAmmo:
+	AmmoPool:
 		Ammo: 24
 		PipCount: 6
 		ReloadTicks: 8
@@ -336,10 +328,11 @@ U2:
 		ROT: 7
 		Speed: 373
 		Repulsable: False
+		MaximumPitch: 56
 	RenderUnit:
-	WithShadow:
 	AttackBomber:
 	-Selectable:
+	-TargetableAircraft:
 	-GainsExperience:
 	Contrail@1:
 		Offset: -725,683,0
@@ -351,4 +344,5 @@ U2:
 		Offset: -1c43,0,0
 		Interval: 2
 	RejectsOrders:
+	-AnnounceOnSeen:
 

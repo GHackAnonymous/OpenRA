@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -8,27 +8,18 @@
  */
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using OpenRA.Effects;
 using OpenRA.Traits;
 
 namespace OpenRA.GameRules
 {
 	public abstract class DamageWarhead : Warhead
 	{
-		[Desc("How much (raw) damage to deal")]
+		[Desc("How much (raw) damage to deal.")]
 		public readonly int Damage = 0;
 
-		[Desc("Infantry death animation to use")]
-		public readonly string DeathType = "1";
-
-		[Desc("Whether we should prevent prone response for infantry.")]
-		public readonly bool PreventProne = false;
-
-		[Desc("By what percentage should damage be modified against prone infantry.")]
-		public readonly int ProneModifier = 50;
+		[Desc("Types of damage that this warhead causes. Leave empty for no damage.")]
+		public readonly string[] DamageTypes = new string[0];
 
 		[FieldLoader.LoadUsing("LoadVersus")]
 		[Desc("Damage percentage versus each armortype. 0% = can't target.")]

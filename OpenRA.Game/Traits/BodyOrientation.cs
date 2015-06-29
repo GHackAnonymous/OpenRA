@@ -1,6 +1,6 @@
-﻿#region Copyright & License Information
+#region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -40,7 +40,7 @@ namespace OpenRA.Traits
 			return new WRot(WAngle.Zero, WAngle.Zero, WAngle.FromFacing(facing));
 		}
 
-		public object Create(ActorInitializer init) { return new BodyOrientation(init.self, this); }
+		public object Create(ActorInitializer init) { return new BodyOrientation(init, this); }
 	}
 
 	public class BodyOrientation : IBodyOrientation
@@ -50,9 +50,11 @@ namespace OpenRA.Traits
 
 		[Sync] public int QuantizedFacings { get { return quantizedFacings.Value; } }
 
-		public BodyOrientation(Actor self, BodyOrientationInfo info)
+		public BodyOrientation(ActorInitializer init, BodyOrientationInfo info)
 		{
 			this.info = info;
+			var self = init.Self;
+			var race = init.Contains<RaceInit>() ? init.Get<RaceInit, string>() : self.Owner.Country.Race;
 
 			quantizedFacings = Exts.Lazy(() =>
 			{
@@ -64,7 +66,7 @@ namespace OpenRA.Traits
 				if (qboi == null)
 					throw new InvalidOperationException("Actor type '" + self.Info.Name + "' does not define a quantized body orientation.");
 
-				return qboi.QuantizedBodyFacings(self.World.Map.SequenceProvider, self.Info);
+				return qboi.QuantizedBodyFacings(self.Info, self.World.Map.SequenceProvider, race);
 			});
 		}
 

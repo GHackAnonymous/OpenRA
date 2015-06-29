@@ -1,9 +1,8 @@
-RIFLE:
+rifle:
 	Inherits: ^Infantry
 	Buildable:
 		Queue: Infantry
 		BuildPaletteOrder: 10
-		Prerequisites: ~barracks
 	Valued:
 		Cost: 100
 	Tooltip:
@@ -19,13 +18,18 @@ RIFLE:
 		Weapon: LMG
 	AttackFrontal:
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	AttractsWorms:
+		Intensity: 120
 
-ENGINEER:
+engineer:
 	Inherits: ^Infantry
 	Buildable:
 		Queue: Infantry
 		BuildPaletteOrder: 50
-		Prerequisites: ~barracks, radar, ~techlevel.medium
+		Prerequisites: upgrade.barracks, ~techlevel.medium
 	Valued:
 		Cost: 500
 	Tooltip:
@@ -33,7 +37,6 @@ ENGINEER:
 		Description: Infiltrates and captures enemy structures\n  Strong vs Buildings\n  Weak vs Everything
 	Selectable:
 		Bounds: 12,17,0,0
-		Voice: EngineerVoice
 	Health:
 		HP: 25
 	Mobile:
@@ -46,13 +49,17 @@ ENGINEER:
 	Captures:
 		CaptureTypes: husk
 	-AutoTarget:
+	AttractsWorms:
+		Intensity: 180
+	Voiced:
+		VoiceSet: EngineerVoice
 
-BAZOOKA:
+bazooka:
 	Inherits: ^Infantry
 	Buildable:
 		Queue: Infantry
 		BuildPaletteOrder: 20
-		Prerequisites: ~barracks, radar, ~techlevel.medium
+		Prerequisites: upgrade.barracks, ~techlevel.medium
 	Valued:
 		Cost: 250
 	Tooltip:
@@ -69,13 +76,18 @@ BAZOOKA:
 		LocalOffset: 0,0,555
 	AttackFrontal:
 	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	AttractsWorms:
+		Intensity: 180
 
-MEDIC:
+medic:
 	Inherits: ^Infantry
 	Buildable:
 		Queue: Infantry
 		BuildPaletteOrder: 60
-		Prerequisites: ~medics, ~techlevel.high
+		Prerequisites: ~barracks.medics, upgrade.barracks, ~techlevel.high
 	Valued:
 		Cost: 500
 	Tooltip:
@@ -83,7 +95,6 @@ MEDIC:
 		Description: Heals nearby infantry\n  Strong vs Nothing\n  Weak vs Everything
 	Selectable:
 		Bounds: 12,17,0,0
-		Voice: EngineerVoice
 	Health:
 		HP: 60
 	Mobile:
@@ -94,9 +105,147 @@ MEDIC:
 	AttackMedic:
 		Cursor: ability
 		OutsideRangeCursor: ability
-	RenderInfantry:
-		AttackAnimation: heal
+	WithInfantryBody:
+		AttackSequence: heal
 	Passenger:
 		PipType: Blue
 	-AutoTarget:
+	AttractsWorms:
+		Intensity: 180
+	Voiced:
+		VoiceSet: EngineerVoice
+
+fremen:
+	Inherits: ^Infantry
+	Valued:
+		Cost: 800
+	Tooltip:
+		Name: Fremen
+		Description: Elite sniper infantry unit\n  Strong vs Infantry\n  Weak vs Vehicles\n  Special Ability: Invisibility
+	Buildable:
+		Queue: Infantry
+		BuildPaletteOrder: 100
+		Prerequisites: ~barracks.atreides, palace, ~techlevel.high
+	Selectable:
+		Bounds: 12,17,0,0
+	Mobile:
+		Speed: 53
+	Health:
+		HP: 70
+	Passenger:
+	RevealsShroud:
+		Range: 7c0
+	AutoTarget:
+		ScanRadius: 7
+	Armament@PRIMARY:
+		Weapon: Sniper
+	Armament@SECONDARY:
+		Weapon: Slung
+	AttackFrontal:
+	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	Cloak:
+		InitialDelay: 250
+		CloakDelay: 250
+		CloakSound: STEALTH1.WAV
+		UncloakSound: STEALTH2.WAV
+	-MustBeDestroyed:
+	Voiced:
+		VoiceSet: FremenVoice
+
+grenadier:
+	Inherits: ^Infantry
+	Buildable:
+		Queue: Infantry
+		BuildPaletteOrder: 80
+		Prerequisites: ~barracks.atreides, upgrade.barracks, hightech, ~techlevel.medium
+	Valued:
+		Cost: 160
+	Tooltip:
+		Name: Grenadier
+		Description: Infantry armed with grenades. \n  Strong vs Buildings, Infantry\n  Weak vs Vehicles
+	Selectable:
+		Bounds: 12,17,0,0
+	Health:
+		HP: 50
+	Mobile:
+		Speed: 53
+	Armament:
+		Weapon: Grenade
+		LocalOffset: 0,0,555
+		FireDelay: 15
+	AttackFrontal:
+	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	WithInfantryBody:
+		IdleSequences: idle
+	Explodes:
+		Weapon: UnitExplodeSmall
+		Chance: 100
+	AttractsWorms:
+		Intensity: 180
+
+sardaukar:
+	Inherits: ^Infantry
+	Buildable:
+		Queue: Infantry
+		BuildPaletteOrder: 80
+		Prerequisites: ~barracks.harkonnen, palace, ~techlevel.high
+	Valued:
+		Cost: 400
+	Tooltip:
+		Name: Sardaukar
+		Description: Elite asssault infantry\n  Strong vs Infantry, Vehicles\n  Weak vs Artillery
+	Selectable:
+		Bounds: 12,17,0,0
+	Health:
+		HP: 100
+	Mobile:
+		Speed: 42
+	RevealsShroud:
+		Range: 6c0
+	TakeCover:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	Armament@PRIMARY:
+		Weapon: Vulcan
+	Armament@SECONDARY:
+		Weapon: Slung
+	AttackFrontal:
+	AttractsWorms:
+		Intensity: 180
+	Voiced:
+		VoiceSet: GenericVoice
+
+saboteur:
+	Inherits: ^Infantry
+	Buildable:
+		Queue: Infantry
+		BuildPaletteOrder: 100
+		Prerequisites: ~barracks.ordos, palace, ~techlevel.high
+	Valued:
+		Cost: 800
+	Tooltip:
+		Name: Saboteur
+		Description: Sneaky infantry, armed with explosives\n  Strong vs Buildings\n  Weak vs Everything\n  Special Ability: destroy buildings
+	Selectable:
+		Bounds: 12,17,0,0
+	Health:
+		HP: 100
+	Mobile:
+		Speed: 64
+	RevealsShroud:
+		Range: 7c0
+	C4Demolition:
+		C4Delay: 45
+	-AutoTarget:
+	AttractsWorms:
+		Intensity: 120
+	Voiced:
+		VoiceSet: SaboteurVoice
 

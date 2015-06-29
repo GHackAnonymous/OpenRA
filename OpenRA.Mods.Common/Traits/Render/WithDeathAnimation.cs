@@ -1,0 +1,105 @@
+#region Copyright & License Information
+/*
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
+ * This file is part of OpenRA, which is free software. It is made
+ * available to you under the terms of the GNU General Public License
+ * as published by the Free Software Foundation. For more information,
+ * see COPYING.
+ */
+#endregion
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using OpenRA.Mods.Common.Effects;
+using OpenRA.Traits;
+
+namespace OpenRA.Mods.Common.Traits
+{
+	[Desc("This actor has a death animation.")]
+	public class WithDeathAnimationInfo : ITraitInfo, Requires<RenderSpritesInfo>
+	{
+		[Desc("Sequence to play when this actor is killed by a warhead.")]
+		public readonly string DeathSequence = "die";
+
+		[Desc("The palette used for `DeathSequence`.")]
+		public readonly string DeathSequencePalette = "player";
+
+		[Desc("Custom death animation palette is a player palette BaseName")]
+		public readonly bool DeathPaletteIsPlayerPalette = true;
+
+		[Desc("Should DeathType-specific sequences be used (sequence name = DeathSequence + DeathType).")]
+		public readonly bool UseDeathTypeSuffix = true;
+
+		[Desc("Sequence to play when this actor is crushed.")]
+		public readonly string CrushedSequence = "die-crushed";
+
+		[Desc("The palette used for `CrushedSequence`.")]
+		public readonly string CrushedSequencePalette = "effect";
+
+		[Desc("Custom crushed animation palette is a player palette BaseName")]
+		public readonly bool CrushedPaletteIsPlayerPalette = false;
+
+		[FieldLoader.LoadUsing("LoadDeathTypes")]
+		[Desc("Death animation to use for each damage type (defined on the warheads).",
+			"Is only used if UseDeathTypeSuffix is `True`.")]
+		public readonly Dictionary<string, int> DeathTypes = new Dictionary<string, int>();
+
+		public static object LoadDeathTypes(MiniYaml yaml)
+		{
+			var md = yaml.ToDictionary();
+
+			return md.ContainsKey("DeathTypes")
+				? md["DeathTypes"].ToDictionary(my => FieldLoader.GetValue<int>("(value)", my.Value))
+				: new Dictionary<string, int>();
+		}
+
+		public object Create(ActorInitializer init) { return new WithDeathAnimation(init.Self, this); }
+	}
+
+	public class WithDeathAnimation : INotifyKilled
+	{
+		public readonly WithDeathAnimationInfo Info;
+		readonly RenderSprites rs;
+
+		public WithDeathAnimation(Actor self, WithDeathAnimationInfo info)
+		{
+			Info = info;
+			rs = self.Trait<RenderSprites>();
+		}
+
+		public void Killed(Actor self, AttackInfo e)
+		{
+			// Killed by some non-standard means. This includes being crushed
+			// by a vehicle (Actors with Crushable trait will spawn CrushedSequence instead).
+			if (e.Warhead == null)
+				return;
+
+			var sequence = Info.DeathSequence;
+			if (Info.UseDeathTypeSuffix)
+			{
+				var damageType = e.Warhead.DamageTypes.Intersect(Info.DeathTypes.Keys).FirstOrDefault();
+				if (damageType == null)
+					throw new Exception("Actor type `{0}` does not define a death animation for weapon with damage types `{1}`!"
+						.F(self.Info.Name, string.Join(", ", e.Warhead.DamageTypes)));
+
+				sequence += Info.DeathTypes[damageType];
+			}
+
+			var palette = Info.DeathSequencePalette;
+			if (Info.DeathPaletteIsPlayerPalette)
+				palette += self.Owner.InternalName;
+
+			SpawnDeathAnimation(self, sequence, palette);
+		}
+
+		public void SpawnDeathAnimation(Actor self, string sequence, string palette)
+		{
+			self.World.AddFrameEndTask(w =>
+			{
+				if (!self.Destroyed)
+					w.Add(new Corpse(w, self.CenterPosition, rs.GetImage(self), sequence, palette));
+			});
+		}
+	}
+}

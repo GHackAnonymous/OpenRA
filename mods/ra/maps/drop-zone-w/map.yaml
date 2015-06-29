@@ -1,6 +1,4 @@
-Selectable: True
-
-MapFormat: 6
+MapFormat: 7
 
 RequiresMod: ra
 
@@ -16,9 +14,11 @@ MapSize: 64,64
 
 Bounds: 16,16,32,32
 
-UseAsShellmap: False
+Visibility: Lobby
 
 Type: Drop Zone
+
+Videos:
 
 Options:
 	Crates: True
@@ -208,23 +208,11 @@ Rules:
 			Maximum: 3
 			SpawnInterval: 5
 			WaterChance: 1
+			CrateActors: unitcrate
 		-SpawnMPUnits:
 		-MPStartLocations:
-	CRATE:
-		-LevelUpCrateAction:
-		-GiveMcvCrateAction:
-		-GiveUnitCrateAction@jeep:
-		-GiveUnitCrateAction@1tnk:
-		-RevealMapCrateAction:
-		-HideMapCrateAction:
-		-ExplodeCrateAction@nuke:
-		-ExplodeCrateAction@boom:
-		-ExplodeCrateAction@fire:
-		-SupportPowerCrateAction@parabombs:
-		-GiveCashCrateAction:
-		-DuplicateUnitCrateAction:
-		-GiveUnitCrateAction@squadlight:
-		-GiveUnitCrateAction@squadheavyallies:
+	UNITCRATE:
+		Inherits: ^Crate
 		GiveUnitCrateAction@pt:
 			SelectionShares: 7
 			Units: pt
@@ -261,6 +249,7 @@ Rules:
 		WithMuzzleFlash@SECONDARY:
 			Armament: secondary
 		MustBeDestroyed:
+			RequiredForShortGame: true
 		-GivesBounty:
 	PT:
 		-GivesBounty:
@@ -305,8 +294,8 @@ Weapons:
 				Wood: 75
 				Light: 60
 				Heavy: 25
-			DeathType: 2
 			Damage: 250
+			DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 		Warhead@1Eff: CreateEffect
 			Explosion: large_explosion
 			WaterExplosion: large_splash
@@ -333,8 +322,8 @@ Weapons:
 				None: 40
 				Light: 30
 				Heavy: 30
-			DeathType: blownaway
 			Damage: 400
+			DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 		Warhead@1Eff: CreateEffect
 			Explosion: large_explosion
 			WaterExplosion: large_splash

@@ -1,6 +1,4 @@
-Selectable: True
-
-MapFormat: 6
+MapFormat: 7
 
 RequiresMod: ra
 
@@ -16,9 +14,11 @@ MapSize: 64,64
 
 Bounds: 16,16,32,32
 
-UseAsShellmap: False
+Visibility: Lobby
 
 Type: Drop Zone
+
+Videos:
 
 Options:
 	Crates: True
@@ -189,21 +189,11 @@ Rules:
 		CrateSpawner:
 			Maximum: 3
 			SpawnInterval: 5
+			CrateActors: unitcrate
 		-SpawnMPUnits:
 		-MPStartLocations:
-	CRATE:
-		-LevelUpCrateAction:
-		-GiveMcvCrateAction:
-		-RevealMapCrateAction:
-		-HideMapCrateAction:
-		-ExplodeCrateAction@nuke:
-		-ExplodeCrateAction@boom:
-		-ExplodeCrateAction@fire:
-		-SupportPowerCrateAction@parabombs:
-		-GiveCashCrateAction:
-		-DuplicateUnitCrateAction:
-		-GiveUnitCrateAction@squadlight:
-		-GiveUnitCrateAction@squadheavysoviet:
+	UNITCRATE:
+		Inherits: ^Crate
 		GiveUnitCrateAction@ttnk:
 			SelectionShares: 4
 			Units: ttnk
@@ -236,6 +226,7 @@ Rules:
 		RevealsShroud:
 			Range: 40c0
 		MustBeDestroyed:
+			RequiredForShortGame: true
 		-AttackMove:
 	HARV:
 		Tooltip:
@@ -266,8 +257,8 @@ Weapons:
 		Range: 10c0
 		Warhead: SpreadDamage
 			Spread: 42
-			DeathType: 5
 			Damage: 80
+			DamageTypes: Prone50Percent, TriggerProne, FireDeath
 
 Voices:
 

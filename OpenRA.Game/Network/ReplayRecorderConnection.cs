@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -25,6 +25,17 @@ namespace OpenRA.Network
 		Func<string> chooseFilename;
 		MemoryStream preStartBuffer = new MemoryStream();
 
+		static bool IsGameStart(byte[] data)
+		{
+			if (data.Length == 5 && data[4] == 0xbf)
+				return false;
+			if (data.Length >= 5 && data[4] == 0x65)
+				return false;
+
+			var frame = BitConverter.ToInt32(data, 0);
+			return frame == 0 && data.ToOrderList(null).Any(o => o.OrderString == "StartGame");
+		}
+
 		public ReplayRecorderConnection(IConnection inner, Func<string> chooseFilename)
 		{
 			this.chooseFilename = chooseFilename;
@@ -36,7 +47,7 @@ namespace OpenRA.Network
 		void StartSavingReplay(byte[] initialContent)
 		{
 			var filename = chooseFilename();
-			var mod = Game.modData.Manifest.Mod;
+			var mod = Game.ModData.Manifest.Mod;
 			var dir = Platform.ResolvePath("^", "Replays", mod.Id, mod.Version);
 
 			if (!Directory.Exists(dir))
@@ -46,7 +57,7 @@ namespace OpenRA.Network
 			var id = -1;
 			while (file == null)
 			{
-				var fullFilename = Path.Combine(dir, id < 0 ? "{0}.rep".F(filename) : "{0}-{1}.rep".F(filename, id));
+				var fullFilename = Path.Combine(dir, id < 0 ? "{0}.orarep".F(filename) : "{0}-{1}.orarep".F(filename, id));
 				id++;
 				try
 				{
@@ -83,17 +94,6 @@ namespace OpenRA.Network
 					writer.Write(data);
 					packetFn(client, data);
 				});
-		}
-
-		static bool IsGameStart(byte[] data)
-		{
-			if (data.Length == 5 && data[4] == 0xbf)
-				return false;
-			if (data.Length >= 5 && data[4] == 0x65)
-				return false;
-
-			var frame = BitConverter.ToInt32(data, 0);
-			return frame == 0 && data.ToOrderList(null).Any(o => o.OrderString == "StartGame");
 		}
 
 		bool disposed;

@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using OpenRA.Activities;
 using OpenRA.Support;
 
 namespace OpenRA.Traits
@@ -87,12 +88,12 @@ namespace OpenRA.Traits
 					start = Stopwatch.GetTimestamp();
 				}
 				else
-				{
 					start = current;
-				}
+
 				if (prev == act)
 					break;
 			}
+
 			return act;
 		}
 
@@ -127,10 +128,7 @@ namespace OpenRA.Traits
 
 		public static IEnumerable<CPos> ExpandFootprint(IEnumerable<CPos> cells, bool allowDiagonal)
 		{
-			var result = new Dictionary<CPos, bool>();
-			foreach (var c in cells.SelectMany(c => Neighbours(c, allowDiagonal)))
-				result[c] = true;
-			return result.Keys;
+			return cells.SelectMany(c => Neighbours(c, allowDiagonal)).Distinct();
 		}
 
 		public static IEnumerable<CPos> AdjacentCells(World w, Target target)

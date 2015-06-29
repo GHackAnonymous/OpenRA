@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -16,7 +16,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace OpenRA.Renderer.Sdl2
 {
-	public class Texture : ITexture
+	public sealed class Texture : ITexture
 	{
 		int texture;
 		TextureScaleFilter scaleFilter;
@@ -26,12 +26,15 @@ namespace OpenRA.Renderer.Sdl2
 
 		public Size Size { get { return size; } }
 
+		bool disposed;
+
 		public TextureScaleFilter ScaleFilter
 		{
 			get
 			{
 				return scaleFilter;
 			}
+
 			set
 			{
 				if (scaleFilter == value)
@@ -54,9 +57,6 @@ namespace OpenRA.Renderer.Sdl2
 			ErrorHandler.CheckGlError();
 			SetData(bitmap);
 		}
-
-		void FinalizeInner() { GL.DeleteTextures(1, ref texture); }
-		~Texture() { Game.RunAfterTick(FinalizeInner); }
 
 		void PrepareTexture()
 		{
@@ -131,6 +131,7 @@ namespace OpenRA.Renderer.Sdl2
 				bitmap = new Bitmap(bitmap, bitmap.Size.NextPowerOf2());
 				allocatedBitmap = true;
 			}
+
 			try
 			{
 				size = new Size(bitmap.Width, bitmap.Height);
@@ -179,6 +180,25 @@ namespace OpenRA.Renderer.Sdl2
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, width, height,
 				0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
 			ErrorHandler.CheckGlError();
+		}
+
+		~Texture()
+		{
+			Game.RunAfterTick(() => Dispose(false));
+		}
+
+		public void Dispose()
+		{
+			Game.RunAfterTick(() => Dispose(true));
+			GC.SuppressFinalize(this);
+		}
+
+		void Dispose(bool disposing)
+		{
+			if (disposed)
+				return;
+			disposed = true;
+			GL.DeleteTextures(1, ref texture);
 		}
 	}
 }

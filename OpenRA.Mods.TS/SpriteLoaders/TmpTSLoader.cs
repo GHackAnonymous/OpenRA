@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -9,52 +9,118 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using OpenRA.FileFormats;
 using OpenRA.Graphics;
 
 namespace OpenRA.Mods.TS.SpriteLoaders
 {
 	public class TmpTSLoader : ISpriteLoader
 	{
+		class TmpTSDepthFrame : ISpriteFrame
+		{
+			readonly TmpTSFrame parent;
+
+			public Size Size { get { return parent.Size; } }
+			public Size FrameSize { get { return Size; } }
+			public float2 Offset { get { return parent.Offset; } }
+			public byte[] Data { get { return parent.DepthData; } }
+			public bool DisableExportPadding { get { return false; } }
+
+			public TmpTSDepthFrame(TmpTSFrame parent)
+			{
+				this.parent = parent;
+			}
+		}
+
 		class TmpTSFrame : ISpriteFrame
 		{
 			public Size Size { get; private set; }
 			public Size FrameSize { get { return Size; } }
-			public float2 Offset { get { return float2.Zero; } }
+			public float2 Offset { get; private set; }
 			public byte[] Data { get; set; }
+			public byte[] DepthData { get; set; }
 			public bool DisableExportPadding { get { return false; } }
 
-			public TmpTSFrame(Stream s, Size size)
+			public TmpTSFrame(Stream s, Size size, int u, int v)
 			{
 				if (s.Position != 0)
 				{
 					Size = size;
 
-					// Ignore tile header for now
-					s.Position += 52;
+					// Skip unnecessary header data
+					s.Position += 20;
 
-					Data = new byte[size.Width * size.Height];
+					// Extra data is specified relative to the top-left of the template
+					var extraX = s.ReadInt32() - (u - v) * size.Width / 2;
+					var extraY = s.ReadInt32() - (u + v) * size.Height / 2;
+					var extraWidth = s.ReadInt32();
+					var extraHeight = s.ReadInt32();
+					var flags = s.ReadUInt32();
 
-					// Unpack tile data
-					var width = 4;
-					for (var i = 0; i < size.Height; i++)
+					var bounds = new Rectangle(0, 0, size.Width, size.Height);
+					if ((flags & 0x01) != 0)
 					{
-						var start = i * size.Width + (size.Width - width) / 2;
-						for (var j = 0; j < width; j++)
-							Data[start + j] = s.ReadUInt8();
+						var extraBounds = new Rectangle(extraX, extraY, extraWidth, extraHeight);
+						bounds = Rectangle.Union(bounds, extraBounds);
 
-						width += (i < size.Height / 2 - 1 ? 1 : -1) * 4;
+						Offset = new float2(bounds.X + 0.5f * (bounds.Width - size.Width), bounds.Y + 0.5f * (bounds.Height - size.Height));
+						Size = new Size(bounds.Width, bounds.Height);
 					}
 
-					// Ignore Z-data for now
-					// Ignore extra data for now
+					// Skip unnecessary header data
+					s.Position += 12;
+
+					Data = new byte[bounds.Width * bounds.Height];
+					DepthData = new byte[bounds.Width * bounds.Height];
+
+					UnpackTileData(s, Data, size, bounds);
+					UnpackTileData(s, DepthData, size, bounds);
+
+					if ((flags & 0x01) == 0)
+						return;
+
+					// Load extra data (cliff faces, etc)
+					for (var j = 0; j < extraHeight; j++)
+					{
+						var start = (j + extraY - bounds.Y) * bounds.Width + extraX - bounds.X;
+						for (var i = 0; i < extraWidth; i++)
+						{
+							var extra = s.ReadUInt8();
+							if (extra != 0)
+								Data[start + i] = extra;
+						}
+					}
+
+					// Extra data depth
+					for (var j = 0; j < extraHeight; j++)
+					{
+						var start = (j + extraY - bounds.Y) * bounds.Width + extraX - bounds.X;
+						for (var i = 0; i < extraWidth; i++)
+						{
+							var extra = s.ReadUInt8();
+
+							// XCC source indicates that there are only 32 valid values
+							if (extra < 32)
+								DepthData[start + i] = extra;
+						}
+					}
 				}
 				else
 					Data = new byte[0];
+			}
+		}
+
+		static void UnpackTileData(Stream s, byte[] data, Size size, Rectangle frameBounds)
+		{
+			var width = 4;
+			for (var j = 0; j < size.Height; j++)
+			{
+				var start = (j - frameBounds.Y) * frameBounds.Width + (size.Width - width) / 2 - frameBounds.X;
+				for (var i = 0; i < width; i++)
+					data[start + i] = s.ReadUInt8();
+
+				width += (j < size.Height / 2 - 1 ? 1 : -1) * 4;
 			}
 		}
 
@@ -83,7 +149,7 @@ namespace OpenRA.Mods.TS.SpriteLoaders
 			return test == sx * sy / 2 + 52;
 		}
 
-		TmpTSFrame[] ParseFrames(Stream s)
+		ISpriteFrame[] ParseFrames(Stream s)
 		{
 			var start = s.Position;
 			var templateWidth = s.ReadUInt32();
@@ -95,11 +161,21 @@ namespace OpenRA.Mods.TS.SpriteLoaders
 			for (var i = 0; i < offsets.Length; i++)
 				offsets[i] = s.ReadUInt32();
 
-			var tiles = new TmpTSFrame[offsets.Length];
-			for (var i = 0; i < offsets.Length; i++)
+			// Depth information are stored as a second set of frames (like split shadows)
+			var stride = offsets.Length;
+			var tiles = new ISpriteFrame[stride * 2];
+
+			for (var j = 0; j < templateHeight; j++)
 			{
-				s.Position = offsets[i];
-				tiles[i] = new TmpTSFrame(s, size);
+				for (var i = 0; i < templateWidth; i++)
+				{
+					var k = j * templateWidth + i;
+					s.Position = offsets[k];
+
+					var frame = new TmpTSFrame(s, size, i, j);
+					tiles[k] = frame;
+					tiles[k + stride] = new TmpTSDepthFrame(frame);
+				}
 			}
 
 			s.Position = start;

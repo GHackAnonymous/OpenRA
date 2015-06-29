@@ -1,6 +1,6 @@
-﻿#region Copyright & License Information
+#region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -20,15 +20,14 @@ namespace OpenRA.Traits
 		public readonly bool Selectable = true;
 		public readonly int Priority = 10;
 		public readonly int[] Bounds = null;
-		[VoiceReference] public readonly string Voice = null;
 
-		public object Create(ActorInitializer init) { return new Selectable(init.self, this); }
+		public object Create(ActorInitializer init) { return new Selectable(init.Self, this); }
 	}
 
 	public class Selectable : IPostRenderSelection
 	{
 		public SelectableInfo Info;
-		Actor self;
+		readonly Actor self;
 
 		public Selectable(Actor self, SelectableInfo info)
 		{
@@ -38,7 +37,7 @@ namespace OpenRA.Traits
 
 		IEnumerable<WPos> ActivityTargetPath()
 		{
-			if (!self.IsInWorld || self.IsDead())
+			if (!self.IsInWorld || self.IsDead)
 				yield break;
 
 			var activity = self.GetCurrentActivity();

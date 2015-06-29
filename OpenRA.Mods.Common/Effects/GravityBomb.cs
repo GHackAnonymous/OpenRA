@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -19,8 +19,14 @@ namespace OpenRA.Mods.Common.Effects
 	public class GravityBombInfo : IProjectileInfo
 	{
 		public readonly string Image = null;
+		[Desc("Sequence to loop while falling.")]
+		public readonly string Sequence = "idle";
+		[Desc("Sequence to play when launched. Skipped if null or empty.")]
+		public readonly string OpenSequence = null;
+		public readonly string Palette = "effect";
 		public readonly bool Shadow = false;
 		public readonly WRange Velocity = WRange.Zero;
+		[Desc("Value added to velocity every tick.")]
 		public readonly WRange Acceleration = new WRange(15);
 
 		public IEffect Create(ProjectileArgs args) { return new GravityBomb(this, args); }
@@ -28,11 +34,12 @@ namespace OpenRA.Mods.Common.Effects
 
 	public class GravityBomb : IEffect
 	{
-		GravityBombInfo info;
-		Animation anim;
-		ProjectileArgs args;
-		WVec velocity;
-		WPos pos;
+		readonly GravityBombInfo info;
+		readonly Animation anim;
+		readonly ProjectileArgs args;
+		[Sync] WVec velocity;
+		[Sync] WPos pos;
+		[Sync] WVec acceleration;
 
 		public GravityBomb(GravityBombInfo info, ProjectileArgs args)
 		{
@@ -40,17 +47,22 @@ namespace OpenRA.Mods.Common.Effects
 			this.args = args;
 			pos = args.Source;
 			velocity = new WVec(WRange.Zero, WRange.Zero, -info.Velocity);
+			acceleration = new WVec(WRange.Zero, WRange.Zero, info.Acceleration);
 
 			anim = new Animation(args.SourceActor.World, info.Image);
-			if (anim.HasSequence("open"))
-				anim.PlayThen("open", () => anim.PlayRepeating("idle"));
-			else
-				anim.PlayRepeating("idle");
+
+			if (!string.IsNullOrEmpty(info.Image))
+			{
+				if (!string.IsNullOrEmpty(info.OpenSequence))
+					anim.PlayThen(info.OpenSequence, () => anim.PlayRepeating(info.Sequence));
+				else
+					anim.PlayRepeating(info.Sequence);
+			}
 		}
 
 		public void Tick(World world)
 		{
-			velocity -= new WVec(WRange.Zero, WRange.Zero, info.Acceleration);
+			velocity -= acceleration;
 			pos += velocity;
 
 			if (pos.Z <= args.PassiveTarget.Z)
@@ -60,12 +72,13 @@ namespace OpenRA.Mods.Common.Effects
 				args.Weapon.Impact(Target.FromPos(pos), args.SourceActor, args.DamageModifiers);
 			}
 
-			anim.Tick();
+			if (anim != null)
+				anim.Tick();
 		}
 
 		public IEnumerable<IRenderable> Render(WorldRenderer wr)
 		{
-			var cell = wr.world.Map.CellContaining(pos);
+			var cell = wr.World.Map.CellContaining(pos);
 			if (!args.SourceActor.World.FogObscures(cell))
 			{
 				if (info.Shadow)
@@ -75,7 +88,7 @@ namespace OpenRA.Mods.Common.Effects
 						yield return r;
 				}
 
-				var palette = wr.Palette(args.Weapon.Palette);
+				var palette = wr.Palette(info.Palette);
 				foreach (var r in anim.Render(pos, palette))
 					yield return r;
 			}

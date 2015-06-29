@@ -1,6 +1,6 @@
-﻿#region Copyright & License Information
+#region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -66,6 +66,9 @@ namespace OpenRA.Renderer.Null
 		public ITexture CreateTexture(Bitmap bitmap) { return new NullTexture(); }
 		public IFrameBuffer CreateFrameBuffer(Size s) { return new NullFrameBuffer(); }
 		public IShader CreateShader(string name) { return new NullShader(); }
+
+		public IHardwareCursor CreateHardwareCursor(string name, Size size, byte[] data, int2 hotspot) { return null; }
+		public void SetHardwareCursor(IHardwareCursor cursor) { }
 	}
 
 	public class NullShader : IShader
@@ -78,7 +81,7 @@ namespace OpenRA.Renderer.Null
 		public void Render(Action a) { }
 	}
 
-	public class NullTexture : ITexture
+	public sealed class NullTexture : ITexture
 	{
 		public TextureScaleFilter ScaleFilter { get { return TextureScaleFilter.Nearest; } set { } }
 		public void SetData(Bitmap bitmap) { }
@@ -86,18 +89,22 @@ namespace OpenRA.Renderer.Null
 		public void SetData(byte[] colors, int width, int height) { }
 		public byte[] GetData() { return new byte[0]; }
 		public Size Size { get { return new Size(0, 0); } }
+		public void Dispose() { }
 	}
 
-	public class NullFrameBuffer : IFrameBuffer
+	public sealed class NullFrameBuffer : IFrameBuffer
 	{
 		public void Bind() { }
 		public void Unbind() { }
 		public ITexture Texture { get { return new NullTexture(); } }
+		public void Dispose() { }
 	}
 
-	class NullVertexBuffer<T> : IVertexBuffer<T>
+	sealed class NullVertexBuffer<T> : IVertexBuffer<T>
 	{
 		public void Bind() { }
 		public void SetData(T[] vertices, int length) { }
+		public void SetData(T[] vertices, int start, int length) { }
+		public void Dispose() { }
 	}
 }

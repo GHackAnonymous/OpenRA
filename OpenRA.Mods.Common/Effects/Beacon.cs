@@ -1,6 +1,6 @@
-﻿#region Copyright & License Information
+#region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -17,6 +17,8 @@ namespace OpenRA.Mods.Common.Effects
 {
 	public class Beacon : IEffect
 	{
+		static readonly int MaxArrowHeight = 512;
+
 		readonly Player owner;
 		readonly WPos position;
 		readonly string palettePrefix;
@@ -26,8 +28,7 @@ namespace OpenRA.Mods.Common.Effects
 		readonly Animation poster;
 		readonly Animation clock;
 
-		static readonly int maxArrowHeight = 512;
-		int arrowHeight = maxArrowHeight;
+		int arrowHeight = MaxArrowHeight;
 		int arrowSpeed = 50;
 
 		// Player-placed beacons are removed after a delay
@@ -69,7 +70,7 @@ namespace OpenRA.Mods.Common.Effects
 		public void Tick(World world)
 		{
 			arrowHeight += arrowSpeed;
-			var clamped = arrowHeight.Clamp(0, maxArrowHeight);
+			var clamped = arrowHeight.Clamp(0, MaxArrowHeight);
 			if (arrowHeight != clamped)
 			{
 				arrowHeight = clamped;
@@ -91,7 +92,7 @@ namespace OpenRA.Mods.Common.Effects
 			var palette = r.Palette(palettePrefix + owner.InternalName);
 			foreach (var a in circles.Render(position, palette))
 				yield return a;
-				
+
 			foreach (var a in arrow.Render(position + new WVec(0, 0, arrowHeight), palette))
 				yield return a;
 

@@ -1,6 +1,6 @@
-﻿#region Copyright & License Information
+#region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -14,11 +14,11 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using OpenRA.Traits;
-using OpenRA.Graphics;
 using OpenRA.FileFormats;
 using OpenRA.FileSystem;
+using OpenRA.Graphics;
 using OpenRA.Mods.Common.SpriteLoaders;
+using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.UtilityCommands
 {
@@ -37,16 +37,16 @@ namespace OpenRA.Mods.Common.UtilityCommands
 
 			var srcMod = args[1].Split(':')[0];
 
-			Game.modData = new ModData(srcMod);
-			GlobalFileSystem.LoadFromManifest(Game.modData.Manifest);
-			var srcRules = Game.modData.RulesetCache.LoadDefaultRules();
+			Game.ModData = new ModData(srcMod);
+			GlobalFileSystem.LoadFromManifest(Game.ModData.Manifest);
+			var srcRules = Game.ModData.RulesetCache.LoadDefaultRules();
 			var srcPaletteInfo = srcRules.Actors["player"].Traits.Get<PlayerColorPaletteInfo>();
 			var srcRemapIndex = srcPaletteInfo.RemapIndex;
 
 			var destMod = args[2].Split(':')[0];
-			Game.modData = new ModData(destMod);
-			GlobalFileSystem.LoadFromManifest(Game.modData.Manifest);
-			var destRules = Game.modData.RulesetCache.LoadDefaultRules();
+			Game.ModData = new ModData(destMod);
+			GlobalFileSystem.LoadFromManifest(Game.ModData.Manifest);
+			var destRules = Game.ModData.RulesetCache.LoadDefaultRules();
 			var destPaletteInfo = destRules.Actors["player"].Traits.Get<PlayerColorPaletteInfo>();
 			var destRemapIndex = destPaletteInfo.RemapIndex;
 			var shadowIndex = new int[] { };

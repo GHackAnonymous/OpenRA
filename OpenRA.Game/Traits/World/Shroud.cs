@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -17,12 +17,14 @@ namespace OpenRA.Traits
 	[Desc("Required for shroud and fog visibility checks. Add this to the player actor.")]
 	public class ShroudInfo : ITraitInfo
 	{
-		public object Create(ActorInitializer init) { return new Shroud(init.self); }
+		public object Create(ActorInitializer init) { return new Shroud(init.Self); }
 	}
 
 	public class Shroud
 	{
 		[Sync] public bool Disabled;
+
+		public event Action<IEnumerable<CPos>> CellsChanged;
 
 		readonly Actor self;
 		readonly Map map;
@@ -40,12 +42,12 @@ namespace OpenRA.Traits
 
 		public int Hash { get; private set; }
 
-		static readonly Func<CPos, bool> TruthPredicate = cell => true;
-		readonly Func<CPos, bool> shroudEdgeTest;
-		readonly Func<CPos, bool> fastExploredTest;
-		readonly Func<CPos, bool> slowExploredTest;
-		readonly Func<CPos, bool> fastVisibleTest;
-		readonly Func<CPos, bool> slowVisibleTest;
+		static readonly Func<MPos, bool> TruthPredicate = _ => true;
+		readonly Func<MPos, bool> shroudEdgeTest;
+		readonly Func<MPos, bool> fastExploredTest;
+		readonly Func<MPos, bool> slowExploredTest;
+		readonly Func<MPos, bool> fastVisibleTest;
+		readonly Func<MPos, bool> slowVisibleTest;
 
 		public Shroud(Actor self)
 		{
@@ -56,29 +58,51 @@ namespace OpenRA.Traits
 			generatedShroudCount = new CellLayer<short>(map);
 			explored = new CellLayer<bool>(map);
 
-			self.World.ActorAdded += AddVisibility;
+			self.World.ActorAdded += a => { CPos[] visible = null; AddVisibility(a, ref visible); };
 			self.World.ActorRemoved += RemoveVisibility;
 
-			self.World.ActorAdded += AddShroudGeneration;
+			self.World.ActorAdded += a => { CPos[] shrouded = null; AddShroudGeneration(a, ref shrouded); };
 			self.World.ActorRemoved += RemoveShroudGeneration;
 
 			fogVisibilities = Exts.Lazy(() => self.TraitsImplementing<IFogVisibilityModifier>().ToArray());
 
-			shroudEdgeTest = cell => map.Contains(cell);
+			shroudEdgeTest = map.Contains;
 			fastExploredTest = IsExploredCore;
 			slowExploredTest = IsExplored;
 			fastVisibleTest = IsVisibleCore;
 			slowVisibleTest = IsVisible;
 		}
 
-		void Invalidate()
+		void Invalidate(IEnumerable<CPos> changed)
 		{
+			if (CellsChanged != null)
+				CellsChanged(changed);
+
 			var oldHash = Hash;
-			Hash = Sync.hash_player(self.Owner) + self.World.WorldTick * 3;
+			Hash = Sync.HashPlayer(self.Owner) + self.World.WorldTick * 3;
 
 			// Invalidate may be called multiple times in one world tick, which is decoupled from rendering.
 			if (oldHash == Hash)
 				Hash += 1;
+		}
+
+		public static void UpdateVisibility(IEnumerable<Shroud> shrouds, Actor actor)
+		{
+			CPos[] visbility = null;
+			foreach (var shroud in shrouds)
+				shroud.UpdateVisibility(actor, ref visbility);
+		}
+
+		public static void UpdateShroudGeneration(IEnumerable<Shroud> shrouds, Actor actor)
+		{
+			CPos[] shrouded = null;
+			foreach (var shroud in shrouds)
+				shroud.UpdateShroudGeneration(actor, ref shrouded);
+		}
+
+		static CPos[] FindVisibleTiles(Actor actor, WRange range)
+		{
+			return GetVisOrigins(actor).SelectMany(o => FindVisibleTiles(actor.World, o, range)).Distinct().ToArray();
 		}
 
 		static IEnumerable<CPos> FindVisibleTiles(World world, CPos position, WRange radius)
@@ -93,28 +117,27 @@ namespace OpenRA.Traits
 					yield return cell;
 		}
 
-		void AddVisibility(Actor a)
+		void AddVisibility(Actor a, ref CPos[] visible)
 		{
 			var rs = a.TraitOrDefault<RevealsShroud>();
 			if (rs == null || !a.Owner.IsAlliedWith(self.Owner) || rs.Range == WRange.Zero)
 				return;
 
-			var origins = GetVisOrigins(a);
-			var visible = origins.SelectMany(o => FindVisibleTiles(a.World, o, rs.Range))
-				.Distinct().ToArray();
+			// Lazily generate the visible tiles, allowing the caller to re-use them if desired.
+			visible = visible ?? FindVisibleTiles(a, rs.Range);
 
-			// Update visibility
 			foreach (var c in visible)
 			{
-				visibleCount[c]++;
-				explored[c] = true;
+				var uv = c.ToMPos(map);
+				visibleCount[uv]++;
+				explored[uv] = true;
 			}
 
 			if (visibility.ContainsKey(a))
 				throw new InvalidOperationException("Attempting to add duplicate actor visibility");
 
 			visibility[a] = visible;
-			Invalidate();
+			Invalidate(visible);
 		}
 
 		void RemoveVisibility(Actor a)
@@ -124,30 +147,31 @@ namespace OpenRA.Traits
 				return;
 
 			foreach (var c in visible)
-				visibleCount[c]--;
+				visibleCount[c.ToMPos(map)]--;
 
 			visibility.Remove(a);
-			Invalidate();
+			Invalidate(visible);
 		}
 
-		public void UpdateVisibility(Actor a)
+		void UpdateVisibility(Actor a, ref CPos[] visible)
 		{
 			// Actors outside the world don't have any vis
 			if (!a.IsInWorld)
 				return;
 
 			RemoveVisibility(a);
-			AddVisibility(a);
+			AddVisibility(a, ref visible);
 		}
 
-		void AddShroudGeneration(Actor a)
+		void AddShroudGeneration(Actor a, ref CPos[] shrouded)
 		{
 			var cs = a.TraitOrDefault<CreatesShroud>();
 			if (cs == null || a.Owner.IsAlliedWith(self.Owner) || cs.Range == WRange.Zero)
 				return;
 
-			var shrouded = GetVisOrigins(a).SelectMany(o => FindVisibleTiles(a.World, o, cs.Range))
-				.Distinct().ToArray();
+			// Lazily generate the shrouded tiles, allowing the caller to re-use them if desired.
+			shrouded = shrouded ?? FindVisibleTiles(a, cs.Range);
+
 			foreach (var c in shrouded)
 				generatedShroudCount[c]++;
 
@@ -155,7 +179,7 @@ namespace OpenRA.Traits
 				throw new InvalidOperationException("Attempting to add duplicate shroud generation");
 
 			generation[a] = shrouded;
-			Invalidate();
+			Invalidate(shrouded);
 		}
 
 		void RemoveShroudGeneration(Actor a)
@@ -168,13 +192,13 @@ namespace OpenRA.Traits
 				generatedShroudCount[c]--;
 
 			generation.Remove(a);
-			Invalidate();
+			Invalidate(shrouded);
 		}
 
-		public void UpdateShroudGeneration(Actor a)
+		void UpdateShroudGeneration(Actor a, ref CPos[] shrouded)
 		{
 			RemoveShroudGeneration(a);
-			AddShroudGeneration(a);
+			AddShroudGeneration(a, ref shrouded);
 		}
 
 		public void UpdatePlayerStance(World w, Player player, Stance oldStance, Stance newStance)
@@ -184,8 +208,10 @@ namespace OpenRA.Traits
 
 			foreach (var a in w.Actors.Where(a => a.Owner == player))
 			{
-				UpdateVisibility(a);
-				UpdateShroudGeneration(a);
+				CPos[] visible = null;
+				UpdateVisibility(a, ref visible);
+				CPos[] shrouded = null;
+				UpdateShroudGeneration(a, ref shrouded);
 			}
 		}
 
@@ -204,10 +230,17 @@ namespace OpenRA.Traits
 
 		public void Explore(World world, CPos center, WRange range)
 		{
+			var changed = new List<CPos>();
 			foreach (var c in FindVisibleTiles(world, center, range))
-				explored[c] = true;
+			{
+				if (!explored[c])
+				{
+					explored[c] = true;
+					changed.Add(c);
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public void Explore(Shroud s)
@@ -215,49 +248,74 @@ namespace OpenRA.Traits
 			if (map.Bounds != s.map.Bounds)
 				throw new ArgumentException("The map bounds of these shrouds do not match.", "s");
 
-			foreach (var cell in map.Cells)
-				if (s.explored[cell])
-					explored[cell] = true;
+			var changed = new List<CPos>();
+			foreach (var uv in map.Cells.MapCoords)
+			{
+				if (!explored[uv] && s.explored[uv])
+				{
+					explored[uv] = true;
+					changed.Add(uv.ToCPos(map));
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public void ExploreAll(World world)
 		{
-			foreach (var cell in map.Cells)
-				explored[cell] = true;
+			var changed = new List<CPos>();
+			foreach (var uv in map.Cells.MapCoords)
+			{
+				if (!explored[uv])
+				{
+					explored[uv] = true;
+					changed.Add(uv.ToCPos(map));
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public void ResetExploration()
 		{
-			foreach (var cell in map.Cells)
-				explored[cell] = visibleCount[cell] > 0;
+			var changed = new List<CPos>();
+			foreach (var uv in map.Cells.MapCoords)
+			{
+				var visible = visibleCount[uv] > 0;
+				if (explored[uv] != visible)
+				{
+					explored[uv] = visible;
+					changed.Add(uv.ToCPos(map));
+				}
+			}
 
-			Invalidate();
+			Invalidate(changed);
 		}
 
 		public bool IsExplored(CPos cell)
 		{
-			if (!map.Contains(cell))
+			return IsExplored(cell.ToMPos(map));
+		}
+
+		public bool IsExplored(MPos uv)
+		{
+			if (!map.Contains(uv))
 				return false;
 
 			if (!ShroudEnabled)
 				return true;
 
-			return IsExploredCore(cell);
+			return IsExploredCore(uv);
 		}
 
 		bool ShroudEnabled { get { return !Disabled && self.World.LobbyInfo.GlobalSettings.Shroud; } }
 
-		bool IsExploredCore(CPos cell)
+		bool IsExploredCore(MPos uv)
 		{
-			var uv = Map.CellToMap(map.TileShape, cell);
-			return explored[uv.X, uv.Y] && (generatedShroudCount[uv.X, uv.Y] == 0 || visibleCount[uv.X, uv.Y] > 0);
+			return explored[uv] && (generatedShroudCount[uv] == 0 || visibleCount[uv] > 0);
 		}
 
-		public Func<CPos, bool> IsExploredTest(CellRegion region)
+		public Func<MPos, bool> IsExploredTest(CellRegion region)
 		{
 			// If the region to test extends outside the map we must use the slow test that checks the map boundary every time.
 			if (!map.Cells.Contains(region))
@@ -273,28 +331,34 @@ namespace OpenRA.Traits
 
 		public bool IsExplored(Actor a)
 		{
-			return GetVisOrigins(a).Any(o => IsExplored(o));
+			return GetVisOrigins(a).Any(IsExplored);
 		}
 
 		public bool IsVisible(CPos cell)
 		{
-			if (!map.Contains(cell))
+			var uv = cell.ToMPos(map);
+			return IsVisible(uv);
+		}
+
+		bool IsVisible(MPos uv)
+		{
+			if (!map.Contains(uv))
 				return false;
 
 			if (!FogEnabled)
 				return true;
 
-			return IsVisibleCore(cell);
+			return IsVisibleCore(uv);
 		}
 
 		bool FogEnabled { get { return !Disabled && self.World.LobbyInfo.GlobalSettings.Fog; } }
 
-		bool IsVisibleCore(CPos cell)
+		bool IsVisibleCore(MPos uv)
 		{
-			return visibleCount[cell] > 0;
+			return visibleCount[uv] > 0;
 		}
 
-		public Func<CPos, bool> IsVisibleTest(CellRegion region)
+		public Func<MPos, bool> IsVisibleTest(CellRegion region)
 		{
 			// If the region to test extends outside the map we must use the slow test that checks the map boundary every time.
 			if (!map.Cells.Contains(region))

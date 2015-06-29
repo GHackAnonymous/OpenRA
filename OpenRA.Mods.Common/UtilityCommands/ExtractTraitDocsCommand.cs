@@ -1,6 +1,6 @@
-﻿#region Copyright & License Information
+#region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -24,21 +24,29 @@ namespace OpenRA.Mods.Common.UtilityCommands
 		public void Run(ModData modData, string[] args)
 		{
 			// HACK: The engine code assumes that Game.modData is set.
-			Game.modData = modData;
+			Game.ModData = modData;
 
 			Console.WriteLine(
 				"This documentation is aimed at modders. It displays all traits with default values and developer commentary. " +
 				"Please do not edit it directly, but add new `[Desc(\"String\")]` tags to the source code. This file has been " +
-				"automatically generated for version {0} of OpenRA.", Game.modData.Manifest.Mod.Version);
+				"automatically generated for version {0} of OpenRA.", Game.ModData.Manifest.Mod.Version);
 			Console.WriteLine();
 
 			var toc = new StringBuilder();
 			var doc = new StringBuilder();
+			var currentNamespace = "";
 
-			foreach (var t in Game.modData.ObjectCreator.GetTypesImplementing<ITraitInfo>().OrderBy(t => t.Namespace))
+			foreach (var t in Game.ModData.ObjectCreator.GetTypesImplementing<ITraitInfo>().OrderBy(t => t.Namespace))
 			{
 				if (t.ContainsGenericParameters || t.IsAbstract)
 					continue; // skip helpers like TraitInfo<T>
+
+				if (currentNamespace != t.Namespace)
+				{
+					currentNamespace = t.Namespace;
+					doc.AppendLine();
+					doc.AppendLine("## {0}".F(currentNamespace));
+				}
 
 				var traitName = t.Name.EndsWith("Info") ? t.Name.Substring(0, t.Name.Length - 4) : t.Name;
 				toc.AppendLine("* [{0}](#{1})".F(traitName, traitName.ToLowerInvariant()));
@@ -53,7 +61,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 				if (reqCount > 0)
 				{
 					if (t.HasAttribute<DescAttribute>())
-						doc.AppendLine("\n");
+						doc.AppendLine();
 
 					doc.Append("Requires trait{0}: ".F(reqCount > 1 ? "s" : ""));
 
@@ -62,7 +70,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					{
 						var n = require.Name;
 						var name = n.EndsWith("Info") ? n.Remove(n.Length - 4, 4) : n;
-						doc.Append("`{0}`{1}".F(name, i + 1 == reqCount ? ".\n" : ", "));
+						doc.Append("[`{0}`](#{1}){2}".F(name, name.ToLowerInvariant(), i + 1 == reqCount ? ".\n" : ", "));
 						i++;
 					}
 				}
@@ -72,7 +80,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 					continue;
 				doc.AppendLine("<table>");
 				doc.AppendLine("<tr><th>Property</th><th>Default Value</th><th>Type</th><th>Description</th></tr>");
-				var liveTraitInfo = Game.modData.ObjectCreator.CreateBasic(t);
+				var liveTraitInfo = Game.ModData.ObjectCreator.CreateBasic(t);
 				foreach (var info in infos)
 				{
 					var fieldDescLines = info.Field.GetCustomAttributes<DescAttribute>(true).SelectMany(d => d.Lines);
@@ -84,6 +92,7 @@ namespace OpenRA.Mods.Common.UtilityCommands
 						doc.Append(line + " ");
 					doc.AppendLine("</td></tr>");
 				}
+
 				doc.AppendLine("</table>");
 			}
 

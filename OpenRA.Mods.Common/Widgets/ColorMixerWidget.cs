@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -18,11 +18,14 @@ namespace OpenRA.Mods.Common.Widgets
 {
 	public class ColorMixerWidget : Widget
 	{
-		public float[] SRange = {0.0f, 1.0f};
-		public float[] VRange = {0.2f, 1.0f};
-		public event Action OnChange = () => {};
+		public float[] SRange = { 0.0f, 1.0f };
+		public float[] VRange = { 0.2f, 1.0f };
+		public event Action OnChange = () => { };
 
-		float H, S, V;
+		public float H { get; private set; }
+		public float S { get; private set; }
+		public float V { get; private set; }
+
 		byte[] front, back;
 		Sprite mixerSprite;
 		bool isMoving;
@@ -32,7 +35,7 @@ namespace OpenRA.Mods.Common.Widgets
 		Thread workerThread;
 		bool workerAlive;
 
-		public ColorMixerWidget() {}
+		public ColorMixerWidget() { }
 		public ColorMixerWidget(ColorMixerWidget other)
 			: base(other)
 		{
@@ -47,12 +50,12 @@ namespace OpenRA.Mods.Common.Widgets
 			base.Initialize(args);
 
 			// Bitmap data is generated in a background thread and then flipped
-			front = new byte[4*256*256];
-			back = new byte[4*256*256];
+			front = new byte[4 * 256 * 256];
+			back = new byte[4 * 256 * 256];
 
-			var rect = new Rectangle((int)(255*SRange[0]), (int)(255*(1 - VRange[1])), (int)(255*(SRange[1] - SRange[0]))+1, (int)(255*(VRange[1] - VRange[0])) + 1);
-			var mixerSheet = new Sheet(new Size(256, 256), false);
-			mixerSheet.Texture.SetData(front, 256, 256);
+			var rect = new Rectangle((int)(255 * SRange[0]), (int)(255 * (1 - VRange[1])), (int)(255 * (SRange[1] - SRange[0])) + 1, (int)(255 * (VRange[1] - VRange[0])) + 1);
+			var mixerSheet = new Sheet(new Size(256, 256));
+			mixerSheet.GetTexture().SetData(front, 256, 256);
 			mixerSprite = new Sprite(mixerSheet, rect, TextureChannel.Alpha);
 		}
 
@@ -87,6 +90,7 @@ namespace OpenRA.Mods.Common.Widgets
 						workerAlive = false;
 						break;
 					}
+
 					update = false;
 
 					// Take a local copy of the hue to generate to avoid tearing
@@ -123,7 +127,7 @@ namespace OpenRA.Mods.Common.Widgets
 			{
 				try
 				{
-					mixerSprite.sheet.Texture.SetData(front, 256, 256);
+					mixerSprite.Sheet.GetTexture().SetData(front, 256, 256);
 				}
 				finally
 				{
@@ -134,16 +138,16 @@ namespace OpenRA.Mods.Common.Widgets
 			Game.Renderer.RgbaSpriteRenderer.DrawSprite(mixerSprite, RenderOrigin, new float2(RenderBounds.Size));
 
 			var sprite = ChromeProvider.GetImage("lobby-bits", "colorpicker");
-			var pos = RenderOrigin + PxFromValue() - new int2(sprite.bounds.Width, sprite.bounds.Height) / 2;
-			WidgetUtils.FillEllipseWithColor(new Rectangle(pos.X + 1, pos.Y + 1, sprite.bounds.Width - 2, sprite.bounds.Height - 2), Color.RGB);
+			var pos = RenderOrigin + PxFromValue() - new int2(sprite.Bounds.Width, sprite.Bounds.Height) / 2;
+			WidgetUtils.FillEllipseWithColor(new Rectangle(pos.X + 1, pos.Y + 1, sprite.Bounds.Width - 2, sprite.Bounds.Height - 2), Color.RGB);
 			Game.Renderer.RgbaSpriteRenderer.DrawSprite(sprite, pos);
 		}
 
 		void SetValueFromPx(int2 xy)
 		{
 			var rb = RenderBounds;
-			var s = SRange[0] + xy.X*(SRange[1] - SRange[0])/rb.Width;
-			var v = SRange[1] - xy.Y*(VRange[1] - VRange[0])/rb.Height;
+			var s = SRange[0] + xy.X * (SRange[1] - SRange[0]) / rb.Width;
+			var v = SRange[1] - xy.Y * (VRange[1] - VRange[0]) / rb.Height;
 			S = s.Clamp(SRange[0], SRange[1]);
 			V = v.Clamp(VRange[0], VRange[1]);
 		}
@@ -151,8 +155,8 @@ namespace OpenRA.Mods.Common.Widgets
 		int2 PxFromValue()
 		{
 			var rb = RenderBounds;
-			var x = RenderBounds.Width*(S - SRange[0])/(SRange[1] - SRange[0]);
-			var y = RenderBounds.Height*(1 - (V - VRange[0])/(VRange[1] - VRange[0]));
+			var x = RenderBounds.Width * (S - SRange[0]) / (SRange[1] - SRange[0]);
+			var y = RenderBounds.Height * (1 - (V - VRange[0]) / (VRange[1] - VRange[0]));
 			return new int2((int)x.Clamp(0, rb.Width), (int)y.Clamp(0, rb.Height));
 		}
 
@@ -167,24 +171,25 @@ namespace OpenRA.Mods.Common.Widgets
 
 			switch (mi.Event)
 			{
-			case MouseInputEvent.Up:
-				isMoving = false;
-				YieldMouseFocus(mi);
-				break;
+				case MouseInputEvent.Up:
+					isMoving = false;
+					YieldMouseFocus(mi);
+					break;
 
-			case MouseInputEvent.Down:
-				isMoving = true;
-				SetValueFromPx(mi.Location - RenderOrigin);
-				OnChange();
-				break;
-
-			case MouseInputEvent.Move:
-				if (isMoving)
-				{
+				case MouseInputEvent.Down:
+					isMoving = true;
 					SetValueFromPx(mi.Location - RenderOrigin);
 					OnChange();
-				}
-				break;
+					break;
+
+				case MouseInputEvent.Move:
+					if (isMoving)
+					{
+						SetValueFromPx(mi.Location - RenderOrigin);
+						OnChange();
+					}
+
+					break;
 			}
 
 			return true;
@@ -204,7 +209,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 		public void Set(HSLColor color)
 		{
-			float h,s,v;
+			float h, s, v;
 			color.ToHSV(out h, out s, out v);
 
 			if (H != h || S != s || V != v)

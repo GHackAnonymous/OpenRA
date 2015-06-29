@@ -21,17 +21,11 @@ RunInitialActivities = function()
 end
 
 MissionAccomplished = function()
-	Media.PlaySpeechNotification(player, "Win")
-	Trigger.AfterDelay(DateTime.Seconds(1), function()
-		Media.PlayMovieFullscreen("montpass.vqa")
-	end)
+	Media.PlaySpeechNotification(player, "MissionAccomplished")
 end
 
 MissionFailed = function()
-	Media.PlaySpeechNotification(player, "Lose")
-	Trigger.AfterDelay(DateTime.Seconds(1), function()
-		Media.PlayMovieFullscreen("frozen.vqa")
-	end)
+	Media.PlaySpeechNotification(player, "MissionFailed")
 end
 
 Tick = function()
@@ -109,11 +103,9 @@ WorldLoaded = function()
 	Trigger.OnPlayerLost(player, MissionFailed)
 	Trigger.OnPlayerWon(player, MissionAccomplished)
 
-	Media.PlayMovieFullscreen("mcv.vqa", function()
-		ConquestObjective = player.AddPrimaryObjective("Secure the area.")
-		ussr.AddPrimaryObjective("Defend your base.")
-		ukraine.AddPrimaryObjective("Destroy the convoy.")
-	end)
+	ConquestObjective = player.AddPrimaryObjective("Secure the area.")
+
+	Trigger.AfterDelay(DateTime.Seconds(1), function() Media.PlaySpeechNotification(allies, "MissionTimerInitialised") end)
 
 	RunInitialActivities()
 

@@ -4,7 +4,8 @@ C1:
 C2:
 	Inherits: ^CivInfantry
 	Selectable:
-		Voice: CivilianFemaleVoice
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C3:
 	Inherits: ^CivInfantry
@@ -12,45 +13,56 @@ C3:
 C4:
 	Inherits: ^CivInfantry
 	Selectable:
-		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C5:
 	Inherits: ^CivInfantry
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C1
 
 C6:
 	Inherits: ^CivInfantry
 	Selectable:
-		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C7:
 	Inherits: ^CivInfantry
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C1
 
 C8:
 	Inherits: ^CivInfantry
 	Selectable:
-		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 C9:
 	Inherits: ^CivInfantry
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C1
 
 C10:
 	Inherits: ^CivInfantry
 	Selectable:
-		Voice: CivilianFemaleVoice
-	RenderInfantry:
+	WithInfantryBody:
+	RenderSprites:
 		Image: C2
+	Voiced:
+		VoiceSet: CivilianFemaleVoice
 
 FCOM:
 	Inherits: ^TechBuilding
@@ -70,6 +82,7 @@ FCOM:
 	Bib:
 	Power:
 		Amount: -200
+	ProvidesPrerequisite@buildingname:
 
 HOSP:
 	Inherits: ^TechBuilding
@@ -89,7 +102,12 @@ HOSP:
 		Range: 3c0
 	Bib:
 		HasMinibib: Yes
-	DeadBuildingState:
+	WithDeathAnimation:
+		DeathSequence: dead
+		UseDeathTypeSuffix: false
+	WithBuildingExplosion:
+		Delay: 1
+	ProvidesPrerequisite@buildingname:
 
 V01:
 	Inherits: ^CivBuilding
@@ -101,7 +119,7 @@ V01:
 	RevealsShroud:
 		Range: 10c0
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V02:
 	Inherits: ^CivBuilding
@@ -109,7 +127,7 @@ V02:
 		Footprint: xx xx
 		Dimensions: 2,2
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V03:
 	Inherits: ^CivBuilding
@@ -117,7 +135,7 @@ V03:
 		Footprint: xx xx
 		Dimensions: 2,2
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V04:
 	Inherits: ^CivBuilding
@@ -125,7 +143,7 @@ V04:
 		Footprint: xx xx
 		Dimensions: 2,2
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V05:
 	Inherits: ^CivBuilding
@@ -133,7 +151,7 @@ V05:
 		Footprint: xx
 		Dimensions: 2,1
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V06:
 	Inherits: ^CivBuilding
@@ -141,7 +159,7 @@ V06:
 		Footprint: xx
 		Dimensions: 2,1
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V07:
 	Inherits: ^CivBuilding
@@ -149,62 +167,62 @@ V07:
 		Footprint: xx
 		Dimensions: 2,1
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V08:
 	Inherits: ^CivBuilding
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V09:
 	Inherits: ^CivBuilding
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V10:
 	Inherits: ^CivBuilding
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V11:
 	Inherits: ^CivBuilding
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V12:
 	Inherits: ^CivBuilding
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V13:
 	Inherits: ^CivBuilding
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V14:
 	Inherits: ^CivField
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V15:
 	Inherits: ^CivField
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V16:
 	Inherits: ^CivField
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V17:
 	Inherits: ^CivField
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V18:
 	Inherits: ^CivField
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		ExcludeTilesets: DESERT, INTERIOR
 
 V19:
 	Inherits: ^CivBuilding
@@ -222,7 +240,10 @@ V19.Husk:
 		ExcludeTilesets: DESERT
 	Tooltip:
 		Name: Husk (Oil Pump)
-	WithFire:
+	RenderSprites:
+	WithSpriteBody:
+		StartSequence: fire-start
+		Sequence: fire-loop
 	-Health:
 	-Selectable:
 	-TargetableBuilding:
@@ -291,7 +312,12 @@ MISS:
 	Tooltip:
 		Name: Technology Center
 	Bib:
-	DeadBuildingState:
+	WithDeathAnimation:
+		DeathSequence: dead
+		UseDeathTypeSuffix: false
+	WithBuildingExplosion:
+		Delay: 1
+	ProvidesPrerequisite@buildingname:
 
 BIO:
 	Inherits: ^TechBuilding
@@ -303,7 +329,12 @@ BIO:
 	EngineerRepairable:
 	Tooltip:
 		Name: Biological Lab
-	DeadBuildingState:
+	WithDeathAnimation:
+		DeathSequence: dead
+		UseDeathTypeSuffix: false
+	WithBuildingExplosion:
+		Delay: 1
+	ProvidesPrerequisite@buildingname:
 
 OILB:
 	Inherits: ^TechBuilding
@@ -591,7 +622,7 @@ RUSHOUSE:
 ASIANHUT:
 	Inherits: ^CivBuilding
 	EditorTilesetFilter:
-		ExcludeTilesets: DESERT
+		RequireTilesets: TEMPERAT
 
 SNOWHUT:
 	Inherits: ^CivBuilding
@@ -602,4 +633,28 @@ SNOWHUT:
 		Dimensions: 1,2
 	RenderBuilding:
 		Scale: 0.7
+
+LHUS:
+	Inherits: ^CivBuilding
+	EditorTilesetFilter:
+		RequireTilesets: TEMPERAT
+	Selectable:
+		Bounds: 24,48
+	Tooltip:
+		Name: Lighthouse
+	Building:
+		Footprint: _ x
+		Dimensions: 1,2
+
+WINDMILL:
+	Inherits: ^CivBuilding
+	EditorTilesetFilter:
+		RequireTilesets: TEMPERAT
+	Selectable:
+		Bounds: 36,36
+	Tooltip:
+		Name: Windmill
+	Building:
+		Footprint: _ x
+		Dimensions: 1,2
 

@@ -12,11 +12,9 @@
 		ROT: 5
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
 	TargetableUnit:
 		TargetTypes: Ground, Vehicle
 	Repairable:
-	Chronoshiftable:
 	Passenger:
 		CargoType: Vehicle
 	HiddenUnderFog:
@@ -34,7 +32,8 @@
 		GenericName: Vehicle
 	UpdatesPlayerStatistics:
 	Cloak:
-		RequiresUpgrade: cloak
+		UpgradeTypes: cloak
+		UpgradeMinEnabledLevel: 1
 		InitialDelay: 15
 		CloakDelay: 90
 		CloakSound: trans1.aud
@@ -47,8 +46,12 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
+	MustBeDestroyed:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Tank:
 	AppearsOnRadar:
@@ -64,11 +67,9 @@
 		ROT: 5
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
 	TargetableUnit:
 		TargetTypes: Ground, Vehicle
 	Repairable:
-	Chronoshiftable:
 	Passenger:
 		CargoType: Vehicle
 	HiddenUnderFog:
@@ -89,7 +90,8 @@
 		GenericName: Tank
 	UpdatesPlayerStatistics:
 	Cloak:
-		RequiresUpgrade: cloak
+		UpgradeTypes: cloak
+		UpgradeMinEnabledLevel: 1
 		InitialDelay: 15
 		CloakDelay: 90
 		CloakSound: trans1.aud
@@ -102,8 +104,12 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
+	MustBeDestroyed:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Helicopter:
 	AppearsOnRadar:
@@ -113,7 +119,6 @@
 		GroundedTargetTypes: Ground
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
 	Helicopter:
 		RepairBuildings: hpad
 		RearmBuildings:
@@ -142,8 +147,14 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
+	WithShadow:
+	Hovers:
+	MustBeDestroyed:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Infantry:
 	AppearsOnRadar:
@@ -169,13 +180,23 @@
 			Beach: 80
 	SelectionDecorations:
 	Selectable:
-		Voice: GenericVoice
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
 	TakeCover:
 		SpeedModifier: 60
-	RenderInfantry:
+		DamageModifiers:
+			Prone50Percent: 50
+		DamageTriggers: TriggerProne
+	RenderSprites:
+	WithInfantryBody:
 	WithDeathAnimation:
+		DeathTypes:
+			DefaultDeath: 1
+			BulletDeath: 2
+			SmallExplosionDeath: 3
+			ExplosionDeath: 4
+			FireDeath: 5
+			TiberiumDeath: 6
 	AttackMove:
 	Passenger:
 		CargoType: Infantry
@@ -201,7 +222,8 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: hospitalheal
+		UpgradeTypes: hospitalheal
+		UpgradeMinEnabledLevel: 1
 	GlobalUpgradable:
 		Upgrades: hospitalheal
 		Prerequisites: hosp
@@ -211,21 +233,25 @@
 		Range: 1
 	ScriptTriggers:
 	DeathSounds@NORMAL:
-		DeathTypes: 1, 2, 3, 4
+		DeathTypes: DefaultDeath, BulletDeath, SmallExplosionDeath, ExplosionDeath
 	DeathSounds@BURNED:
 		DeathSound: Burned
-		DeathTypes: 5
+		DeathTypes: FireDeath
 	DeathSounds@POISONED:
 		DeathSound: Poisoned
-		DeathTypes: 6
+		DeathTypes: TiberiumDeath
 	GainsStatUpgrades:
 	SelfHealing@ELITE:
 		Step: 2
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
+	MustBeDestroyed:
+	Voiced:
+		VoiceSet: GenericVoice
 
 ^CivInfantry:
 	Inherits: ^Infantry
@@ -234,7 +260,6 @@
 	AppearsOnRadar:
 	SelectionDecorations:
 	Selectable:
-		Voice: CivilianMaleVoice
 		Bounds: 12,17,0,-9
 	Valued:
 		Cost: 70
@@ -256,6 +281,8 @@
 	ScaredyCat:
 	Crushable:
 		CrushSound: squish2.aud
+	Voiced:
+		VoiceSet: CivilianMaleVoice
 
 ^DINO:
 	AppearsOnRadar:
@@ -284,13 +311,11 @@
 			BlueTiberium: 70
 			Beach: 80
 	Selectable:
-		Voice: DinoVoice
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
 	HiddenUnderFog:
 	GivesExperience:
-	RenderInfantry:
-		Palette: terrain
+	WithInfantryBody:
 	WithDeathAnimation:
 		UseDeathTypeSuffix: false
 	EditorAppearance:
@@ -305,13 +330,16 @@
 	Huntable:
 	ScriptTriggers:
 	DeathSounds:
+	RenderSprites:
+		Palette: terrain
+	Voiced:
+		VoiceSet: DinoVoice
 
 ^Plane:
 	AppearsOnRadar:
 		UseLocation: yes
 	SelectionDecorations:
 	Selectable:
-		Voice: GenericVoice
 	TargetableUnit:
 		TargetTypes: Air
 	HiddenUnderFog:
@@ -330,8 +358,12 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
+	WithShadow:
+	Voiced:
+		VoiceSet: GenericVoice
 
 ^Ship:
 	AppearsOnRadar:
@@ -341,7 +373,6 @@
 			Water: 100
 	SelectionDecorations:
 	Selectable:
-		Voice: VehicleVoice
 	TargetableUnit:
 		TargetTypes: Ground, Water
 	HiddenUnderFog:
@@ -363,8 +394,11 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	UpgradeManager:
+	Voiced:
+		VoiceSet: VehicleVoice
 
 ^Building:
 	AppearsOnRadar:
@@ -383,10 +417,11 @@
 		BuildSounds: constru2.aud, hvydoor1.aud
 		TerrainTypes: Clear,Road
 	SoundOnDamageTransition:
-		DamagedSound: xplos.aud
-		DestroyedSound: crumble.aud
+		DamagedSounds: xplos.aud
+		DestroyedSounds: crumble.aud
 	RenderBuilding:
 	WithBuildingExplosion:
+		Delay: 1
 	EmitInfantryOnSell:
 		ActorTypes: e6,e1
 	GivesExperience:
@@ -414,10 +449,13 @@
 ^BaseBuilding:
 	Inherits: ^Building
 	MustBeDestroyed:
+		RequiredForShortGame: true
 	RepairableBuilding:
 		RepairPercent: 40
 		RepairStep: 14
-	DeadBuildingState:
+	WithDeathAnimation:
+		DeathSequence: dead
+		UseDeathTypeSuffix: false
 	GivesBuildableArea:
 	EngineerRepairable:
 	Sellable:
@@ -436,6 +474,7 @@
 		GenericVisibility: None
 	FrozenUnderFog:
 		StartsRevealed: true
+	-WithMakeAnimation:
 
 ^CivBuildingHusk:
 	AppearsOnRadar:
@@ -452,7 +491,6 @@
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
 
 ^TechBuilding:
 	Inherits: ^CivBuilding
@@ -478,7 +516,6 @@
 		Palette: terrain
 	EditorAppearance:
 		UseTerrainPalette: true
-	WithMakeAnimation:
 
 ^CivFieldHusk:
 	AppearsOnRadar:
@@ -490,14 +527,12 @@
 	Tooltip:
 		Name: Field (Destroyed)
 		GenericVisibility: None
-	BelowUnits:
 	BodyOrientation:
 	RenderBuilding:
 		Palette: terrain
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
 
 ^Wall:
 	AppearsOnRadar:
@@ -512,7 +547,7 @@
 	Crushable:
 		CrushClasses: wall
 		CrushSound: sandbag2.aud
-	BlocksBullets:
+	BlocksProjectiles:
 	LineBuild:
 		Range: 8
 		NodeTypes: wall
@@ -546,7 +581,6 @@
 		RelativeToTopLeft: yes
 	Health:
 		HP: 500
-	DeadBuildingState:
 	Armor:
 		Type: Wood
 	AutoTargetIgnore:
@@ -554,7 +588,6 @@
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
 
 ^TibTree:
 	Tooltip:
@@ -590,7 +623,8 @@
 	FrozenUnderFog:
 		StartsRevealed: true
 	ScriptTriggers:
-	WithMakeAnimation:
+	EditorTilesetFilter:
+		RequireTilesets: DESERT
 
 ^Husk:
 	Health:
@@ -612,7 +646,6 @@
 		CaptureThreshold: 1.0
 	TransformOnCapture:
 		ForceHealthPercentage: 25
-	BelowUnits:
 	BodyOrientation:
 	Tooltip:
 		GenericName: Destroyed Vehicle
@@ -627,7 +660,6 @@
 		Spins: True
 		Moves: False
 		Explosion: HeliCrash
-	-BelowUnits:
 	-Capturable:
 	-TransformOnCapture:
 	-TargetableUnit:
@@ -638,14 +670,14 @@
 	TargetableBuilding:
 		RequiresForceFire: yes
 		TargetTypes: Ground, Water
-	BelowUnits:
 	Health:
 		HP: 500
 	SoundOnDamageTransition:
-		DamagedSound: xplos.aud
-		DestroyedSound: xplobig4.aud
+		DamagedSounds: xplos.aud
+		DestroyedSounds: xplobig4.aud
 	BodyOrientation:
 	ScriptTriggers:
+
 ^Crate:
 	Tooltip:
 		Name: Crate
@@ -659,5 +691,4 @@
 	Selectable:
 		Selectable: false
 		Bounds: 15,15,-1,-1
-	BodyOrientation:
 

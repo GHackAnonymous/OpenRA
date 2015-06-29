@@ -4,6 +4,7 @@ hard work of many contributors.
 The OpenRA developers are:
     * Chris Forbes (chrisf)
     * Curtis Shmyr (hamb)
+    * Igor Popov (ihptru)
     * Matthias Mailänder (Mailaender)
     * Oliver Brakmann (obrakmann)
     * Paul Chote (pchote)
@@ -26,30 +27,37 @@ Also thanks to:
     * Andrew Perkins
     * Andrew Riedi
     * Andreas Beck (baxtor)
+    * Ang Soon Li (asl97)
+    * Arik Lirette (Angusm3)
     * Barnaby Smith (mvi)
     * Bellator
     * Braxton Williams (Buddytex)
     * Bugra Cuhadaroglu (BugraC)
     * Christer Ulfsparre (Holloweye)
+    * Chris Grant (Unit158)
     * Cody Brittain (Generalcamo)
     * D2k Sardaukar
     * Daniel Derejvanik (Harisson)
     * Danny Keary (Dan9550)
+    * David Jiménez (Rydra)
+    * David Russell (DavidARussell)
     * DeadlySurprise
     * Erasmus Schroder (rasco)
     * Eric Bajumpaa (SteelPhase)
     * Fahrradkette
     * Frank Razenberg (zzattack)
     * Gareth Needham (Ripley`)
+    * Glen Anderson (GlenAnderson)
+    * Glenn Martin Jensen (Baxxster)
     * Gordon Martin (Happy0)
     * Guido Lipke (LipkeGu)
     * Huw Pascoe
     * Ian T. Jacobsen (Smilex)
-    * Igor Popov (ihptru)
     * Imago
     * Iran
     * Jacob Dufault (jacobdufault)
     * James Dunne (jsd)
+    * Jan-Willem Buurlage (jwbuurlage)
     * Jason (atlimit8)
     * Jeff Harris (jeff_1amstudios)
     * Jes
@@ -66,16 +74,19 @@ Also thanks to:
     * Matija Hustic (matija-hustic)
     * Matthew Gatland (mgatland)
     * Matthew Uzzell (MUzzell)
+    * Matthijs Benschop (Nerdie)
     * Max621
     * Max Ugrumov (katzsmile)
     * Michael Sztolcman (s1w_)
     * Mustafa Alperen Seki (MustaphaTR)
     * Neil Shivkar (havok13888)
+    * Nooze
     * Nukem
     * Okunev Yu Dmitry (xaionaro)
     * Olaf van der Spek
     * Paolo Chiodi (paolochiodi)
     * Paul Dovydaitis (pdovy)
+    * Pavel Penev (penev92)
     * Pavlos Touboulidis (pav)
     * Pizzaoverhead
     * Psydev
@@ -97,6 +108,9 @@ Also thanks to:
     * Tristan Mühlbacher (MicroBit)
     * Vladimir Komarov (VrKomarov)
     * Wuschel
+
+Using GNU FreeFont distributed under the GNU GPL
+terms.
 
 Using Simple DirectMedia Layer distributed under
 the terms of the zlib license.

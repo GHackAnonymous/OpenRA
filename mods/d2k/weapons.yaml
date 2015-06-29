@@ -11,32 +11,34 @@ LMG:
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 15
-		DeathType: 4
 		Versus:
 			Wood: 25
 			Light: 40
 			Heavy: 10
 			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: piffs
 
 Bazooka:
 	ReloadDelay: 50
 	Range: 5c0
+	MinRange: 0c512
 	Report: BAZOOK1.WAV
 	ValidTargets: Ground
 	Projectile: Missile
 		Speed: 160
 		Arm: 2
-		ContrailLength: 10
 		Inaccuracy: 96
 		Image: RPG
-		ROT: 5
+		RateOfTurn: 5
+		Trail: bazooka_trail
+		TrailPalette: effect75alpha
+		TrailInterval: 1
 		RangeLimit: 35
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 50
-		DeathType: 3
 		ValidTargets: Ground
 		Versus:
 			None: 10
@@ -44,6 +46,7 @@ Bazooka:
 			Light: 60
 			Heavy: 90
 			Concrete: 40
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -63,19 +66,19 @@ Sniper:
 	Warhead@1Dam: SpreadDamage
 		Spread: 32
 		Damage: 60
-		DeathType: 4
 		Versus:
 			None: 100
 			Wood: 0
 			Light: 1
 			Heavy: 0
 			Concrete: 0
+		DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 
 Vulcan:
 	ReloadDelay: 30
 	Range: 5c768
 	Report: VULCAN.AUD
-	ValidTargets: Ground, Air
+	ValidTargets: Ground
 	Projectile: Bullet
 		Speed: 1c256
 		ContrailLength: 3
@@ -85,13 +88,13 @@ Vulcan:
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 30
-		DeathType: 4
-		ValidTargets: Ground, Air
+		ValidTargets: Ground
 		Versus:
 			Wood: 0
 			Light: 60
 			Heavy: 10
 			Concrete: 0
+		DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: piffs
 
@@ -103,7 +106,7 @@ Slung:
 	ValidTargets: Ground
 	Projectile: Bullet
 		Speed: 320
-		High: true
+		Blockable: false
 		Shadow: yes
 		Angle: 88
 		Inaccuracy: 384
@@ -111,7 +114,6 @@ Slung:
 	Warhead@1Dam: SpreadDamage
 		Spread: 192
 		Damage: 30
-		DeathType: 3
 		ValidTargets: Ground
 		Versus:
 			None: 0
@@ -119,6 +121,7 @@ Slung:
 			Light: 40
 			Heavy: 90
 			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: small_explosion
 		ImpactSound: EXPLLG5.WAV
@@ -138,12 +141,12 @@ HMG:
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 30
-		DeathType: 4
 		Versus:
 			Wood: 15
 			Light: 45
 			Heavy: 20
 			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: piffs
 
@@ -162,12 +165,12 @@ HMGo:
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 40
-		DeathType: 4
 		Versus:
 			Wood: 15
 			Light: 45
 			Heavy: 25
 			Concrete: 20
+		DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: piffs
 
@@ -182,13 +185,15 @@ QuadRockets:
 		Arm: 0
 		Inaccuracy: 96
 		Image: RPG
-		ROT: 10
+		RateOfTurn: 10
+		Trail: bazooka_trail2
+		TrailPalette: effect75alpha
+		TrailInterval: 1
 		Speed: 256
 		RangeLimit: 40
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 25
-		DeathType: 3
 		ValidTargets: Ground, Air
 		Versus:
 			None: 35
@@ -196,6 +201,7 @@ QuadRockets:
 			Light: 100
 			Heavy: 100
 			Concrete: 35
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -208,19 +214,19 @@ TurretGun:
 	Report: TURRET1.WAV
 	Projectile: Bullet
 		Speed: 704
-		High: yes
+		Blockable: false
 		Shadow: no
 		Inaccuracy: 288
 		Image: 120mm
 	Warhead@1Dam: SpreadDamage
 		Spread: 256
 		Damage: 55
-		DeathType: 3
 		Versus:
 			None: 50
 			Wood: 75
 			Light: 100
 			Concrete: 65
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -236,19 +242,17 @@ TowerMissile:
 	Burst: 2
 	BurstDelay: 15
 	Projectile: Bullet
-		Arm: 0
-		High: yes
+		Blockable: false
 		Shadow: yes
 		Inaccuracy: 384
 		Image: MISSILE2
-		ROT: 10
-		Speed: 256
-		RangeLimit: 50
-		Angle: 110
+		Trail: large_trail
+		TrailInterval: 1
+		Speed: 298
+		Angle: 90
 	Warhead@1Dam: SpreadDamage
 		Spread: 384
 		Damage: 50
-		DeathType: 1
 		ValidTargets: Ground, Air
 		Versus:
 			None: 50
@@ -256,6 +260,7 @@ TowerMissile:
 			Light: 100
 			Heavy: 50
 			Concrete: 35
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -273,12 +278,12 @@ TowerMissile:
 	Warhead@1Dam: SpreadDamage
 		Spread: 256
 		Damage: 40
-		DeathType: 3
 		Versus:
 			None: 50
 			Wood: 50
 			Light: 100
 			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -296,12 +301,12 @@ TowerMissile:
 	Warhead@1Dam: SpreadDamage
 		Spread: 256
 		Damage: 40
-		DeathType: 3
 		Versus:
 			None: 50
 			Wood: 50
 			Light: 100
 			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -318,13 +323,13 @@ DevBullet:
 	Warhead@1Dam: SpreadDamage
 		Spread: 256
 		Damage: 100
-		DeathType: 3
 		Versus:
 			None: 100
 			Wood: 50
 			Light: 100
 			Heavy: 100
 			Concrete: 80
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -339,19 +344,17 @@ DevBullet:
 	Report: MISSLE1.WAV
 	ValidTargets: Ground
 	Projectile: Bullet
-		Speed: 358
-		Arm: 5
-		High: yes
+		Speed: 320
+		Blockable: false
 		Shadow: yes
 		Inaccuracy: 1c416
-		Angle: 110
+		Angle: 90
 		Image: MISSILE2
-		ROT: 5
-		ContrailLength: 5
+		Trail: large_trail
+		TrailInterval: 1
 	Warhead@1Dam: SpreadDamage
 		Spread: 384
 		Damage: 60
-		DeathType: 3
 		ValidTargets: Ground
 		Versus:
 			None: 20
@@ -359,26 +362,29 @@ DevBullet:
 			Light: 100
 			Heavy: 50
 			Concrete: 80
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
 		Explosion: mini_explosion
 		ImpactSound: EXPLMD3.WAV
 
-FakeMissile:
+NerveGasMissile:
 	ReloadDelay: 120
 	Range: 8c0
 	Burst: 1
 	Report: MISSLE1.WAV
 	Projectile: Bullet
-		Speed: 448
-		High: true
+		Speed: 384
+		Blockable: false
 		Shadow: yes
-		Angle: 110
+		Angle: 90
 		Inaccuracy: 1c96
 		Image: MISSILE
-		ContrailLength: 15
-		ContrailUsePlayerColor: True
+		Trail: deviator_trail
+		TrailPalette: deviatorgas
+		TrailUsePlayerPalette: true
+		TrailInterval: 1
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 10
@@ -386,11 +392,17 @@ FakeMissile:
 			None: 0
 			Wood: 0
 			Concrete: 0
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
 		Explosion: deviator
+		ExplosionPalette: deviatorgas
+		UsePlayerPalette: true
 		ImpactSound: EXPLSML2.WAV
+	Warhead@4OwnerChange: ChangeOwner
+		Range: 1c0
+		Duration: 750
 
 155mm:
 	ReloadDelay: 75
@@ -399,7 +411,7 @@ FakeMissile:
 	Report: MORTAR1.WAV
 	Projectile: Bullet
 		Speed: 256
-		High: true
+		Blockable: false
 		Shadow: yes
 		Angle: 62
 		Inaccuracy: 1c256
@@ -408,13 +420,13 @@ FakeMissile:
 	Warhead@1Dam: SpreadDamage
 		Spread: 384
 		Damage: 100
-		DeathType: 1
 		Versus:
 			None: 100
 			Wood: 80
 			Light: 75
 			Heavy: 50
 			Concrete: 100
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater, RockCrater
 	Warhead@3Eff: CreateEffect
@@ -433,12 +445,12 @@ Sound:
 	Warhead@1Dam: SpreadDamage
 		Spread: 32
 		Damage: 150
-		DeathType: 2
 		Versus:
 			None: 60
 			Wood: 85
 			Light: 80
 			Concrete: 75
+		DamageTypes: Prone50Percent, TriggerProne, SoundDeath
 
 ChainGun:
 	ReloadDelay: 10
@@ -447,16 +459,16 @@ ChainGun:
 	Report: 20MMGUN1.WAV
 	Projectile: Bullet
 		Speed: 1c256
-		High: true
+		Blockable: false
 	Warhead@1Dam: SpreadDamage
 		Spread: 96
 		Damage: 20
-		DeathType: 4
 		Versus:
 			Wood: 50
 			Light: 60
 			Heavy: 25
 			Concrete: 25
+		DamageTypes: Prone50Percent, TriggerProne, BulletDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: piffs
 
@@ -469,7 +481,6 @@ Heal:
 	Warhead@1Dam: SpreadDamage
 		Spread: 160
 		Damage: -50
-		DeathType: 4
 		Versus:
 			Wood: 0
 			Light: 0
@@ -479,7 +490,6 @@ Heal:
 WormJaw:
 	ReloadDelay: 10
 	Range: 3c0
-	Report: WORM.WAV
 	Warhead@1Dam: SpreadDamage
 		Spread: 160
 		Damage: 100
@@ -497,12 +507,12 @@ ParaBomb:
 		Spread: 192
 		Damage: 50
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
-		DeathType: 3
 		Versus:
 			None: 30
 			Wood: 75
 			Light: 75
 			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -518,13 +528,13 @@ Napalm:
 		Spread: 640
 		Damage: 30
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
-		DeathType: 3
 		Versus:
 			None: 20
 			Wood: 100
 			Light: 30
 			Heavy: 20
 			Concrete: 70
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: Crater
 	Warhead@3Eff: CreateEffect
@@ -534,11 +544,13 @@ Napalm:
 Crush:
 	Warhead@1Dam: SpreadDamage
 		Damage: 100
+		DamageTypes: ExplosionDeath
 	Warhead@2Eff: CreateEffect
 		ImpactSound: CRUSH1.WAV
 
 Demolish:
 	Warhead@1Dam: SpreadDamage
+		DamageTypes: ExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: building
 		ImpactSound: EXPLLG2.WAV
@@ -548,13 +560,13 @@ Atomic:
 		Spread: 2c0
 		Damage: 180
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
-		DeathType: 2
 		Versus:
 			None: 100
 			Wood: 100
 			Light: 100
 			Heavy: 50
 			Concrete: 50
+		DamageTypes: Prone50Percent, TriggerProne, SoundDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: nuke
 		ImpactSound: EXPLLG2.WAV
@@ -564,7 +576,6 @@ CrateNuke:
 		Spread: 1c576
 		Damage: 80
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
-		DeathType: 2
 		Versus:
 			None: 20
 			Wood: 75
@@ -572,6 +583,7 @@ CrateNuke:
 			Heavy: 25
 			Concrete: 50
 		AffectsParent: true
+		DamageTypes: Prone50Percent, TriggerProne, SoundDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: nuke
 		ImpactSound: EXPLLG2.WAV
@@ -581,13 +593,13 @@ CrateExplosion:
 		Spread: 320
 		Damage: 40
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
-		DeathType: 3
 		Versus:
 			None: 90
 			Wood: 75
 			Light: 60
 			Heavy: 25
 		AffectsParent: true
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: building
 		ImpactSound: EXPLSML4.WAV
@@ -597,12 +609,12 @@ UnitExplode:
 		Spread: 320
 		Damage: 50
 		Falloff: 1000, 368, 135, 50, 18, 7, 0
-		DeathType: 3
 		Versus:
 			None: 90
 			Wood: 75
 			Light: 60
 			Heavy: 25
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: building
 		ImpactSound: EXPLMD1.WAV
@@ -611,12 +623,12 @@ UnitExplodeSmall:
 	Warhead@1Dam: SpreadDamage
 		Spread: 320
 		Damage: 60
-		DeathType: 3
 		Versus:
 			None: 90
 			Wood: 75
 			Light: 60
 			Heavy: 25
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: self_destruct
 		ImpactSound: EXPLHG1.WAV, EXPLLG1.WAV, EXPLMD1.WAV, EXPLSML4.WAV
@@ -625,12 +637,12 @@ UnitExplodeTiny:
 	Warhead@1Dam: SpreadDamage
 		Spread: 224
 		Damage: 30
-		DeathType: 3
 		Versus:
 			None: 90
 			Wood: 75
 			Light: 60
 			Heavy: 25
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: med_explosion
 		ImpactSound: EXPLMD2.WAV, EXPLSML1.WAV, EXPLSML2.WAV, EXPLSML3.WAV
@@ -639,12 +651,12 @@ UnitExplodeScale:
 	Warhead@1Dam: SpreadDamage
 		Spread: 416
 		Damage: 90
-		DeathType: 3
 		Versus:
 			None: 90
 			Wood: 75
 			Light: 60
 			Heavy: 25
+		DamageTypes: Prone50Percent, TriggerProne, SmallExplosionDeath
 	Warhead@2Eff: CreateEffect
 		Explosion: building
 		ImpactSound: EXPLLG2.WAV, EXPLLG3.WAV, EXPLLG5.WAV
@@ -655,19 +667,19 @@ Grenade:
 	Report:
 	Projectile: Bullet
 		Speed: 204
-		High: true
+		Blockable: false
 		Angle: 62
 		Inaccuracy: 416
 		Image: BOMBS
 	Warhead@1Dam: SpreadDamage
 		Spread: 192
 		Damage: 60
-		DeathType: 1
 		Versus:
 			None: 50
 			Wood: 100
 			Light: 25
 			Heavy: 5
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater
 	Warhead@3Eff: CreateEffect
@@ -685,19 +697,19 @@ Shrapnel:
 	Report:
 	Projectile: Bullet
 		Speed: 50, 125
-		High: true
+		Blockable: false
 		Angle: 91, 264
 		Inaccuracy: 416
 		Image: bombs
 	Warhead@1Dam: SpreadDamage
 		Spread: 192
 		Damage: 60
-		DeathType: 1
 		Versus:
 			None: 50
 			Wood: 100
 			Light: 25
 			Heavy: 5
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 	Warhead@2Smu: LeaveSmudge
 		SmudgeType: SandCrater
 	Warhead@3Eff: CreateEffect
@@ -708,12 +720,12 @@ SpiceExplosion:
 	Warhead@1Dam: SpreadDamage
 		Spread: 9
 		Damage: 10
-		DeathType: 1
 		Versus:
 			None: 90
 			Wood: 75
 			Light: 60
 			Heavy: 25
+		DamageTypes: Prone50Percent, TriggerProne, ExplosionDeath
 	Warhead@2Res: CreateResource
 		AddsResourceType: Spice
 		Size: 2,2

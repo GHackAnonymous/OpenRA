@@ -1,4 +1,4 @@
-CRATE:
+crate:
 	Tooltip:
 		Name: Crate
 	Crate:
@@ -16,8 +16,17 @@ CRATE:
 		Amount: 1500
 		SelectionShares: 25
 		UseCashTick: yes
+	ExplodeCrateAction@1:
+		Weapon: CrateExplosion
+		SelectionShares: 5
+	HideMapCrateAction:
+		SelectionShares: 5
+		Effect: hide-map
 	LevelUpCrateAction:
 		SelectionShares: 40
+	RevealMapCrateAction:
+		SelectionShares: 2
+		Effect: reveal-map
 	GiveUnitCrateAction@Trike:
 		SelectionShares: 20
 		Units: trike
@@ -89,31 +98,21 @@ CRATE:
 		Units: deviatortank
 		ValidRaces: ordos
 		Prerequisites: techlevel.high, Research
-	GiveMcvCrateAction@Atreides:
+	GiveMcvCrateAction:
 		SelectionShares: 0
 		NoBaseSelectionShares: 9001
-		Units: mcva
-		ValidRaces: atreides
-	GiveMcvCrateAction@Harkonnen:
-		SelectionShares: 0
-		NoBaseSelectionShares: 9001
-		Units: mcvh
-		ValidRaces: harkonnen
-	GiveMcvCrateAction@Ordos:
-		SelectionShares: 0
-		NoBaseSelectionShares: 9001
-		Units: mcvo
-		ValidRaces: ordos
+		Units: mcv
+	GrantUpgradeCrateAction@cloak:
+		SelectionShares: 5
+		Effect: cloak
+		Upgrades: cloak
 	RenderSprites:
 		Palette: effect
 	WithCrateBody:
 	Selectable:
 		Selectable: false
 		Bounds: 15,15,-1,-1
-	ProximityCaptor:
-		Types: Crate
 	Passenger:
-	BodyOrientation:
 
 mpspawn:
 	Immobile:
@@ -127,28 +126,15 @@ waypoint:
 	RenderEditorOnly:
 	BodyOrientation:
 
-SPICEBLOOM:
-	RenderBuilding:
-	Building:
-		Footprint: x
-		Dimensions: 1,1
-	AppearsOnRadar:
-	EditorAppearance:
-		RelativeToTopLeft: yes
-	ProximityCaptor:
-		Types: Tree
-	Tooltip:
-		Name: Spice Bloom
-	SeedsResource:
-		ResourceType: Spice
-		Interval: 75
-	WithActiveAnimation:
-	RadarColorFromTerrain:
-		Terrain: Spice
-	BodyOrientation:
-	WithMakeAnimation:
+^carryall.colorpicker:
+	Inherits: carryall
+	RenderUnit:
+		Image: carryall
+		Palette: colorpicker
+	Helicopter:
+		InitialFacing: 104
 
-CAMERA:
+camera:
 	Immobile:
 		OccupiesSpace: false
 	Health:
@@ -157,3 +143,97 @@ CAMERA:
 		Range: 8c0
 	BodyOrientation:
 
+wormspawner:
+	Immobile:
+		OccupiesSpace: false
+	RenderEditorOnly:
+	BodyOrientation:
+	WormSpawner:
+
+upgrade.conyard:
+	Tooltip:
+		Name: Construction Yard Upgrade
+		Description: Unlocks new construction options
+	Buildable:
+		BuildPaletteOrder: 50
+		Queue: Upgrade
+		BuildLimit: 1
+	Valued:
+		Cost: 1000
+	RenderSprites:
+		Image: conyard.harkonnen
+		RaceImages:
+			atreides: conyard.atreides
+			ordos: conyard.ordos
+			corrino: conyard.corrino
+	ProvidesPrerequisite@upgradename:
+
+upgrade.barracks:
+	Tooltip:
+		Name: Barracks Upgrade
+		Description: Unlocks additional infantry
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: barracks
+		Queue: Upgrade
+		BuildLimit: 1
+	Valued:
+		Cost: 500
+	RenderSprites:
+		Image: barracks.harkonnen
+		RaceImages:
+			atreides: barracks.atreides
+			ordos: barracks.ordos
+	ProvidesPrerequisite@upgradename:
+
+upgrade.light:
+	Tooltip:
+		Name: Light Factory Upgrade
+		Description: Unlocks additional light units
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: light
+		Queue: Upgrade
+		BuildLimit: 1
+	Valued:
+		Cost: 400
+	RenderSprites:
+		Image: light.harkonnen
+		RaceImages:
+			atreides: light.atreides
+			ordos: light.ordos
+	ProvidesPrerequisite@upgradename:
+
+upgrade.heavy:
+	Tooltip:
+		Name: Heavy Factory Upgrade
+		Description: Unlocks advanced technology and heavy weapons
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: heavy
+		Queue: Upgrade
+		BuildLimit: 1
+	Valued:
+		Cost: 800
+	RenderSprites:
+		Image: heavy.harkonnen
+		RaceImages:
+			atreides: heavy.atreides
+			ordos: heavy.ordos
+			corrino: heavy.corrino
+	ProvidesPrerequisite@upgradename:
+
+upgrade.hightech:
+	Tooltip:
+		Name: High Tech Factory Upgrade
+		Description: Unlocks the Air Strike superweapon
+	Buildable:
+		BuildPaletteOrder: 50
+		Prerequisites: ~hightech.atreides, ~techlevel.superweapons
+		Queue: Upgrade
+		BuildLimit: 1
+	Valued:
+		Cost: 1500
+	RenderSprites:
+		Image: hightech.atreides
+	ProvidesPrerequisite@upgradename:

@@ -9,11 +9,21 @@ BeachheadTrigger =
 	CPos.New(137, 104), CPos.New(137, 105), CPos.New(137, 106), CPos.New(136, 106), CPos.New(136, 107)
 }
 
-BaseRaidInterval = DateTime.Minutes(3)
-BaseFrontAttackInterval = DateTime.Minutes(3) + DateTime.Seconds(30)
-BaseRearAttackInterval = DateTime.Minutes(8)
-UBoatPatrolDelay = DateTime.Minutes(2) + DateTime.Seconds(30)
-BaseFrontAttackWpts = { PatrolWpt1.Location, BaseRaidWpt1.Location }
+Difficulty = Map.Difficulty
+
+if Difficulty == "Medium" then
+	BaseRaidInterval = DateTime.Minutes(3)
+	BaseFrontAttackInterval = DateTime.Minutes(3) + DateTime.Seconds(30)
+	BaseRearAttackInterval = DateTime.Minutes(8)
+	UBoatPatrolDelay = DateTime.Minutes(2) + DateTime.Seconds(30)
+	BaseFrontAttackWpts = { PatrolWpt1.Location, BaseRaidWpt1.Location }
+else
+	BaseRaidInterval = DateTime.Minutes(2)
+	BaseFrontAttackInterval = DateTime.Minutes(2) + DateTime.Seconds(30)
+	BaseRearAttackInterval = DateTime.Minutes(5)
+	UBoatPatrolDelay = DateTime.Minutes(2)
+	BaseFrontAttackWpts = { PatrolWpt1.Location }
+end
 
 Village = { FarmHouse1, FarmHouse2, FarmHouse3, FarmHouse4, FarmHouse5, FarmHouse6, FarmHouse7, FarmHouse8, FarmHouse9, Church }
 VillageRaidInterval = DateTime.Minutes(3)
@@ -44,19 +54,16 @@ GroundPatrolUnits =
 	{ "apc", "apc", "ftrk" },
 	{ "3tnk", "3tnk" }
 }
-Paratroopers = { "e1", "e1", "e1", "e3", "e3" }
 
 ParadropSovietUnits = function()
-	local start = BaseRaidEntrypoint.CenterPosition + WVec.New(0, 0, Actor.CruiseAltitude("badr"))
-	local transport = Actor.Create("badr", true, { CenterPosition = start, Owner = soviets, Facing = (Map.CenterOfCell(MCVDeployLocation.Location) - start).Facing })
+	local powerproxy = Actor.Create("powerproxy.paratroopers", false, { Owner = soviets })
+	local units = powerproxy.SendParatroopers(MCVDeployLocation.CenterPosition, false, 256 - 53)
 
-	Utils.Do(Paratroopers, function(type)
-		local a = Actor.Create(type, false, { Owner = soviets })
-		transport.LoadPassenger(a)
-		Trigger.OnIdle(a, function(b) b.Hunt() end)
+	Utils.Do(units, function(a)
+		Trigger.OnIdle(a, a.Hunt)
 	end)
 
-	transport.Paradrop(MCVDeployLocation.Location)
+	powerproxy.Destroy()
 end
 
 AirRaid = function(planeTypes, ingress, egress, target)
@@ -191,12 +198,14 @@ SetupWorld = function()
 end
 
 Tick = function()
-	if soviets.Resources > soviets.ResourceCapacity * 0.75 then
-		soviets.Resources = soviets.Resources - ((soviets.ResourceCapacity * 0.01) / 25)
-	end
+	if DateTime.GameTime > 2 then
+		if soviets.Resources > soviets.ResourceCapacity * 0.75 then
+			soviets.Resources = soviets.Resources - ((soviets.ResourceCapacity * 0.01) / 25)
+		end
 
-	if player.HasNoRequiredUnits() then
-		player.MarkFailedObjective(villageObjective)
+		if player.HasNoRequiredUnits() then
+			player.MarkFailedObjective(villageObjective)
+		end
 	end
 end
 
@@ -215,16 +224,16 @@ WorldLoaded = function()
 	end)
 
 	Trigger.OnPlayerWon(player, function()
-		Media.PlaySpeechNotification(player, "Win")
+		Media.PlaySpeechNotification(player, "MissionAccomplished")
 	end)
 
 	Trigger.OnPlayerLost(player, function()
-		Media.PlaySpeechNotification(player, "Lose")
+		Media.PlaySpeechNotification(player, "MissionFailed")
 	end)
 
 	sovietObjective = soviets.AddPrimaryObjective("Destroy the village.")
 	villageObjective = player.AddPrimaryObjective("Save the village.")
-	beachheadObjective = player.AddSecondaryObjective("Get your MCV to the main island.")
+	beachheadObjective = player.AddPrimaryObjective("Get your MCV to the main island.")
 
 	beachheadTrigger = false
 	Trigger.OnExitedFootprint(BeachheadTrigger, function(a, id)
@@ -234,6 +243,17 @@ WorldLoaded = function()
 			player.MarkCompletedObjective(beachheadObjective)
 
 			captureObjective = player.AddPrimaryObjective("Locate and capture the enemy's Air Force HQ.")
+
+			if AirForceHQ.IsDead then
+				player.MarkFailedObjective(captureObjective)
+				return
+			end
+			if AirForceHQ.Owner == player then
+				player.MarkCompletedObjective(captureObjective)
+				player.MarkCompletedObjective(villageObjective)
+				return
+			end
+
 			Trigger.OnCapture(AirForceHQ, function()
 				Trigger.AfterDelay(DateTime.Seconds(3), function()
 					player.MarkCompletedObjective(captureObjective)
@@ -241,6 +261,8 @@ WorldLoaded = function()
 				end)
 			end)
 			Trigger.OnKilled(AirForceHQ, function() player.MarkFailedObjective(captureObjective) end)
+
+			Actor.Create("mainland", true, { Owner = player })
 
 			Trigger.AfterDelay(BaseFrontAttackInterval, function()
 				Build(BaseFrontAttackUnits, BaseFrontAttack)

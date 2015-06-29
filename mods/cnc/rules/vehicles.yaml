@@ -25,9 +25,10 @@ MCV:
 		Offset: -1,-1
 		Facing: 108
 		TransformSounds: constru2.aud, hvydoor1.aud
-		NoTransformSounds: deploy1.aud
+		NoTransformNotification: BuildingCannotPlaceAudio
 	RenderUnit:
 	MustBeDestroyed:
+		RequiredForShortGame: true
 	BaseBuilding:
 	LeavesHusk:
 		HuskActor: MCV.Husk
@@ -533,7 +534,7 @@ STNK:
 	RevealsShroud:
 		Range: 7c0
 	Cloak:
-		-RequiresUpgrade:
+		-UpgradeTypes:
 		InitialDelay: 90
 		CloakDelay: 90
 		CloakSound: trans1.aud
@@ -548,6 +549,7 @@ STNK:
 	TargetableUnit:
 	LeavesHusk:
 		HuskActor: STNK.Husk
+	-MustBeDestroyed:
 
 MHQ:
 	Inherits: ^Vehicle

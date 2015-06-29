@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -23,20 +23,32 @@ namespace OpenRA.GameRules
 
 		[Desc("What types of targets are unaffected.", "Overrules ValidTargets.")]
 		public readonly string[] InvalidTargets = { };
-		
+
 		[Desc("What diplomatic stances are affected.")]
 		public readonly Stance ValidStances = Stance.Ally | Stance.Neutral | Stance.Enemy;
-		
+
 		[Desc("Can this warhead affect the actor that fired it.")]
 		public readonly bool AffectsParent = false;
 
-		[Desc("Delay in ticks before applying the warhead effect.","0 = instant (old model).")]
+		[Desc("Delay in ticks before applying the warhead effect.", "0 = instant (old model).")]
 		public readonly int Delay = 0;
 
-		///<summary>Applies the warhead's effect against the target.</summary>
+		HashSet<string> validTargetSet;
+		HashSet<string> invalidTargetSet;
+
+		public bool IsValidTarget(IEnumerable<string> targetTypes)
+		{
+			if (validTargetSet == null)
+				validTargetSet = new HashSet<string>(ValidTargets);
+			if (invalidTargetSet == null)
+				invalidTargetSet = new HashSet<string>(InvalidTargets);
+			return validTargetSet.Overlaps(targetTypes) && !invalidTargetSet.Overlaps(targetTypes);
+		}
+
+		/// <summary>Applies the warhead's effect against the target.</summary>
 		public abstract void DoImpact(Target target, Actor firedBy, IEnumerable<int> damageModifiers);
 
-		///<summary>Checks if the warhead is valid against (can do something to) the target.</summary>
+		/// <summary>Checks if the warhead is valid against (can do something to) the target.</summary>
 		public bool IsValidAgainst(Target target, World world, Actor firedBy)
 		{
 			if (target.Type == TargetType.Actor)
@@ -52,8 +64,7 @@ namespace OpenRA.GameRules
 					return false;
 
 				var cellInfo = world.Map.GetTerrainInfo(cell);
-				if (!ValidTargets.Intersect(cellInfo.TargetTypes).Any()
-					|| InvalidTargets.Intersect(cellInfo.TargetTypes).Any())
+				if (!IsValidTarget(cellInfo.TargetTypes))
 					return false;
 
 				return true;
@@ -66,7 +77,7 @@ namespace OpenRA.GameRules
 		// assumption has been removed from the yaml definitions
 		public virtual bool CanTargetActor(ActorInfo victim, Actor firedBy) { return false; }
 
-		///<summary>Checks if the warhead is valid against (can do something to) the actor.</summary>
+		/// <summary>Checks if the warhead is valid against (can do something to) the actor.</summary>
 		public bool IsValidAgainst(Actor victim, Actor firedBy)
 		{
 			if (!CanTargetActor(victim.Info, firedBy))
@@ -81,14 +92,13 @@ namespace OpenRA.GameRules
 
 			// A target type is valid if it is in the valid targets list, and not in the invalid targets list.
 			var targetable = victim.TraitOrDefault<ITargetable>();
-			if (targetable == null || !ValidTargets.Intersect(targetable.TargetTypes).Any()
-				|| InvalidTargets.Intersect(targetable.TargetTypes).Any())
+			if (targetable == null || !IsValidTarget(targetable.TargetTypes))
 				return false;
 
 			return true;
 		}
 
-		///<summary>Checks if the warhead is valid against (can do something to) the frozen actor.</summary>
+		/// <summary>Checks if the warhead is valid against (can do something to) the frozen actor.</summary>
 		public bool IsValidAgainst(FrozenActor victim, Actor firedBy)
 		{
 			if (!CanTargetActor(victim.Info, firedBy))
@@ -101,8 +111,7 @@ namespace OpenRA.GameRules
 
 			// A target type is valid if it is in the valid targets list, and not in the invalid targets list.
 			var targetable = victim.Info.Traits.GetOrDefault<ITargetableInfo>();
-			if (targetable == null || !ValidTargets.Intersect(targetable.GetTargetTypes()).Any()
-				|| InvalidTargets.Intersect(targetable.GetTargetTypes()).Any())
+			if (targetable == null || !IsValidTarget(targetable.GetTargetTypes()))
 				return false;
 
 			return true;

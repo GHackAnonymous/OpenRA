@@ -308,9 +308,10 @@ MCV:
 		Offset: -1,-1
 		Facing: 96
 		TransformSounds: placbldg.aud, build5.aud
-		NoTransformSounds: nodeply1.aud
+		NoTransformNotification: BuildingCannotPlaceAudio
 	RenderUnit:
 	MustBeDestroyed:
+		RequiredForShortGame: true
 	BaseBuilding:
 	LeavesHusk:
 		HuskActor: MCV.Husk
@@ -418,8 +419,9 @@ MNLY.AP:
 	Minelayer:
 		Mine: MINP
 	MineImmune:
-	LimitedAmmo:
-		Ammo: 3
+	AmmoPool:
+		Ammo: 5
+		RearmSound: minelay1.aud
 	DetectCloaked:
 		Range: 5
 		CloakTypes: Mine
@@ -452,8 +454,9 @@ MNLY.AT:
 	Minelayer:
 		Mine: MINV
 	MineImmune:
-	LimitedAmmo:
-		Ammo: 3
+	AmmoPool:
+		Ammo: 5
+		RearmSound: minelay1.aud
 	DetectCloaked:
 		Range: 5
 		CloakTypes: Mine
@@ -494,7 +497,7 @@ MGG:
 	Buildable:
 		Queue: Vehicle
 		BuildPaletteOrder: 160
-		Prerequisites: atek, ~vehicles.allies, ~techlevel.unrestricted
+		Prerequisites: atek, ~vehicles.france, ~techlevel.unrestricted
 	Valued:
 		Cost: 1200
 	Tooltip:
@@ -561,7 +564,7 @@ TTNK:
 	Buildable:
 		Queue: Vehicle
 		BuildPaletteOrder: 180
-		Prerequisites: tsla, stek, ~vehicles.soviet, ~techlevel.unrestricted
+		Prerequisites: tsla, stek, ~vehicles.russia, ~techlevel.unrestricted
 	Valued:
 		Cost: 1350
 	Tooltip:
@@ -634,7 +637,7 @@ DTRK:
 	Buildable:
 		Queue: Vehicle
 		BuildPaletteOrder: 170
-		Prerequisites: stek, ~vehicles.soviet, ~techlevel.unrestricted
+		Prerequisites: stek, ~vehicles.ukraine, ~techlevel.unrestricted
 	Valued:
 		Cost: 2500
 	Tooltip:
@@ -655,7 +658,8 @@ DTRK:
 	DemoTruck:
 	-InvulnerabilityUpgrade@IRONCURTAIN:
 	KillsSelf:
-		RequiresUpgrade: invulnerability
+		UpgradeTypes: invulnerability
+		UpgradeMinEnabledLevel: 1
 	Chronoshiftable:
 		ExplodeInstead: yes
 
@@ -664,7 +668,7 @@ CTNK:
 	Buildable:
 		Queue: Vehicle
 		BuildPaletteOrder: 210
-		Prerequisites: atek, pdox, ~vehicles.allies, ~techlevel.unrestricted
+		Prerequisites: atek, pdox, ~vehicles.germany, ~techlevel.unrestricted
 	Valued:
 		Cost: 1350
 	Tooltip:
@@ -704,7 +708,7 @@ QTNK:
 		BuildPaletteOrder: 200
 		Prerequisites: fix, stek, ~vehicles.soviet, ~techlevel.unrestricted
 	Valued:
-		Cost: 2500
+		Cost: 2000
 	Tooltip:
 		Name: MAD Tank
 		Description: Deals seismic damage to nearby vehicles\nand structures.\n  Strong vs Vehicles, Buildings\n  Weak vs Infantry
@@ -732,7 +736,7 @@ STNK:
 	Buildable:
 		Queue: Vehicle
 		BuildPaletteOrder: 140
-		Prerequisites: atek, ~vehicles.allies, ~techlevel.unrestricted
+		Prerequisites: atek, ~vehicles.england, ~techlevel.unrestricted
 	Valued:
 		Cost: 1350
 	Tooltip:
@@ -766,9 +770,12 @@ STNK:
 	Cloak:
 		InitialDelay: 125
 		CloakDelay: 250
+		CloakSound: appear1.aud
+		UncloakSound: appear1.aud
 	DetectCloaked:
 		Range: 6
 	Explodes:
 		Weapon: UnitExplodeSmall
 		EmptyWeapon: UnitExplodeSmall
+	-MustBeDestroyed:
 

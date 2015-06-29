@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -20,6 +20,8 @@ namespace OpenRA
 	{
 		public readonly Size Size;
 		public readonly TileShape Shape;
+		public event Action<CPos> CellEntryChanged = null;
+
 		readonly T[] entries;
 
 		public CellLayer(Map map)
@@ -32,31 +34,76 @@ namespace OpenRA
 			entries = new T[size.Width * size.Height];
 		}
 
+		public void CopyValuesFrom(CellLayer<T> anotherLayer)
+		{
+			if (Size != anotherLayer.Size || Shape != anotherLayer.Shape)
+				throw new ArgumentException(
+					"layers must have a matching size and shape.", "anotherLayer");
+			if (CellEntryChanged != null)
+				throw new InvalidOperationException(
+					"Cannot copy values when there are listeners attached to the CellEntryChanged event.");
+			Array.Copy(anotherLayer.entries, entries, entries.Length);
+		}
+
+		public static CellLayer<T> CreateInstance(Func<MPos, T> initialCellValueFactory, Size size, TileShape tileShape)
+		{
+			var cellLayer = new CellLayer<T>(tileShape, size);
+			for (var v = 0; v < size.Height; v++)
+			{
+				for (var u = 0; u < size.Width; u++)
+				{
+					var mpos = new MPos(u, v);
+					cellLayer[mpos] = initialCellValueFactory(mpos);
+				}
+			}
+
+			return cellLayer;
+		}
+
 		// Resolve an array index from cell coordinates
 		int Index(CPos cell)
 		{
-			var uv = Map.CellToMap(Shape, cell);
-			return Index(uv.X, uv.Y);
+			return Index(cell.ToMPos(Shape));
 		}
 
 		// Resolve an array index from map coordinates
-		int Index(int u, int v)
+		int Index(MPos uv)
 		{
-			return v * Size.Width + u;
+			return uv.V * Size.Width + uv.U;
 		}
 
 		/// <summary>Gets or sets the <see cref="OpenRA.CellLayer"/> using cell coordinates</summary>
 		public T this[CPos cell]
 		{
-			get { return entries[Index(cell)]; }
-			set { entries[Index(cell)] = value; }
+			get
+			{
+				return entries[Index(cell)];
+			}
+
+			set
+			{
+				entries[Index(cell)] = value;
+
+				if (CellEntryChanged != null)
+					CellEntryChanged(cell);
+			}
 		}
 
 		/// <summary>Gets or sets the layer contents using raw map coordinates (not CPos!)</summary>
-		public T this[int u, int v]
+		public T this[MPos uv]
 		{
-			get { return entries[Index(u, v)]; }
-			set { entries[Index(u, v)] = value; }
+			get
+			{
+				return entries[Index(uv)];
+			}
+
+			set
+			{
+				entries[Index(uv)] = value;
+
+				if (CellEntryChanged != null)
+					CellEntryChanged(uv.ToCPos(Shape));
+			}
 		}
 
 		/// <summary>Clears the layer contents with a known value</summary>
@@ -68,7 +115,7 @@ namespace OpenRA
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			return (IEnumerator<T>)entries.GetEnumerator();
+			return ((IEnumerable<T>)entries).GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -90,7 +137,7 @@ namespace OpenRA
 			result.Clear(defaultValue);
 			for (var j = 0; j < height; j++)
 				for (var i = 0; i < width; i++)
-					result[i, j] = layer[i, j];
+					result[new MPos(i, j)] = layer[new MPos(i, j)];
 
 			return result;
 		}

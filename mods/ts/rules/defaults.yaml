@@ -16,13 +16,24 @@
 	GivesBuildableArea:
 	Capturable:
 	SoundOnDamageTransition:
-		DamagedSound: expnew01.aud
-		DestroyedSound: crmble2.aud
+		DamagedSounds: expnew01.aud
+		DestroyedSounds: crmble2.aud
 	RenderBuilding:
 	WithBuildingExplosion:
+	WithDeathAnimation:
+		DeathSequence: dead
+		UseDeathTypeSuffix: false
 	RepairableBuilding:
+		IndicatorPalette: mouse
 	EngineerRepairable:
+	EmitInfantryOnSell@gdi:
+		ActorTypes: e1, e1, e2, medic
+		Races: gdi
+	EmitInfantryOnSell@nod:
+		ActorTypes: e1, e1, e1, e3, e3
+		Races: nod
 	MustBeDestroyed:
+		RequiredForShortGame: true
 	GivesExperience:
 	CaptureNotification:
 	EditorAppearance:
@@ -45,9 +56,61 @@
 	WithMakeAnimation:
 	UpgradeManager:
 	Cloak@CLOAKGENERATOR:
-		RequiresUpgrade: cloakgenerator
+		UpgradeTypes: cloakgenerator
+		UpgradeMinEnabledLevel: 1
 		InitialDelay: 0
 		CloakDelay: 90
+
+^CivBuilding:
+	Inherits: ^Building
+	-GivesBuildableArea:
+	-Capturable:
+	-EngineerRepairable:
+	-MustBeDestroyed:
+	-GivesExperience:
+	-CaptureNotification:
+	-Sellable:
+	-GivesBounty:
+	-UpdatesPlayerStatistics:
+	-CombatDebugOverlay:
+	-WithMakeAnimation:
+	-WithDeathAnimation:
+	Health:
+		HP: 900
+	Armor:
+		Type: Wood
+	RevealsShroud:
+		Range: 4c0
+	Tooltip:
+		Description: Civilian Building
+	RenderBuilding:
+		Palette: terrain
+
+^CivBillboard:
+	Inherits: ^CivBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1, 1
+	Armor:
+		Type: heavy
+	Health:
+		HP: 400
+	EditorTilesetFilter:
+		RequireTilesets: TEMPERAT
+
+^Crate:
+	Tooltip:
+		Name: Crate
+	Crate:
+		Lifetime: 180
+		TerrainTypes: Clear, Rough, Road, DirtRoad, Tiberium, BlueTiberium
+	RenderSprites:
+		Palette: terrain
+	WithCrateBody:
+		Images: crate
+	Selectable:
+		Selectable: false
+		Bounds: 25,25,-1,-1
 
 ^Wall:
 	AppearsOnRadar:
@@ -58,11 +121,11 @@
 		Adjacent: 7
 		TerrainTypes: Clear, Road
 	SoundOnDamageTransition:
-		DamagedSound: expnew01.aud
-		DestroyedSound: crmble2.aud
+		DamagedSounds: expnew01.aud
+		DestroyedSounds: crmble2.aud
 	Crushable:
 		CrushClasses: wall
-	BlocksBullets:
+	BlocksProjectiles:
 	LineBuild:
 		Range: 8
 		NodeTypes: wall
@@ -87,9 +150,18 @@
 	ScriptTriggers:
 	UpgradeManager:
 	Cloak@CLOAKGENERATOR:
-		RequiresUpgrade: cloakgenerator
+		UpgradeTypes: cloakgenerator
+		UpgradeMinEnabledLevel: 1
 		InitialDelay: 0
 		CloakDelay: 90
+	MustBeDestroyed:
+
+^BuildingPlug:
+	Building:
+		BuildSounds: place2.aud
+	KillsSelf:
+		RemoveInstead: true
+	RenderSprites:
 
 ^Infantry:
 	AppearsOnRadar:
@@ -113,11 +185,20 @@
 	SelectionDecorations:
 		Palette: pips
 	Selectable:
-		Voice: Infantry
+	Voiced:
+		VoiceSet: Infantry
 	TargetableUnit:
 		TargetTypes: Ground, Infantry
-	RenderInfantry:
+	RenderSprites:
+	WithInfantryBody:
 	WithDeathAnimation:
+		DeathTypes:
+			BulletDeath: 1
+			SmallExplosionDeath: 2
+			ExplosionDeath: 3
+			InfantryExplodeDeath: 4 #not used by any warhead; TODO: check what should use this type and add it!
+			FireDeath: 5
+			EnergyDeath: 6
 	AutoTarget:
 	AttackMove:
 	Passenger:
@@ -138,7 +219,8 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -150,6 +232,7 @@
 	PoisonedByTiberium:
 	SpawnViceroid:
 		ViceroidActor: vissml
+		DeathType: EnergyDeath # TODO: FIX ME! (Tiberium currently uses the wrong damage type!)
 	UpdatesPlayerStatistics:
 	CombatDebugOverlay:
 	Guard:
@@ -158,45 +241,42 @@
 	Huntable:
 	ScriptTriggers:
 	DeathSounds@NORMAL:
-		DeathTypes: 1, 2, 3
+		DeathTypes: BulletDeath, SmallExplosionDeath, ExplosionDeath
 	DeathSounds@BURNED:
 		DeathSound: Burned
-		DeathTypes: 5
+		DeathTypes: FireDeath
 	DeathSounds@ZAPPED:
 		DeathSound: Zapped
-		DeathTypes: 6
+		DeathTypes: EnergyDeath
 	UpgradeManager:
 	Cloak@CLOAKGENERATOR:
-		RequiresUpgrade: cloakgenerator
+		UpgradeTypes: cloakgenerator
+		UpgradeMinEnabledLevel: 1
 		InitialDelay: 0
 		CloakDelay: 90
+	MustBeDestroyed:
 
 ^CivilianInfantry:
 	Inherits: ^Infantry
 	Selectable:
-		Voice: Civilian
 		Bounds: 12,17,0,-9
+	Voiced:
+		VoiceSet: Civilian
 	Valued:
 		Cost: 10
 	Tooltip:
 		Name: Civilian
-	Buildable:
-		Queue: Infantry
-		BuildPaletteOrder: 1000
-		Owner: gdi, nod
 	Health:
 		HP: 50
 	Mobile:
 		Speed: 71
 	RevealsShroud:
 		Range: 2c0
-	Armament:
-		Weapon: Pistola
-	AttackFrontal:
 	ProximityCaptor:
 		Types: CivilianInfantry
-	RenderInfantry:
+	WithInfantryBody:
 	ScaredyCat:
+	-MustBeDestroyed:
 
 ^Vehicle:
 	AppearsOnRadar:
@@ -211,10 +291,11 @@
 			Tiberium: 80
 			BlueTiberium: 80
 		ROT: 5
+	Selectable:
 	SelectionDecorations:
 		Palette: pips
-	Selectable:
-		Voice: Vehicle
+	Voiced:
+		VoiceSet: Vehicle
 	TargetableUnit:
 		TargetTypes: Ground, Vehicle
 	Repairable:
@@ -238,12 +319,17 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
 	ProximityCaptor:
 		Types: Vehicle
+	Capturable:
+		Type: Vehicle
+		CaptureThreshold: 1
+		CancelActivity: True
 	GivesBounty:
 	UpdatesPlayerStatistics:
 	CombatDebugOverlay:
@@ -258,17 +344,24 @@
 		EmptyWeapon: UnitExplodeSmall
 	UpgradeManager:
 	UpgradeOverlay@EMPDISABLE:
-		RequiresUpgrade: empdisable
+		UpgradeTypes: empdisable
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 2
 		Palette: disabled
 	DisableUpgrade@EMPDISABLE:
-		RequiresUpgrade: empdisable
+		UpgradeTypes: empdisable
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 2
 	TimedUpgradeBar@EMPDISABLE:
 		Upgrade: empdisable
 		Color: 255,255,255
 	Cloak@CLOAKGENERATOR:
-		RequiresUpgrade: cloakgenerator
+		UpgradeTypes: cloakgenerator
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 2
 		InitialDelay: 0
 		CloakDelay: 90
+	MustBeDestroyed:
 
 ^Tank:
 	AppearsOnRadar:
@@ -283,10 +376,11 @@
 			Tiberium: 80
 			BlueTiberium: 80
 		ROT: 5
+	Selectable:
 	SelectionDecorations:
 		Palette: pips
-	Selectable:
-		Voice: Vehicle
+	Voiced:
+		VoiceSet: Vehicle
 	TargetableUnit:
 		TargetTypes: Ground, Vehicle
 	Repairable:
@@ -310,12 +404,17 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
 	ProximityCaptor:
 		Types: Vehicle
+	Capturable:
+		Type: Vehicle
+		CaptureThreshold: 1
+		CancelActivity: True
 	GivesBounty:
 	UpdatesPlayerStatistics:
 	CombatDebugOverlay:
@@ -330,17 +429,24 @@
 		EmptyWeapon: UnitExplodeSmall
 	UpgradeManager:
 	UpgradeOverlay@EMPDISABLE:
-		RequiresUpgrade: empdisable
+		UpgradeTypes: empdisable
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 2
 		Palette: disabled
 	DisableUpgrade@EMPDISABLE:
-		RequiresUpgrade: empdisable
+		UpgradeTypes: empdisable
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 2
 	TimedUpgradeBar@EMPDISABLE:
 		Upgrade: empdisable
 		Color: 255,255,255
 	Cloak@CLOAKGENERATOR:
-		RequiresUpgrade: cloakgenerator
+		UpgradeTypes: cloakgenerator
+		UpgradeMinEnabledLevel: 1
+		UpgradeMaxAcceptedLevel: 2
 		InitialDelay: 0
 		CloakDelay: 90
+	MustBeDestroyed:
 
 ^Helicopter:
 	AppearsOnRadar:
@@ -348,16 +454,16 @@
 	TargetableAircraft:
 		TargetTypes: Air
 		GroundedTargetTypes: Ground
+	Selectable:
 	SelectionDecorations:
 		Palette: pips
-	Selectable:
-		Voice: Heli
+	Voiced:
+		VoiceSet: Heli
 	Helicopter:
-		RepairBuildings:
+		RepairBuildings: gadept
 		RearmBuildings:
 		LandWhenIdle: no
-	Buildable:
-		Queue: Aircraft
+		CruiseAltitude: 2048
 	HiddenUnderFog:
 	AttackMove:
 	GainsExperience:
@@ -375,7 +481,8 @@
 		Ticks: 100
 		HealIfBelow: 1
 		DamageCooldown: 125
-		RequiresUpgrade: selfheal
+		UpgradeTypes: selfheal
+		UpgradeMinEnabledLevel: 1
 	GivesExperience:
 	DrawLineToTarget:
 	ActorLostNotification:
@@ -387,6 +494,17 @@
 	Guard:
 	Guardable:
 	UpgradeManager:
+	MustBeDestroyed:
+
+^Plane:
+	Inherits: ^Helicopter
+	-Helicopter:
+	Plane:
+		RepairBuildings: gadept
+		RearmBuildings: gahpad, nahpad
+		LandWhenIdle: no
+		CruiseAltitude: 2560
+	ReturnOnIdle:
 
 ^BlossomTree:
 	Tooltip:
@@ -406,4 +524,39 @@
 		ResourceType: Tiberium
 		Interval: 55
 	WithActiveAnimation:
+
+^Tree:
+	RenderBuilding:
+		Palette: terrain
+	Building:
+		Footprint: x
+		Dimensions: 1, 1
+	AppearsOnRadar:
+	BodyOrientation:
+	Tooltip:
+		Name: Tree
+
+^Rock:
+	RenderBuilding:
+		Palette: terrain
+	Building:
+		Footprint: x
+		Dimensions: 1, 1
+	AppearsOnRadar:
+	BodyOrientation:
+	Tooltip:
+		Name: Rock
+
+^Veinhole:
+	RadarColorFromTerrain:
+		Terrain: Tiberium
+	RenderBuilding:
+		Palette: player
+	AppearsOnRadar:
+	Tooltip:
+		Name: Veinhole
+	Building:
+		Footprint: x
+		Dimensions: 1, 1
+	BodyOrientation:
 

@@ -2,7 +2,7 @@ MINP:
 	Mine:
 		CrushClasses: mine
 		DetonateClasses: mine
-		AvoidFriendly: no
+		AvoidFriendly: false
 	Explodes:
 		Weapon: APMine
 	Health:
@@ -11,7 +11,6 @@ MINP:
 	Armor:
 		Type: Light
 	RenderSimple:
-	BelowUnits:
 	Cloak:
 		CloakSound:
 		UncloakSound:
@@ -31,7 +30,7 @@ MINV:
 	Mine:
 		CrushClasses: mine
 		DetonateClasses: mine
-		AvoidFriendly: no
+		AvoidFriendly: false
 	Explodes:
 		Weapon: ATMine
 	Health:
@@ -40,7 +39,6 @@ MINV:
 	Armor:
 		Type: Light
 	RenderSimple:
-	BelowUnits:
 	Cloak:
 		CloakSound:
 		UncloakSound:
@@ -61,7 +59,7 @@ CRATE:
 	GiveCashCrateAction:
 		Amount: 1000
 		SelectionShares: 50
-		UseCashTick: yes
+		UseCashTick: true
 	LevelUpCrateAction:
 		SelectionShares: 40
 	ExplodeCrateAction@fire:
@@ -80,10 +78,6 @@ CRATE:
 	RevealMapCrateAction:
 		SelectionShares: 1
 		Effect: reveal-map
-	SupportPowerCrateAction@parabombs:
-		SelectionShares: 5
-		Proxy: powerproxy.parabombs
-		Effect: parabombs
 	DuplicateUnitCrateAction:
 		SelectionShares: 10
 		MaxAmount: 5
@@ -96,51 +90,51 @@ CRATE:
 	GiveUnitCrateAction@jeep:
 		SelectionShares: 7
 		Units: jeep
-		ValidRaces: allies
+		ValidRaces: allies, england, france, germany
 		Prerequisites: techlevel.low
 	GiveUnitCrateAction@arty:
 		SelectionShares: 6
 		Units: arty
-		ValidRaces: allies
+		ValidRaces: allies, england, france, germany
 		Prerequisites: techlevel.medium, dome
 	GiveUnitCrateAction@v2rl:
 		SelectionShares: 6
 		Units: v2rl
-		ValidRaces: soviet
+		ValidRaces: soviet, russia, ukraine
 		Prerequisites: techlevel.medium, dome
 	GiveUnitCrateAction@1tnk:
 		SelectionShares: 5
 		Units: 1tnk
-		ValidRaces: allies
+		ValidRaces: allies, england, france, germany
 		Prerequisites: techlevel.low
 	GiveUnitCrateAction@2tnk:
 		SelectionShares: 4
 		Units: 2tnk
-		ValidRaces: allies
+		ValidRaces: allies, england, france, germany
 		Prerequisites: techlevel.medium, fix
 	GiveUnitCrateAction@3tnk:
 		SelectionShares: 4
 		Units: 3tnk
-		ValidRaces: soviet
+		ValidRaces: soviet, russia, ukraine
 		Prerequisites: techlevel.medium, fix
 	GiveUnitCrateAction@4tnk:
 		SelectionShares: 3
 		Units: 4tnk
-		ValidRaces: soviet
+		ValidRaces: soviet, russia, ukraine
 		Prerequisites: techlevel.unrestricted, fix, techcenter
 	GiveUnitCrateAction@squadlight:
 		SelectionShares: 7
 		Units: e1,e1,e1,e3,e3
-		ValidRaces: allies, soviet
+		ValidRaces: allies, england, france, germany, soviet, russia, ukraine
 	GiveUnitCrateAction@squadheavyallies:
 		SelectionShares: 7
 		Units: e1,e1,e1,e1,e3,e3,e3,e6,medi
-		ValidRaces: allies
+		ValidRaces: allies, england, france, germany
 		TimeDelay: 4500
 	GiveUnitCrateAction@squadheavysoviet:
 		SelectionShares: 7
 		Units: e1,e1,e4,e4,e3,e3,e3
-		ValidRaces: soviet
+		ValidRaces: soviet, russia, ukraine
 		TimeDelay: 4500
 	GrantUpgradeCrateAction@invuln:
 		SelectionShares: 5
@@ -181,6 +175,8 @@ CAMERA:
 	BodyOrientation:
 	DetectCloaked:
 		Range: 10
+	RenderEditorOnly:
+		Image: camera
 
 camera.paradrop:
 	Immobile:
@@ -210,17 +206,19 @@ SONAR:
 FLARE:
 	Immobile:
 		OccupiesSpace: false
-	Health:
-		HP: 1000
 	RevealsShroud:
 		Range: 3c0
-	RenderFlare:
+	RenderSprites:
 		Image: smokland
+	WithSpriteBody:
+		StartSequence: open
 	HiddenUnderFog:
 	Tooltip:
 		Name: Flare
-	ProximityCaptor:
-		Types: Flare
+		ShowOwnerRow: false
+	Selectable:
+		Selectable: false
+		Bounds: 25,25
 	BodyOrientation:
 
 MINE:
@@ -235,32 +233,46 @@ MINE:
 	RadarColorFromTerrain:
 		Terrain: Ore
 	EditorAppearance:
-		RelativeToTopLeft: yes
-		UseTerrainPalette: yes
+		RelativeToTopLeft: true
+		UseTerrainPalette: true
 	AutoTargetIgnore:
 	BodyOrientation:
 	SeedsResource:
-	BelowUnits:
 
-RAILMINE:
+GMINE:
 	Tooltip:
 		Name: Gem Mine
 	RenderBuilding:
 		Palette: player
 	Building:
-		Footprint: xx
-		Dimensions: 2,1
+		Footprint: x
+		Dimensions: 1,1
 	AppearsOnRadar:
 	RadarColorFromTerrain:
 		Terrain: Gems
 	EditorAppearance:
-		RelativeToTopLeft: yes
-		UseTerrainPalette: no
+		RelativeToTopLeft: true
+		UseTerrainPalette: false
 	AutoTargetIgnore:
 	BodyOrientation:
 	SeedsResource:
 		ResourceType: Gems
-	BelowUnits:
+
+RAILMINE:
+	Tooltip:
+		Name: Abandoned Mine
+	RenderBuilding:
+		Palette: player
+	Building:
+		Footprint: xx
+		Dimensions: 2,1
+	EditorAppearance:
+		RelativeToTopLeft: true
+		UseTerrainPalette: false
+	AutoTargetIgnore:
+	BodyOrientation:
+	EditorTilesetFilter:
+		ExcludeTilesets: INTERIOR
 
 QUEE:
 	Tooltip:
@@ -274,7 +286,7 @@ QUEE:
 	EditorTilesetFilter:
 		RequireTilesets: INTERIOR
 	EditorAppearance:
-		RelativeToTopLeft: yes
+		RelativeToTopLeft: true
 		UseTerrainPalette: true
 
 LAR1:
@@ -290,7 +302,7 @@ LAR1:
 	EditorTilesetFilter:
 		RequireTilesets: INTERIOR
 	EditorAppearance:
-		RelativeToTopLeft: yes
+		RelativeToTopLeft: true
 		UseTerrainPalette: true
 
 LAR2:
@@ -306,7 +318,7 @@ LAR2:
 	EditorTilesetFilter:
 		RequireTilesets: INTERIOR
 	EditorAppearance:
-		RelativeToTopLeft: yes
+		RelativeToTopLeft: true
 		UseTerrainPalette: true
 
 powerproxy.parabombs:
@@ -314,8 +326,8 @@ powerproxy.parabombs:
 		Icon: parabombs
 		Description: Parabombs (Single Use)
 		LongDesc: A Badger drops a load of parachuted\nbombs on your target.
-		OneShot: yes
-		AllowMultiple: yes
+		OneShot: true
+		AllowMultiple: true
 		UnitType: badr.bomber
 		SelectTargetSound: slcttgt1.aud
 		QuantizedFacings: 8
@@ -337,6 +349,19 @@ powerproxy.sonarpulse:
 		EffectSequence: moveflsh
 		EffectPalette: moveflash
 
+powerproxy.paratroopers:
+	ParatroopersPower:
+		Icon: paratroopers
+		Description: Paratroopers
+		LongDesc: A Badger drops a squad of infantry\nanywhere on the map.
+		DropItems: E1,E1,E1,E3,E3
+		SelectTargetSound: slcttgt1.aud
+		AllowImpassableCells: false
+		QuantizedFacings: 8
+		CameraActor: camera.paradrop
+		DisplayBeacon: true
+		BeaconPoster: pinficon
+
 mpspawn:
 	Immobile:
 		OccupiesSpace: false
@@ -348,4 +373,23 @@ waypoint:
 		OccupiesSpace: false
 	RenderEditorOnly:
 	BodyOrientation:
+
+^fact.colorpicker:
+	Inherits: FACT
+	RenderBuilding:
+		Image: fact
+		Palette: colorpicker
+
+CTFLAG:
+	Inherits: ^TechBuilding
+	Building:
+		Footprint: x
+		Dimensions: 1,1
+	Tooltip:
+		Name: Flag
+	Bib:
+		HasMinibib: Yes
+	Invulnerable:
+	-Selectable:
+	-TargetableBuilding:
 

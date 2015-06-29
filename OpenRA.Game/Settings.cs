@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
- * Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+ * Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
  * This file is part of OpenRA, which is free software. It is made
  * available to you under the terms of the GNU General Public License
  * as published by the Free Software Foundation. For more information,
@@ -80,6 +80,7 @@ namespace OpenRA
 		public WindowMode Mode = WindowMode.PseudoFullscreen;
 		public int2 FullscreenSize = new int2(0, 0);
 		public int2 WindowedSize = new int2(1024, 768);
+		public bool HardwareCursors = true;
 		public bool PixelDouble = false;
 		public bool CursorDouble = false;
 		public bool CapFramerate = true;
@@ -126,8 +127,10 @@ namespace OpenRA
 		public bool ViewportEdgeScroll = true;
 		public bool LockMouseWindow = false;
 		public MouseScrollType MouseScroll = MouseScrollType.Standard;
+		public MouseButtonPreference MouseButtonPreference = new MouseButtonPreference();
 		public float ViewportEdgeScrollStep = 10f;
 		public float UIScrollSpeed = 50f;
+		public int SelectionDeadzone = 24;
 
 		public bool UseClassicMouseStyle = false;
 		public bool AlwaysShowStatusBars = false;
@@ -200,10 +203,35 @@ namespace OpenRA
 		public Hotkey Production23Key = new Hotkey(Keycode.F11, Modifiers.Ctrl);
 		public Hotkey Production24Key = new Hotkey(Keycode.F12, Modifiers.Ctrl);
 
+		public Hotkey ProductionTypeBuildingKey = new Hotkey(Keycode.E, Modifiers.None);
+		public Hotkey ProductionTypeDefenseKey = new Hotkey(Keycode.R, Modifiers.None);
+		public Hotkey ProductionTypeInfantryKey = new Hotkey(Keycode.T, Modifiers.None);
+		public Hotkey ProductionTypeVehicleKey = new Hotkey(Keycode.Y, Modifiers.None);
+		public Hotkey ProductionTypeAircraftKey = new Hotkey(Keycode.U, Modifiers.None);
+		public Hotkey ProductionTypeNavalKey = new Hotkey(Keycode.I, Modifiers.None);
+		public Hotkey ProductionTypeTankKey = new Hotkey(Keycode.I, Modifiers.None);
+		public Hotkey ProductionTypeMerchantKey = new Hotkey(Keycode.O, Modifiers.None);
+		public Hotkey ProductionTypeUpgradeKey = new Hotkey(Keycode.R, Modifiers.None);
+
+		public Hotkey SupportPower01Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower02Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower03Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower04Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower05Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
+		public Hotkey SupportPower06Key = new Hotkey(Keycode.UNKNOWN, Modifiers.None);
 
 		public Hotkey GetProductionHotkey(int index)
 		{
 			var field = GetType().GetField("Production{0:D2}Key".F(index + 1));
+			if (field == null)
+				return Hotkey.Invalid;
+
+			return (Hotkey)field.GetValue(this);
+		}
+
+		public Hotkey GetSupportPowerHotkey(int index)
+		{
+			var field = GetType().GetField("SupportPower{0:D2}Key".F(index + 1));
 			if (field == null)
 				return Hotkey.Invalid;
 

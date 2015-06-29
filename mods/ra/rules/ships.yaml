@@ -48,6 +48,7 @@ SS:
 	Explodes:
 		Weapon: UnitExplodeSubmarine
 		EmptyWeapon: UnitExplodeSubmarine
+	-MustBeDestroyed:
 
 MSUB:
 	Inherits: ^Ship
@@ -99,6 +100,7 @@ MSUB:
 	Explodes:
 		Weapon: UnitExplodeSubmarine
 		EmptyWeapon: UnitExplodeSubmarine
+	-MustBeDestroyed:
 
 DD:
 	Inherits: ^Ship
@@ -132,6 +134,10 @@ DD:
 		Weapon: DepthCharge
 		LocalOffset: 0,-100,0, 0,100,0
 		LocalYaw: 80, -80
+	Armament@TERTIARY:
+		Weapon: StingerAA
+		LocalOffset: 0,-100,0, 0,100,0
+		LocalYaw: 64, -64
 	AttackTurreted:
 	Selectable:
 		Bounds: 38,38
@@ -234,6 +240,7 @@ LST:
 		Types: Infantry, Vehicle
 		MaxWeight: 5
 		PipCount: 5
+		PassengerFacing: 0
 	RepairableNear:
 	Explodes:
 		Weapon: UnitExplodeShip

@@ -1,6 +1,6 @@
 #region Copyright & License Information
 /*
-* Copyright 2007-2014 The OpenRA Developers (see AUTHORS)
+* Copyright 2007-2015 The OpenRA Developers (see AUTHORS)
 * This file is part of OpenRA, which is free software. It is made
 * available to you under the terms of the GNU General Public License
 * as published by the Free Software Foundation. For more information,
@@ -10,6 +10,8 @@
 
 using System;
 using System.Drawing;
+using System.IO;
+using System.Runtime.InteropServices;
 using OpenRA;
 using OpenRA.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -80,7 +82,6 @@ namespace OpenRA.Renderer.Sdl2
 				SDL.SDL_SetHint(SDL.SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 			}
 
-			SDL.SDL_ShowCursor(0);
 			context = SDL.SDL_GL_CreateContext(window);
 			SDL.SDL_GL_MakeCurrent(window, context);
 			GL.LoadAll();
@@ -103,21 +104,104 @@ namespace OpenRA.Renderer.Sdl2
 			input = new Sdl2Input();
 		}
 
+		public IHardwareCursor CreateHardwareCursor(string name, Size size, byte[] data, int2 hotspot)
+		{
+			try
+			{
+				return new SDL2HardwareCursor(size, data, hotspot);
+			}
+			catch (Exception ex)
+			{
+				throw new InvalidDataException("Failed to create hardware cursor `{0}`".F(name), ex);
+			}
+		}
+
+		public void SetHardwareCursor(IHardwareCursor cursor)
+		{
+			var c = cursor as SDL2HardwareCursor;
+			if (c == null)
+				SDL.SDL_ShowCursor(0);
+			else
+			{
+				SDL.SDL_ShowCursor(1);
+				SDL.SDL_SetCursor(c.Cursor);
+			}
+		}
+
+		sealed class SDL2HardwareCursor : IHardwareCursor
+		{
+			public IntPtr Cursor { get; private set; }
+			IntPtr surface;
+
+			public SDL2HardwareCursor(Size size, byte[] data, int2 hotspot)
+			{
+				try
+				{
+					surface = SDL.SDL_CreateRGBSurface(0, size.Width, size.Height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+					if (surface == IntPtr.Zero)
+						throw new InvalidDataException("Failed to create surface: {0}".F(SDL.SDL_GetError()));
+
+					var sur = (SDL2.SDL.SDL_Surface)Marshal.PtrToStructure(surface, typeof(SDL2.SDL.SDL_Surface));
+					Marshal.Copy(data, 0, sur.pixels, data.Length);
+
+					// This call very occasionally fails on Windows, but often works when retried.
+					for (var retries = 0; retries < 3 && Cursor == IntPtr.Zero; retries++)
+						Cursor = SDL.SDL_CreateColorCursor(surface, hotspot.X, hotspot.Y);
+					if (Cursor == IntPtr.Zero)
+						throw new InvalidDataException("Failed to create cursor: {0}".F(SDL.SDL_GetError()));
+				}
+				catch
+				{
+					Dispose();
+					throw;
+				}
+			}
+
+			~SDL2HardwareCursor()
+			{
+				Game.RunAfterTick(() => Dispose(false));
+			}
+
+			public void Dispose()
+			{
+				Game.RunAfterTick(() => Dispose(true));
+				GC.SuppressFinalize(this);
+			}
+
+			void Dispose(bool disposing)
+			{
+				if (Cursor != IntPtr.Zero)
+				{
+					SDL.SDL_FreeCursor(Cursor);
+					Cursor = IntPtr.Zero;
+				}
+
+				if (surface != IntPtr.Zero)
+				{
+					SDL.SDL_FreeSurface(surface);
+					surface = IntPtr.Zero;
+				}
+			}
+		}
+
 		public void Dispose()
 		{
 			if (disposed)
 				return;
+
 			disposed = true;
 			if (context != IntPtr.Zero)
 			{
 				SDL.SDL_GL_DeleteContext(context);
 				context = IntPtr.Zero;
 			}
+
 			if (window != IntPtr.Zero)
 			{
 				SDL.SDL_DestroyWindow(window);
 				window = IntPtr.Zero;
 			}
+
 			SDL.SDL_Quit();
 		}
 
@@ -175,25 +259,35 @@ namespace OpenRA.Renderer.Sdl2
 				case BlendMode.Alpha:
 					GL.Enable(EnableCap.Blend);
 					ErrorHandler.CheckGlError();
-					GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+					GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
 					break;
 				case BlendMode.Additive:
-					GL.Enable(EnableCap.Blend);
-					ErrorHandler.CheckGlError();
-					GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
-					break;
 				case BlendMode.Subtractive:
 					GL.Enable(EnableCap.Blend);
 					ErrorHandler.CheckGlError();
 					GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
-					ErrorHandler.CheckGlError();
-					GL.BlendEquation(BlendEquationMode.FuncReverseSubtract);
+					if (mode == BlendMode.Subtractive)
+					{
+						ErrorHandler.CheckGlError();
+						GL.BlendEquation(BlendEquationMode.FuncReverseSubtract);
+					}
+
 					break;
 				case BlendMode.Multiply:
 					GL.Enable(EnableCap.Blend);
 					ErrorHandler.CheckGlError();
-					GL.BlendFuncSeparate(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero, BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+					GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.OneMinusSrcAlpha);
 					ErrorHandler.CheckGlError();
+					break;
+				case BlendMode.Multiplicative:
+					GL.Enable(EnableCap.Blend);
+					ErrorHandler.CheckGlError();
+					GL.BlendFunc(BlendingFactorSrc.Zero, BlendingFactorDest.SrcColor);
+					break;
+				case BlendMode.DoubleMultiplicative:
+					GL.Enable(EnableCap.Blend);
+					ErrorHandler.CheckGlError();
+					GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.SrcColor);
 					break;
 			}
 

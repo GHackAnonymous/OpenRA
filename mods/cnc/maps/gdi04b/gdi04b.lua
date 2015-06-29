@@ -57,7 +57,7 @@ end
 BuildNod1 = function()
 	Build(NodxUnits, false, function(actor)
 		Trigger.OnKilled(actor, KillCounter)
-		actor.Patrol({ waypoint1.Location, waypoint2.Location, waypoint3.Location, waypoint4.Location }, false)
+		actor.Patrol({ NodPatrol1.Location, NodPatrol2.Location, NodPatrol3.Location, NodPatrol4.Location }, false)
 		Trigger.OnIdle(actor, actor.Hunt)
 	end)
 end
@@ -65,7 +65,7 @@ end
 BuildNod2 = function()
 	Build(NodxUnits, false, function(actor)
 		Trigger.OnKilled(actor, KillCounter)
-		actor.Patrol({ waypoint1.Location, waypoint2.Location }, false)
+		actor.Patrol({ NodPatrol1.Location, NodPatrol2.Location }, false)
 		Trigger.OnIdle(actor, actor.Hunt)
 	end)
 end
@@ -126,25 +126,15 @@ WorldLoaded = function()
 
 	Trigger.OnPlayerWon(gdi, function()
 		Media.PlaySpeechNotification(gdi, "Win")
-		Trigger.AfterDelay(DateTime.Seconds(1), function()
-			Media.PlayMovieFullscreen("burdet1.vqa")
-		end)
 	end)
 
 	Trigger.OnPlayerLost(gdi, function()
 		Media.PlaySpeechNotification(gdi, "Lose")
-		Trigger.AfterDelay(DateTime.Seconds(1), function()
-			Media.PlayMovieFullscreen("gameover.vqa")
-		end)
 	end)
 
-	Media.PlayMovieFullscreen("bkground.vqa", function()
-		Media.PlayMovieFullscreen("nitejump.vqa", function()
-			gdiObjective = gdi.AddPrimaryObjective("Retrieve the crate with the stolen rods.")
-			reinforcementsObjective = gdi.AddSecondaryObjective("Eliminate " .. KillsUntilReinforcements .. " Nod units for reinforcements.")
-			nod.AddPrimaryObjective("Defend against the GDI forces.")
-		end)
-	end)
+	gdiObjective = gdi.AddPrimaryObjective("Retrieve the crate with the stolen rods.")
+	reinforcementsObjective = gdi.AddSecondaryObjective("Eliminate " .. KillsUntilReinforcements .. " Nod units for reinforcements.")
+	nod.AddPrimaryObjective("Defend against the GDI forces.")
 
 	SetupWorld()
 
